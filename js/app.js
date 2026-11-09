@@ -2,7 +2,7 @@ import { createAbacus } from "./abacus.js";
 import * as L from "./logic.js";
 import { LEVELS } from "./levels.js";
 import { canSpeak, speak, stopSpeak } from "./speech.js";
-import { loadProgress, saveStars } from "./storage.js";
+import { loadProgress, saveStars, loadProfiles, activeProfile, selectProfile, addProfile } from "./storage.js";
 
 const $ = (id) => document.getElementById(id);
 const PRACTICE_TOTAL = 10;
@@ -29,12 +29,26 @@ function route() {
 const starHTML = (s) => `<span class="stars" aria-label="${s} 顆星">${"★".repeat(s)}<span class="off">${"★".repeat(3 - s)}</span></span>`;
 
 function renderHome() {
+  const picker = $("profile");
+  picker.replaceChildren(...loadProfiles().map((name) => new Option(name, name)));
+  picker.value = activeProfile();
   const prog = loadProgress();
   $("levels").innerHTML = LEVELS.map((l) => l.ready
     ? `<a class="lvcard" href="#level-${l.id}"><span class="lvnum">${l.id}</span><span class="lvtext"><b>${l.title}</b><small>${l.sub}</small></span>${starHTML(prog[l.id] || 0)}</a>`
     : `<div class="lvcard locked"><span class="lvnum">${l.id}</span><span class="lvtext"><b>${l.title}</b><small>${l.sub}</small></span><span class="soon">製作中</span></div>`
   ).join("");
 }
+
+$("profile").onchange = (event) => { selectProfile(event.target.value); renderHome(); };
+$("addProfile").onsubmit = (event) => {
+  event.preventDefault();
+  const input = $("profileName");
+  if (addProfile(input.value)) {
+    input.value = "";
+    $("profileError").hidden = true;
+    renderHome();
+  } else $("profileError").hidden = false;
+};
 
 /* ---------- 關卡 ---------- */
 function openLevel(lv) {

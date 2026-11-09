@@ -23,6 +23,15 @@
       <h1>今天要闖哪一關？</h1>
       <p class="lead">每一關先看動畫學撥法，再練習 10 題。第一次就答對 9 題以上，可以拿到三顆星。</p>
     </div>
+    <div class="family-picker">
+      <label for="profile">誰在練習？</label>
+      <select id="profile" aria-label="選擇練習的家人"></select>
+      <form id="addProfile">
+        <input id="profileName" aria-label="新家人的名字" placeholder="輸入名字" maxlength="20" required>
+        <button class="btn" type="submit">加入家人</button>
+      </form>
+      <p id="profileError" class="tip" role="alert" hidden>名字已經有了，請換一個。</p>
+    </div>
     <div class="levels" id="levels"></div>
   </section>
 
