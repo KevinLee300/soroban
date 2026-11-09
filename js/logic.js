@@ -168,7 +168,9 @@ export function buildTenSteps(r, a) {
       { v: a, hl: [], show: 2, on: [], cap: `算盤上是 ${a}，要${plus ? "加" : "減"} ${n}。` },
       {
         v: a, hl: unitsBeads, show: 2, on: [1],
-        cap: plus ? `個位最多只能再加 ${9 - u}，不夠加 ${n}！` : `個位只有 ${u}，不夠減 ${n}！`,
+        cap: plus
+          ? (u === 9 ? `個位已經是 9，滿了，不夠加 ${n}！` : `個位最多只能再加 ${9 - u}，不夠加 ${n}！`)
+          : (u === 0 ? `個位是 0，不夠減 ${n}！` : `個位只有 ${u}，不夠減 ${n}！`),
       },
       { v: a, hl: [], show: 6, on: [4, 5], cap: `口訣「${c}」：${n} 的好朋友是 ${m}，所以 ${opSym(r.op)}${n} 變成 ${opSym(r.op)}10 ${plus ? MINUS : "+"}${m}。` },
       { v: mid, hl: movedBeads(1, t, t2), show: 6, on: [4], cap: plus ? "先 +10：左邊的十位撥上 1。" : `先 ${MINUS}10：左邊的十位撥掉 1。` },
