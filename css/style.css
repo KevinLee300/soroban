@@ -147,6 +147,37 @@ svg.abacus { width: 100%; max-width: calc(220px * var(--rods, 1)); height: auto;
   svg.abacus { max-width: calc(150px * var(--rods, 1)); }
   .rules { grid-template-columns: 1fr; }
 }
+/* 題庫（實體算盤用） */
+.drillcard { border-style: dashed; }
+.drillcard .lvnum { background: var(--wood); font-family: var(--f-display); font-weight: 400; font-size: 20px; }
+.drill-opts { display: flex; flex-direction: column; gap: 12px; }
+.optrow { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+.optrow .lab { font-family: var(--f-display); color: var(--muted); width: 3em; }
+.seg { display: flex; flex-wrap: wrap; gap: 6px; }
+.seg button { border: 2px solid var(--line); background: var(--panel); border-radius: 12px; padding: 8px 14px; min-height: 44px; }
+.seg button[aria-pressed="true"] { background: var(--ink); color: var(--panel); border-color: var(--ink); }
+.drill { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 12px; }
+.dq { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 10px 14px 12px; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.dno { align-self: flex-start; font-size: 13px; color: var(--muted); font-family: var(--f-num); }
+.dcol { font-family: var(--f-num); font-weight: 600; font-size: 30px; line-height: 1.25; font-variant-numeric: tabular-nums; }
+.dr, .dans { display: grid; grid-template-columns: 1.1em 1.2em; text-align: right; }
+.dr.pl .s { color: var(--plus); } .dr.mi .s { color: var(--minus); }
+.dans { border-top: 3px solid var(--ink); margin-top: 4px; padding-top: 4px; min-height: 1.4em; }
+.dans .n { visibility: hidden; color: var(--bead); }
+.drill.show-ans .dans .n { visibility: visible; }
+.print-only { display: none; }
+@media print {
+  :root { --bg: #fff; --panel: #fff; --ink: #000; --muted: #444; --line: #999; --plus: #000; --minus: #000; color-scheme: light; }
+  .top, .no-print, #view-home, #view-level { display: none !important; }
+  .print-only { display: flex !important; }
+  .print-head { justify-content: space-between; flex-wrap: wrap; gap: 8px; font-size: 16px; margin-bottom: 8px; }
+  body { padding: 0; }
+  .wrap { padding: 0; max-width: none; }
+  .drill { grid-template-columns: repeat(5, 1fr); gap: 10px; }
+  .dq { break-inside: avoid; border-radius: 6px; }
+  .dans { min-height: 1.6em; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .abacus .bead { transition-duration: .15s; }
   .abacus .bead.hl .halo { animation: none; }

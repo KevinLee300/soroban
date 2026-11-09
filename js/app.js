@@ -3,6 +3,7 @@ import * as L from "./logic.js";
 import { LEVELS } from "./levels.js";
 import { canSpeak, speak, stopSpeak } from "./speech.js";
 import { loadProgress, saveStars, loadProfiles, activeProfile, selectProfile, addProfile } from "./storage.js";
+import { renderDrill } from "./drill.js";
 
 const $ = (id) => document.getElementById(id);
 const PRACTICE_TOTAL = 10;
@@ -20,9 +21,11 @@ function route() {
   stopDemo();
   const m = location.hash.match(/^#level-(\d+)$/);
   const lv = m && LEVELS.find((l) => l.id === +m[1] && l.ready);
-  $("view-home").hidden = !!lv;
+  const drill = !lv && location.hash === "#drill";
+  $("view-home").hidden = !!lv || drill;
   $("view-level").hidden = !lv;
-  if (lv) openLevel(lv); else renderHome();
+  $("view-drill").hidden = !drill;
+  if (lv) openLevel(lv); else if (drill) renderDrill(); else renderHome();
   window.scrollTo(0, 0);
 }
 

@@ -88,3 +88,29 @@ test("十的好朋友：出題都合理", () => {
     assert.ok(q.target >= 0 && q.target <= 99);
   }
 });
+
+test("題庫：五以內、每步都在一檔內、至少用一次五的好朋友", () => {
+  for (const mode of ["+", "-", "mix"]) for (const terms of [2, 3, 4]) for (let k = 0; k < 300; k++) {
+    const q = L.fiveDrill({ mode, terms });
+    assert.equal(q.nums.length, terms);
+    let v = q.nums[0], plusFive = 0, minusFive = 0;
+    assert.ok(v >= 1 && v <= 5);
+    for (const x of q.nums.slice(1)) {
+      assert.ok(Math.abs(x) >= 1 && Math.abs(x) <= 5, `數字超過 5：${q.nums}`);
+      const op = x > 0 ? "+" : "-";
+      if (L.needsFive(v, op, Math.abs(x))) op === "+" ? plusFive++ : minusFive++;
+      v += x;
+      assert.ok(v >= 0 && v <= 9, `超出一檔：${q.nums}`);
+    }
+    assert.equal(q.answer, v);
+    if (mode === "+") { assert.ok(q.nums.every((x) => x > 0)); assert.ok(plusFive > 0); }
+    if (mode === "-") assert.ok(minusFive > 0, `減法題沒有用到減五：${q.nums}`);
+    if (mode === "mix") assert.ok(plusFive + minusFive > 0);
+  }
+});
+
+test("題庫：一次出一組", () => {
+  const set = L.fiveDrillSet({ mode: "mix", terms: 3 }, 20);
+  assert.equal(set.length, 20);
+  assert.ok(new Set(set.map((q) => q.nums.join())).size >= 15);
+});

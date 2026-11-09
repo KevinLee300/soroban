@@ -209,6 +209,47 @@ export function q4(rng = Math.random) {
   return { start: a, target: apply(a, r.op, r.n), text: `${a} ${opSym(r.op)} ${r.n} = ?`, hint: `口訣「${tenChant(r)}」，${l} = ${rr}` };
 }
 
+/* ---------- 題庫：五的好朋友（給實體算盤用，只出題目） ---------- */
+// mode："+" 只有加法、"-" 一定有「減五加X」（可以先加上去再減）、"mix" 加減都可以
+// terms：題目有幾個數字（2 = 一步，3 = 三個數字連加減）
+// max：題目上每個數字的上限（預設 5 以內）。算的過程都在一檔 0–9 之內，不會用到十。
+// 每題至少有一步要用到五的好朋友。回傳 { nums: [3, 4, -2], answer: 5 }
+export function fiveDrill({ mode = "mix", terms = 3, max = 5, rng = Math.random } = {}) {
+  for (let tries = 0; tries < 5000; tries++) {
+    const nums = [1 + Math.floor(rng() * max)];
+    let v = nums[0], plusFive = 0, minusFive = 0, stuck = false;
+    for (let k = 1; k < terms; k++) {
+      const cands = [];
+      for (const op of mode === "+" ? ["+"] : ["+", "-"]) for (let n = 1; n <= max; n++) {
+        const r = apply(v, op, n);
+        if (r >= 0 && r <= 9) cands.push({ op, n, five: needsFive(v, op, n) });
+      }
+      if (!cands.length) { stuck = true; break; }
+      const fives = cands.filter((c) => c.five && (mode !== "-" || c.op === "-" || k < terms - 1));
+      const c = fives.length && rng() < 0.65 ? pick(fives, rng) : pick(cands, rng);
+      if (c.five) c.op === "+" ? plusFive++ : minusFive++;
+      v = apply(v, c.op, c.n);
+      nums.push(c.op === "+" ? c.n : -c.n);
+    }
+    if (stuck) continue;
+    const ok = mode === "+" ? plusFive > 0 : mode === "-" ? minusFive > 0 : plusFive + minusFive > 0;
+    if (ok) return { nums, answer: v };
+  }
+  throw new Error("fiveDrill: 找不到符合條件的題目");
+}
+
+// 一次出 count 題，盡量不重複
+export function fiveDrillSet(opts, count) {
+  const out = [], seen = new Set();
+  while (out.length < count) {
+    let q, tries = 0;
+    do { q = fiveDrill(opts); tries++; } while (seen.has(q.nums.join()) && tries < 30);
+    seen.add(q.nums.join());
+    out.push(q);
+  }
+  return out;
+}
+
 export function stars(correct, total) {
   const p = total ? correct / total : 0;
   return p >= 0.9 ? 3 : p >= 0.7 ? 2 : p >= 0.5 ? 1 : 0;
