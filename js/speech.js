@@ -10,7 +10,7 @@ export function speak(text, done) {
   if (!canSpeak) { done && done(); return; }
   if (current) stopSpeak();
   const u = new SpeechSynthesisUtterance(toSpeech(text));
-  u.lang = "zh-TW"; u.rate = 1; u.pitch = 1;
+  u.lang = "zh-TW"; u.rate = 0.88; u.pitch = 1;
   u.voice = speechSynthesis.getVoices().find((voice) => voice.lang.toLowerCase() === "zh-tw") || null;
   current = u;
   const fin = () => {
@@ -20,7 +20,7 @@ export function speak(text, done) {
     done && done();
   };
   u.onend = fin; u.onerror = fin;
-  timer = setTimeout(fin, 9000);
+  timer = setTimeout(fin, Math.max(9000, u.text.length * 600));
   speechSynthesis.speak(u);
 }
 

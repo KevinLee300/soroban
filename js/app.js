@@ -165,7 +165,7 @@ function playDemo() {
         loadDemo(demoIdx + 1, true);
       } else go(player.step + 1, true);
       narrate();
-    }, voiceOn ? 100 : 2300);
+    }, atEnd() ? 1800 : voiceOn ? 100 : 2300);
   };
   const narrate = () => (voiceOn ? speak(player.data.steps[player.step].cap, () => player.playing && advance()) : advance());
   narrate();
