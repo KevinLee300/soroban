@@ -55,11 +55,13 @@ function openLevel(lv) {
   level = lv;
   $("lvTitle").textContent = `第 ${lv.id} 關　${lv.title}`;
   $("lvSub").textContent = lv.sub;
+  $("view-level").style.setProperty("--rods", lv.rods || 1);
   $("abacusMain").innerHTML = "";
   mainAb = createAbacus($("abacusMain"), { rods: lv.rods || 1 });
   $("abacusQuiz").innerHTML = "";
   quizAb = createAbacus($("abacusQuiz"), { rods: lv.rods || 1, interactive: true, onChange: onQuizChange });
   $("picker").hidden = !lv.rules;
+  $("picker").classList.toggle("compact", !!lv.rules && lv.rules.length > 8);
   if (lv.rules) { rule = lv.rules[0]; renderPicker(); }
   setTab("learn");
   loadDemos();
@@ -70,10 +72,10 @@ function renderPicker() {
     const row = $(rowId);
     row.innerHTML = "";
     level.rules.filter((r) => r.op === op).forEach((r) => {
-      const [l, rr] = L.ruleLabel(r);
+      const [l, rr] = level.label(r);
       const b = document.createElement("button");
       b.className = "rule " + (op === "+" ? "p" : "m");
-      b.innerHTML = `<span class="ch"><b>${l}</b> ${L.chantShort(r)}</span><span class="fx">${l} = ${rr}</span>`;
+      b.innerHTML = `<span class="ch"><b>${l}</b> ${level.chantShort(r)}</span><span class="fx">${l} = ${rr}</span>`;
       b.setAttribute("aria-pressed", String(r === rule));
       b.onclick = () => { rule = r; renderPicker(); loadDemos(); };
       row.appendChild(b);
@@ -87,7 +89,7 @@ function loadDemos() {
   ch.hidden = !level.rules;
   if (level.rules) {
     ch.className = "chant " + (rule.op === "+" ? "p" : "m");
-    ch.innerHTML = `<small>口訣</small>${L.ruleLabel(rule)[0]} ${L.chantShort(rule)}`;
+    ch.innerHTML = `<small>口訣</small>${level.label(rule)[0]} ${level.chantShort(rule)}`;
   }
   $("exRow").hidden = demos.length < 2;
   loadDemo(level.rules ? demos.length - 1 : 0);
