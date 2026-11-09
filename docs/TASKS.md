@@ -17,6 +17,7 @@
 | ⬜ | 錯題本：練習答錯的題目存起來，可以單獨重練 | Codex | `storage.js`、新的練習模式 |
 | ⬜ | 音效：撥珠「喀」聲、答對音效（用 Web Audio 產生，不用音檔），可以關掉 | Codex | 新檔 `js/sound.js` |
 | ⬜ | 算盤可以用鍵盤操作（無障礙） | Codex | `abacus.js` |
+| ✅ Claude 完成 | 五的好朋友題庫：只出題目給實體算盤用（5 以內、加法／減法／混合、2–4 個數字、可列印、可看答案） | Claude | `logic.js`、`drill.js` |
 | ⬜ | 「找五還是找十？」判斷練習 | Claude | `logic.js`、`levels.js` |
 | ⬜ | PWA：加到主畫面、離線可用（manifest + service worker） | Codex | 新檔 |
 
