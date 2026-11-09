@@ -10,11 +10,12 @@ const PRACTICE_TOTAL = 10;
 
 let level = null, rule = null, demos = [], demoIdx = 0;
 let mainAb = null, quizAb = null;
-let voiceOn = false;
+let voiceOn = canSpeak;
 const player = { data: null, step: 0, playing: false, timer: null };
 const P = { i: 0, correct: 0, q: null, firstTry: true, done: false };
 
 if (!canSpeak) $("voice").hidden = true;
+else { $("voice").textContent = "朗讀：開"; $("voice").setAttribute("aria-pressed", "true"); }
 
 /* ---------- 路由 ---------- */
 function route() {
@@ -95,7 +96,7 @@ function loadDemos() {
     ch.innerHTML = `<small>口訣</small>${level.label(rule)[0]} ${level.chantShort(rule)}`;
   }
   $("exRow").hidden = demos.length < 2;
-  loadDemo(level.rules ? demos.length - 1 : 0);
+  loadDemo(0);
 }
 
 function renderChips() {
@@ -112,8 +113,8 @@ function renderChips() {
 }
 
 /* ---------- 動畫播放 ---------- */
-function loadDemo(i) {
-  stopDemo();
+function loadDemo(i, continuing = false) {
+  if (!continuing) stopDemo();
   demoIdx = i;
   player.data = demos[i].build();
   $("eq").innerHTML = "";
@@ -153,19 +154,21 @@ function go(i, silent) {
 const atEnd = () => player.data && player.step >= player.data.steps.length - 1;
 
 function playDemo() {
-  if (atEnd()) go(0, true);
+  if (atEnd()) loadDemo(0);
   player.playing = true;
   $("play").textContent = "暫停";
-  const wait = () => {
+  const advance = () => {
     player.timer = setTimeout(() => {
       if (!player.playing) return;
-      if (atEnd()) { stopDemo(); return; }
-      go(player.step + 1, true);
-      sayThenWait();
-    }, voiceOn ? 500 : 2300);
+      if (atEnd()) {
+        if (demoIdx + 1 >= demos.length) { stopDemo(); return; }
+        loadDemo(demoIdx + 1, true);
+      } else go(player.step + 1, true);
+      narrate();
+    }, voiceOn ? 100 : 2300);
   };
-  const sayThenWait = () => (voiceOn ? speak(player.data.steps[player.step].cap, () => player.playing && wait()) : wait());
-  sayThenWait();
+  const narrate = () => (voiceOn ? speak(player.data.steps[player.step].cap, () => player.playing && advance()) : advance());
+  narrate();
 }
 
 function stopDemo() {
@@ -179,6 +182,7 @@ $("play").onclick = () => (player.playing ? stopDemo() : playDemo());
 $("prev").onclick = () => { stopDemo(); go(player.step - 1); };
 $("next").onclick = () => { stopDemo(); go(player.step + 1); $("play").textContent = atEnd() ? "再看一次" : "播放"; };
 $("voice").onclick = () => {
+  if (player.playing) stopDemo();
   voiceOn = !voiceOn;
   $("voice").textContent = "朗讀：" + (voiceOn ? "開" : "關");
   $("voice").setAttribute("aria-pressed", String(voiceOn));
