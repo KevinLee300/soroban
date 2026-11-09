@@ -163,8 +163,27 @@ svg.abacus { width: 100%; max-width: calc(220px * var(--rods, 1)); height: auto;
 .dr, .dans { display: grid; grid-template-columns: 1.1em 1.2em; text-align: right; }
 .dr.pl .s { color: var(--plus); } .dr.mi .s { color: var(--minus); }
 .dans { border-top: 3px solid var(--ink); margin-top: 4px; padding-top: 4px; min-height: 1.4em; }
-.dans .n { visibility: hidden; color: var(--bead); }
-.drill.show-ans .dans .n { visibility: visible; }
+.dq { position: relative; }
+.ain {
+  width: 1.4em; height: 1.4em; padding: 0; text-align: center; justify-self: end;
+  font: inherit; color: var(--ink); background: var(--bg); border: 2px solid var(--line); border-radius: 8px;
+}
+.ain:focus { outline: 3px solid var(--glow); outline-offset: 1px; border-color: var(--glow); }
+.ain[readonly] { background: transparent; border-color: transparent; }
+.dmark { position: absolute; top: 4px; right: 10px; font-size: 26px; font-weight: 700; line-height: 1; }
+.dq.right { border-color: var(--plus); background: var(--plus-soft); }
+.dq.right .dmark { color: var(--plus); }
+.dq.wrong { border-color: var(--bead); }
+.dq.wrong .dmark { color: var(--bead); }
+.dq.wrong .ain { color: var(--bead); text-decoration: line-through; }
+.dfix { font-family: var(--f-body); font-size: 13px; font-weight: 500; color: var(--bead); text-align: center; min-height: 1em; }
+.drill-submit { display: flex; flex-direction: column; align-items: center; gap: 10px; padding-block: 8px; }
+.btn.big { font-family: var(--f-display); font-size: 22px; padding: 12px 32px; border-radius: 16px; }
+.dnote { margin: 0; font-family: var(--f-display); font-size: 18px; color: var(--minus); }
+.drill-result { grid-template-columns: 1fr; justify-items: center; text-align: center; gap: 8px; scroll-margin-top: 16px; }
+.dscore { font-family: var(--f-num); line-height: 1; }
+.dscore b { font-size: 72px; font-weight: 600; color: var(--ink); }
+.dscore small { font-family: var(--f-display); font-size: 22px; color: var(--muted); margin-left: 4px; }
 .print-only { display: none; }
 @media print {
   :root { --bg: #fff; --panel: #fff; --ink: #000; --muted: #444; --line: #999; --plus: #000; --minus: #000; color-scheme: light; }
@@ -176,6 +195,9 @@ svg.abacus { width: 100%; max-width: calc(220px * var(--rods, 1)); height: auto;
   .drill { grid-template-columns: repeat(5, 1fr); gap: 10px; }
   .dq { break-inside: avoid; border-radius: 6px; }
   .dans { min-height: 1.6em; }
+  .ain { border: 0; background: transparent; }
+  .dmark, .dfix { display: none; }
+  .dq.right, .dq.wrong { border-color: var(--line); background: #fff; }
 }
 
 @media (prefers-reduced-motion: reduce) {

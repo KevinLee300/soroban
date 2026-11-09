@@ -41,7 +41,7 @@
     <div class="no-print">
       <a href="#home" class="back">← 回關卡地圖</a>
       <h1>五的好朋友題庫</h1>
-      <p class="lead">拿出算盤，從上往下一個數字一個數字撥，最後寫下答案。題目上的數字都在 5 以內，每題至少用到一次五的好朋友。</p>
+      <p class="lead">拿出算盤，從上往下一個數字一個數字撥，把答案填在橫線下面。全部寫完再按「交卷」，就會看到分數。題目上的數字都在 5 以內。</p>
     </div>
     <div class="drill-opts no-print">
       <div class="optrow"><span class="lab">題型</span>
@@ -58,12 +58,24 @@
         </div></div>
       <div class="ctrls">
         <button class="btn primary" id="dNew">換一組題目</button>
-        <button class="btn" id="dAns" aria-pressed="false">顯示答案</button>
         <button class="btn" id="dPrint">列印</button>
       </div>
     </div>
     <div class="print-only print-head"><b>五的好朋友練習</b><span>姓名：＿＿＿＿＿＿　日期：＿＿＿＿＿＿　答對：＿＿＿ 題</span></div>
+    <div class="board drill-result no-print" id="dResult" hidden>
+      <div id="dStars" class="rstars"></div>
+      <div class="dscore"><b id="dScore">0</b><small>分</small></div>
+      <p id="dText" class="caption"></p>
+      <div class="ctrls">
+        <button class="btn primary" id="dRetry">同一組再做一次</button>
+        <button class="btn" id="dNew2">換一組題目</button>
+      </div>
+    </div>
     <ol class="drill" id="drillList"></ol>
+    <div class="drill-submit no-print" id="dSubmit">
+      <p id="dNote" class="dnote" role="status" hidden></p>
+      <button class="btn primary big" id="dCheck">寫完了，交卷！</button>
+    </div>
   </section>
 
   <!-- 關卡頁 -->
