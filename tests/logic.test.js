@@ -52,3 +52,39 @@ test("星星計算", () => {
   assert.equal(L.stars(5, 10), 1);
   assert.equal(L.stars(4, 10), 0);
 });
+
+test("十的好朋友：口訣說法", () => {
+  const plus9 = L.TEN_RULES.find((r) => r.op === "+" && r.n === 9);
+  const minus6 = L.TEN_RULES.find((r) => r.op === "-" && r.n === 6);
+  assert.equal(L.tenChantShort(plus9), "加十減一");
+  assert.equal(L.tenChant(minus6), "減六，減十加四");
+});
+
+test("十的好朋友：每條口訣都有題目，而且真的需要進位／退位", () => {
+  for (const r of L.TEN_RULES) {
+    const us = L.tenUnits(r);
+    assert.ok(us.length > 0, `${r.op}${r.n} 沒有起始數字`);
+    for (const u of us) assert.ok(!L.isDirect(u, r.op, r.n) && !L.needsFive(u, r.op, r.n));
+  }
+});
+
+test("十的好朋友：動畫每一步數字正確", () => {
+  for (const r of L.TEN_RULES) for (const u of L.tenUnits(r)) for (const t of L.tenTens(r.op)) {
+    const a = t * 10 + u, { steps } = L.buildTenSteps(r, a), ans = L.apply(a, r.op, r.n);
+    assert.equal(steps.at(-1).v, ans);
+    assert.equal(steps[3].v, r.op === "+" ? a + 10 : a - 10);
+    for (const s of steps) assert.ok(s.v >= 0 && s.v <= 99);
+    // 先撥十位那一步只動十位，再撥個位那一步只動個位
+    assert.ok(steps[3].hl.length === 1 && steps[3].hl[0].startsWith("r1-"));
+    assert.ok(steps[4].hl.length > 0 && steps[4].hl.every((k) => k.startsWith("r0-")));
+  }
+});
+
+test("十的好朋友：出題都合理", () => {
+  for (let k = 0; k < 500; k++) {
+    const q = L.q4();
+    const [, a, op, n] = q.text.match(/^(\d+) ([+−]) (\d)/);
+    assert.ok(L.isTenCase(+a, op === "+" ? "+" : "-", +n), q.text);
+    assert.ok(q.target >= 0 && q.target <= 99);
+  }
+});

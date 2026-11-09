@@ -1,0 +1,3 @@
+# 統一用 LF 換行，避免 Windows 和 Linux 互相改到整個檔案
+* text=auto eol=lf
+*.png binary

@@ -83,15 +83,17 @@ a.lvcard:hover { transform: translateY(-2px); border-color: var(--wood); }
 .rule .ch { font-family: var(--f-display); font-size: 19px; }
 .rule .ch b { font-family: var(--f-num); font-weight: 600; }
 .rule .fx { font-family: var(--f-num); font-size: 14px; font-weight: 500; color: var(--muted); }
+.rules.compact .rule .fx { display: none; }
+.rules.compact .rule { padding: 6px 10px; }
 .rule.p b { color: var(--plus); } .rule.m b { color: var(--minus); }
 .rule.p[aria-pressed="true"] { background: var(--plus-soft); border-color: var(--plus); }
 .rule.m[aria-pressed="true"] { background: var(--minus-soft); border-color: var(--minus); }
 
 /* 教學板 */
-.board { background: var(--panel); border: 1px solid var(--line); border-radius: 20px; padding: 20px; display: grid; grid-template-columns: minmax(180px, 260px) 1fr; gap: 28px; align-items: center; }
+.board { background: var(--panel); border: 1px solid var(--line); border-radius: 20px; padding: 20px; display: grid; grid-template-columns: minmax(180px, calc(150px + 110px * var(--rods, 1))) 1fr; gap: 28px; align-items: center; }
 .abacus-col { display: flex; flex-direction: column; align-items: center; gap: 6px; }
 .bigval { font-family: var(--f-num); font-weight: 600; font-size: 44px; line-height: 1; font-variant-numeric: tabular-nums; text-align: center; }
-.bigval small { display: block; font-family: var(--f-body); font-size: 12px; font-weight: 500; color: var(--muted); letter-spacing: .08em; margin-bottom: 4px; }
+.bigval small { display: block; white-space: nowrap; font-family: var(--f-body); font-size: 12px; font-weight: 500; color: var(--muted); letter-spacing: .08em; margin-bottom: 4px; }
 svg.abacus { width: 100%; max-width: calc(220px * var(--rods, 1)); height: auto; display: block; touch-action: manipulation; }
 .abacus .frame { fill: none; stroke: var(--wood); stroke-width: 18; }
 .abacus .frame-in { fill: none; stroke: var(--wood-dark); stroke-width: 2; }

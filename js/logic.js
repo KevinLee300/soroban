@@ -108,6 +108,76 @@ export function buildFiveSteps(r, a) {
   return { toks, steps };
 }
 
+/* ---------- 十的好朋友（兩檔：十位 r1、個位 r0） ---------- */
+export const TEN_RULES = [];
+for (const op of ["+", "-"]) for (let n = 1; n <= 9; n++) TEN_RULES.push({ op, n, m: 10 - n });
+
+export function tenLabel(r) {
+  return r.op === "+" ? [`+${r.n}`, `+10 ${MINUS}${r.m}`] : [`${MINUS}${r.n}`, `${MINUS}10 +${r.m}`];
+}
+export function tenChantShort(r) {
+  return r.op === "+" ? `加十減${CN[r.m]}` : `減十加${CN[r.m]}`;
+}
+export function tenChant(r) {
+  return `${r.op === "+" ? "加" : "減"}${CN[r.n]}，${tenChantShort(r)}`;
+}
+// 個位要用「十的好朋友」，而且減（加）好朋友那一步可以直接撥（不用再請五幫忙，那是第 5 關）
+export function tenUnits(r) {
+  const out = [];
+  for (let u = 0; u <= 9; u++) {
+    if (r.op === "+" ? u + r.n >= 10 && isDirect(u, "-", r.m) : u < r.n && isDirect(u, "+", r.m)) out.push(u);
+  }
+  return out;
+}
+// 十位可以直接 +1 / −1 的數字
+export const tenTens = (op) => [0, 1, 2, 3, 4, 5, 6, 7, 8, 9].filter((t) => isDirect(t, op, 1));
+export function isTenCase(a, op, n) {
+  const r = { op, n, m: 10 - n }, t = Math.floor(a / 10), u = a % 10;
+  return a >= 0 && a <= 99 && n >= 1 && n <= 9 && tenUnits(r).includes(u) && tenTens(op).includes(t);
+}
+
+// 一檔從 from 撥到 to，哪些珠子會動
+export function movedBeads(rod, from, to) {
+  const out = [];
+  if ((from >= 5) !== (to >= 5)) out.push(`r${rod}-h`);
+  for (let i = 0; i < 4; i++) if ((i < from % 5) !== (i < to % 5)) out.push(`r${rod}-e${i}`);
+  return out;
+}
+function describeMove(from, to) {
+  const acts = [], dh = (to >= 5) - (from >= 5), de = (to % 5) - (from % 5);
+  if (dh > 0) acts.push("上珠撥下來");
+  if (dh < 0) acts.push("上珠撥上去");
+  if (de > 0) acts.push(`撥上 ${de} 顆下珠`);
+  if (de < 0) acts.push(`撥掉 ${-de} 顆下珠`);
+  return acts.join("，再");
+}
+
+export function buildTenSteps(r, a) {
+  const { n, m } = r, plus = r.op === "+", ans = apply(a, r.op, n);
+  const t = Math.floor(a / 10), u = a % 10, t2 = plus ? t + 1 : t - 1, u2 = ans % 10;
+  const toks = [
+    { t: a }, { t: opSym(r.op) + n, c: plus ? "pl" : "mi" }, { t: "=", c: "sym" }, { t: a },
+    { t: opSym(r.op) + "10", c: plus ? "pl" : "mi" }, { t: (plus ? MINUS : "+") + m, c: plus ? "mi" : "pl" },
+    { t: "=", c: "sym" }, { t: ans },
+  ];
+  const c = tenChant(r), mid = plus ? a + 10 : a - 10;
+  const unitsBeads = movedBeads(0, u, plus ? 9 : 0); // 個位還能撥的珠子
+  return {
+    toks,
+    steps: [
+      { v: a, hl: [], show: 2, on: [], cap: `算盤上是 ${a}，要${plus ? "加" : "減"} ${n}。` },
+      {
+        v: a, hl: unitsBeads, show: 2, on: [1],
+        cap: plus ? `個位最多只能再加 ${9 - u}，不夠加 ${n}！` : `個位只有 ${u}，不夠減 ${n}！`,
+      },
+      { v: a, hl: [], show: 6, on: [4, 5], cap: `口訣「${c}」：${n} 的好朋友是 ${m}，所以 ${opSym(r.op)}${n} 變成 ${opSym(r.op)}10 ${plus ? MINUS : "+"}${m}。` },
+      { v: mid, hl: movedBeads(1, t, t2), show: 6, on: [4], cap: plus ? "先 +10：左邊的十位撥上 1。" : `先 ${MINUS}10：左邊的十位撥掉 1。` },
+      { v: ans, hl: movedBeads(0, u, u2), show: 6, on: [5], cap: `再 ${plus ? MINUS : "+"}${m}：個位${describeMove(u, u2)}。` },
+      { v: ans, hl: [], show: 8, on: [7], cap: `${a} ${opSym(r.op)} ${n} = ${ans}！記住口訣「${c}」。` },
+    ],
+  };
+}
+
 /* ---------- 練習題 ---------- */
 // 每題：{ start: 起始數字, target: 正確答案, text: 題目, hint: 答錯時的提示 }
 const pick = (arr, rng) => arr[Math.floor(rng() * arr.length)];
@@ -128,6 +198,13 @@ export function q3(rng = Math.random) {
   const r = pick(FIVE_RULES, rng), a = pick(fiveStarts(r), rng);
   const [l, rr] = ruleLabel(r);
   return { start: a, target: apply(a, r.op, r.n), text: `${a} ${opSym(r.op)} ${r.n} = ?`, hint: `口訣「${chant(r)}」，${l} = ${rr}` };
+}
+
+export function q4(rng = Math.random) {
+  const r = pick(TEN_RULES, rng), u = pick(tenUnits(r), rng), t = pick(tenTens(r.op), rng);
+  const a = t * 10 + u;
+  const [l, rr] = tenLabel(r);
+  return { start: a, target: apply(a, r.op, r.n), text: `${a} ${opSym(r.op)} ${r.n} = ?`, hint: `口訣「${tenChant(r)}」，${l} = ${rr}` };
 }
 
 export function stars(correct, total) {
