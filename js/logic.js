@@ -1,0 +1,136 @@
+// 純邏輯（不碰 DOM），可以用 node --test 測試。
+// 算盤一檔的值 0–9：上珠 1 顆代表 5，下珠 4 顆各代表 1。
+// 動畫步驟格式：{ v: 算盤上的數字, hl: 要發亮的珠子, show: 顯示幾個算式片段, on: 標亮哪幾個片段, cap: 說明文字 }
+// 珠子代號：r{檔位}-h 是上珠，r{檔位}-e{i} 是下珠（i=0 最靠近橫樑）。檔位 0 = 個位。
+
+export const MINUS = "−";
+export const CN = ["零", "一", "二", "三", "四", "五", "六", "七", "八", "九"];
+export const opSym = (op) => (op === "+" ? "+" : MINUS);
+export const apply = (a, op, n) => (op === "+" ? a + n : a - n);
+
+/* ---------- 五的好朋友 ---------- */
+export const FIVE_RULES = [];
+for (const op of ["+", "-"]) for (const n of [1, 2, 3, 4]) FIVE_RULES.push({ op, n, m: 5 - n });
+
+export function ruleLabel(r) {
+  return r.op === "+" ? [`+${r.n}`, `+5 ${MINUS}${r.m}`] : [`${MINUS}${r.n}`, `${MINUS}5 +${r.m}`];
+}
+// 口訣統一用「+1 加五減四」的說法，不用傳統的「一下五去四」。
+export function chantShort(r) {
+  return r.op === "+" ? `加五減${CN[r.m]}` : `減五加${CN[r.m]}`;
+}
+export function chant(r) {
+  return `${r.op === "+" ? "加" : "減"}${CN[r.n]}，${chantShort(r)}`;
+}
+// 需要用到這條口訣的起始數字
+export function fiveStarts(r) {
+  const out = [];
+  if (r.op === "+") for (let a = 5 - r.n; a <= 4; a++) out.push(a);
+  else for (let a = 5; a <= r.n + 4; a++) out.push(a);
+  return out;
+}
+export function needsFive(a, op, n) {
+  if (n < 1 || n > 4) return false;
+  return op === "+" ? a < 5 && a + n >= 5 : a >= 5 && a - n < 5;
+}
+
+/* ---------- 直接加減（一檔內，不需要好朋友） ---------- */
+export function isDirect(a, op, n) {
+  if (n < 1 || n > 9 || a < 0 || a > 9) return false;
+  const nh = n >= 5, ne = n % 5;
+  if (op === "+") return (!nh || a < 5) && (a % 5) + ne <= 4;
+  return (!nh || a >= 5) && a % 5 >= ne;
+}
+
+const range = (s, e) => { const o = []; for (let i = s; i < e; i++) o.push("r0-e" + i); return o; };
+
+export function buildIntroSteps() {
+  return {
+    toks: [],
+    steps: [
+      { v: 0, hl: [], show: 0, on: [], cap: "這是算盤的一檔。中間的橫樑把珠子分成上下兩邊。" },
+      { v: 0, hl: ["r0-h"], show: 0, on: [], cap: "上面這顆是「上珠」，一顆代表 5。" },
+      { v: 0, hl: range(0, 4), show: 0, on: [], cap: "下面四顆是「下珠」，一顆代表 1。" },
+      { v: 5, hl: ["r0-h"], show: 0, on: [], cap: "上珠撥下來、靠近橫樑，就是 5。" },
+      { v: 3, hl: range(0, 3), show: 0, on: [], cap: "撥上 3 顆下珠，就是 3。" },
+      { v: 8, hl: ["r0-h", ...range(0, 3)], show: 0, on: [], cap: "上珠加上 3 顆下珠：5 + 3 = 8。" },
+      { v: 0, hl: [], show: 0, on: [], cap: "珠子全部離開橫樑，就是 0。" },
+    ],
+  };
+}
+
+export function buildDirectSteps(a, op, n) {
+  const plus = op === "+", ans = apply(a, op, n);
+  const nh = n >= 5, ne = n % 5, lo = a % 5;
+  const toks = [{ t: a }, { t: opSym(op) + n, c: plus ? "pl" : "mi" }, { t: "=", c: "sym" }, { t: ans }];
+  const moved = [...(nh ? ["r0-h"] : []), ...(plus ? range(lo, lo + ne) : range(lo - ne, lo))];
+  const acts = [];
+  if (nh) acts.push(plus ? "把上珠撥下來" : "把上珠撥上去");
+  if (ne) acts.push(plus ? `撥上 ${ne} 顆下珠` : `撥掉 ${ne} 顆下珠`);
+  const enough = plus
+    ? (nh && !ne ? "上珠空著，可以直接加 5！" : nh ? "上珠和下珠都夠，直接撥！" : `下珠還有 ${4 - lo} 顆，夠撥！`)
+    : (nh && !ne ? "上珠在橫樑旁，可以直接減 5！" : nh ? "上珠和下珠都夠，直接撥！" : `下珠有 ${lo} 顆，夠撥！`);
+  return {
+    toks,
+    steps: [
+      { v: a, hl: [], show: 2, on: [], cap: `算盤上是 ${a}，要${plus ? "加" : "減"} ${n}。` },
+      { v: a, hl: moved, show: 2, on: [1], cap: enough },
+      { v: ans, hl: moved, show: 2, on: [1], cap: acts.join("，再") + "。" },
+      { v: ans, hl: [], show: 4, on: [3], cap: `${a} ${opSym(op)} ${n} = ${ans}，完成！` },
+    ],
+  };
+}
+
+export function buildFiveSteps(r, a) {
+  const { n, m } = r, plus = r.op === "+", ans = apply(a, r.op, n);
+  const toks = [
+    { t: a }, { t: opSym(r.op) + n, c: plus ? "pl" : "mi" }, { t: "=", c: "sym" }, { t: a },
+    { t: opSym(r.op) + "5", c: plus ? "pl" : "mi" }, { t: (plus ? MINUS : "+") + m, c: plus ? "mi" : "pl" },
+    { t: "=", c: "sym" }, { t: ans },
+  ];
+  const c = chant(r), steps = [];
+  if (plus) {
+    const left = 4 - a;
+    steps.push({ v: a, hl: [], show: 2, on: [], cap: `算盤上是 ${a}，要加 ${n}。` });
+    steps.push({ v: a, hl: range(a, 4), show: 2, on: [1], cap: left ? `下珠只剩 ${left} 顆，不夠加 ${n} 顆！` : `下珠一顆都不剩，不夠加 ${n}！` });
+    steps.push({ v: a, hl: [], show: 6, on: [4, 5], cap: `口訣「${c}」：${n} 的好朋友是 ${m}，所以 +${n} 變成 +5 ${MINUS}${m}。` });
+    steps.push({ v: 5 + a, hl: ["r0-h"], show: 6, on: [4], cap: "先 +5：把上珠撥下來。" });
+    steps.push({ v: ans, hl: range(a - m, a), show: 6, on: [5], cap: `再 ${MINUS}${m}：撥掉 ${m} 顆下珠。` });
+  } else {
+    const k = a - 5;
+    steps.push({ v: a, hl: [], show: 2, on: [], cap: `算盤上是 ${a}，要減 ${n}。` });
+    steps.push({ v: a, hl: range(0, k), show: 2, on: [1], cap: k ? `下珠只有 ${k} 顆，不夠減 ${n} 顆！` : `下珠一顆都沒有，不夠減 ${n}！` });
+    steps.push({ v: a, hl: [], show: 6, on: [4, 5], cap: `口訣「${c}」：${n} 的好朋友是 ${m}，所以 ${MINUS}${n} 變成 ${MINUS}5 +${m}。` });
+    steps.push({ v: k, hl: ["r0-h"], show: 6, on: [4], cap: `先 ${MINUS}5：把上珠撥上去。` });
+    steps.push({ v: ans, hl: range(k, k + m), show: 6, on: [5], cap: `再 +${m}：撥上 ${m} 顆下珠。` });
+  }
+  steps.push({ v: ans, hl: [], show: 8, on: [7], cap: `${a} ${opSym(r.op)} ${n} = ${ans}！記住口訣「${c}」。` });
+  return { toks, steps };
+}
+
+/* ---------- 練習題 ---------- */
+// 每題：{ start: 起始數字, target: 正確答案, text: 題目, hint: 答錯時的提示 }
+const pick = (arr, rng) => arr[Math.floor(rng() * arr.length)];
+
+export function q1(rng = Math.random) {
+  const n = 1 + Math.floor(rng() * 9);
+  return {
+    start: 0, target: n, text: `撥出 ${n}`,
+    hint: n >= 5 ? `${n} = 5 + ${n - 5}：上珠撥下來${n > 5 ? `，再撥上 ${n - 5} 顆下珠` : ""}。` : `撥上 ${n} 顆下珠。`,
+  };
+}
+export function q2(rng = Math.random) {
+  let a, op, n;
+  do { a = Math.floor(rng() * 10); op = rng() < 0.5 ? "+" : "-"; n = 1 + Math.floor(rng() * 9); } while (!isDirect(a, op, n));
+  return { start: a, target: apply(a, op, n), text: `${a} ${opSym(op)} ${n} = ?`, hint: "珠子夠撥，直接撥上或撥掉就好。" };
+}
+export function q3(rng = Math.random) {
+  const r = pick(FIVE_RULES, rng), a = pick(fiveStarts(r), rng);
+  const [l, rr] = ruleLabel(r);
+  return { start: a, target: apply(a, r.op, r.n), text: `${a} ${opSym(r.op)} ${r.n} = ?`, hint: `口訣「${chant(r)}」，${l} = ${rr}` };
+}
+
+export function stars(correct, total) {
+  const p = total ? correct / total : 0;
+  return p >= 0.9 ? 3 : p >= 0.7 ? 2 : p >= 0.5 ? 1 : 0;
+}

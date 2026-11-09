@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>小小珠算</title>
+<meta name="description" content="用動畫和口訣學珠算：認識算盤、直接加減、五的好朋友。">
+<meta property="og:title" content="小小珠算">
+<meta property="og:description" content="用動畫和口訣學珠算，一關一關闖。">
+<meta name="theme-color" content="#9A6438">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Huninn&family=Noto+Sans+TC:wght@400;500;700&family=Fredoka:wght@500;600&display=swap">
+<link rel="stylesheet" href="css/style.css">
+<script type="module" src="js/app.js"></script>
+</head>
+<body>
+<header class="top"><div class="top-in"><a href="#home" class="brand">小小珠算</a></div></header>
+
+<main class="wrap">
+  <!-- 首頁：關卡地圖 -->
+  <section id="view-home" class="stack">
+    <div>
+      <h1>今天要闖哪一關？</h1>
+      <p class="lead">每一關先看動畫學撥法，再練習 10 題。第一次就答對 9 題以上，可以拿到三顆星。</p>
+    </div>
+    <div class="levels" id="levels"></div>
+  </section>
+
+  <!-- 關卡頁 -->
+  <section id="view-level" class="stack" hidden>
+    <div>
+      <a href="#home" class="back">← 回關卡地圖</a>
+      <h1 id="lvTitle"></h1>
+      <p class="lead" id="lvSub"></p>
+    </div>
+
+    <div class="tabs" role="tablist">
+      <button id="tabLearn" role="tab" aria-selected="true">看動畫</button>
+      <button id="tabPractice" role="tab" aria-selected="false">練習</button>
+    </div>
+
+    <div id="panelLearn" class="stack">
+      <div class="rules" id="picker" aria-label="選擇口訣">
+        <span class="lab">加法</span><div class="row" id="rowPlus"></div>
+        <span class="lab">減法</span><div class="row" id="rowMinus"></div>
+      </div>
+      <div class="board">
+        <div class="abacus-col">
+          <div class="bigval"><small>算盤上</small><span id="val">0</span></div>
+          <div id="abacusMain"></div>
+        </div>
+        <div class="lesson">
+          <div class="chant" id="chant" hidden></div>
+          <div class="eqline" id="eq" aria-live="polite"></div>
+          <div class="caption" id="cap" aria-live="polite"></div>
+          <div class="dots" id="dots" aria-label="步驟"></div>
+          <div class="ctrls">
+            <button class="btn" id="prev">上一步</button>
+            <button class="btn primary" id="play">播放</button>
+            <button class="btn" id="next">下一步</button>
+            <button class="btn" id="voice" aria-pressed="false">朗讀：關</button>
+          </div>
+          <div class="examples" id="exRow"><span>換一題：</span><span id="ex" class="row"></span></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="panelPractice" hidden>
+      <div class="board" id="quizArea">
+        <div class="abacus-col">
+          <div class="bigval"><small>算盤上</small><span id="qval">0</span></div>
+          <div id="abacusQuiz"></div>
+        </div>
+        <div class="lesson">
+          <div class="progress"><div class="bar"><i id="qbar"></i></div><span id="qprog"></span></div>
+          <div class="qq" id="qq"></div>
+          <p class="tip">點珠子就能撥動，撥好答案再按「檢查」。</p>
+          <div class="ctrls">
+            <button class="btn primary" id="check">檢查</button>
+            <button class="btn" id="qreset">重撥</button>
+            <button class="btn primary" id="qnext" hidden>下一題</button>
+          </div>
+          <div class="fb" id="fb" aria-live="polite"></div>
+        </div>
+      </div>
+      <div class="board result" id="result" hidden>
+        <div id="rStars" class="rstars"></div>
+        <p id="rText" class="caption"></p>
+        <p id="rBest" class="tip"></p>
+        <div class="ctrls">
+          <button class="btn primary" id="again">再練一次</button>
+          <a class="btn" href="#home">回關卡地圖</a>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+</body>
+</html>
