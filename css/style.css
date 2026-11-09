@@ -43,6 +43,13 @@ button:focus-visible, a:focus-visible { outline: 3px solid var(--glow); outline-
 
 /* 關卡地圖 */
 .levels { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; }
+.family-picker { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; }
+.family-picker label { font-family: var(--f-display); font-size: 20px; }
+.family-picker form { display: flex; flex-wrap: wrap; gap: 8px; }
+.family-picker select, .family-picker input { font: inherit; color: var(--ink); background: var(--panel); border: 2px solid var(--line); border-radius: 12px; padding: 8px 12px; min-height: 48px; }
+.family-picker input { width: 140px; }
+.family-picker select:focus-visible, .family-picker input:focus-visible { outline: 3px solid var(--glow); outline-offset: 2px; }
+.family-picker .tip { flex-basis: 100%; }
 .lvcard {
   display: flex; align-items: center; gap: 14px; padding: 14px 16px;
   background: var(--panel); border: 2px solid var(--line); border-radius: 16px;
