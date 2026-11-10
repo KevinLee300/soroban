@@ -4,12 +4,16 @@ import { LEVELS } from "./levels.js";
 import { canSpeak, speak, stopSpeak } from "./speech.js";
 import { loadProgress, saveStars, loadProfiles, activeProfile, selectProfile, addProfile } from "./storage.js";
 import { renderDrill } from "./drill.js";
+import { createCoinTray } from "./coins.js";
 
 const $ = (id) => document.getElementById(id);
 const PRACTICE_TOTAL = 10;
 
 let level = null, rule = null, demos = [], demoIdx = 0, pset = null;
-let mainAb = null, quizAb = null;
+let mainAb = null, quizAb = null, tray = null;
+// 錢幣對照（零錢盒）預設打開，記在這台裝置
+let coinsOn = true;
+try { coinsOn = localStorage.getItem("soroban.coins") !== "off"; } catch { /* 用預設 */ }
 let voiceOn = canSpeak;
 const player = { data: null, step: 0, playing: false, timer: null };
 const P = { i: 0, correct: 0, q: null, firstTry: true, done: false };
@@ -83,6 +87,14 @@ function openLevel(lv) {
   $("view-level").style.setProperty("--rods", lv.rods || 1);
   $("abacusMain").innerHTML = "";
   mainAb = createAbacus($("abacusMain"), { rods: lv.rods || 1 });
+  $("coinTray").innerHTML = "";
+  tray = createCoinTray($("coinTray"), { rods: lv.rods || 1 });
+  // 算盤和零錢盒等高：依兩張圖的寬度比例分配空間
+  const wa = mainAb.el.viewBox.baseVal.width, wt = tray.el.viewBox.baseVal.width;
+  $("abacusMain").parentElement.style.flex = `${wa} 1 0`;
+  $("coinFig").style.flex = `${wt} 1 0`;
+  $("view-level").style.setProperty("--pair-w", `${Math.round((wa + wt) * 0.85)}px`);
+  applyCoins();
   $("abacusQuiz").innerHTML = "";
   quizAb = createAbacus($("abacusQuiz"), { rods: lv.rods || 1, interactive: true, onChange: onQuizChange });
   $("picker").hidden = !lv.rules;
@@ -166,11 +178,33 @@ function go(i, silent) {
   $("val").textContent = s.v;
   [...$("eq").children].forEach((el, k) => { el.classList.toggle("hide", k >= s.show); el.classList.toggle("on", s.on.includes(k)); });
   $("cap").textContent = s.cap;
+  tray.setValue(s.v);
+  tray.highlight(s.hl);
+  $("coinCap").textContent = L.coinLine(steps, player.step, level.rods || 1);
   [...$("dots").children].forEach((d, k) => { d.classList.toggle("done", k < player.step); d.classList.toggle("cur", k === player.step); });
   $("prev").disabled = player.step === 0;
   $("next").disabled = player.step === steps.length - 1;
-  if (!silent && voiceOn) speak(s.cap);
+  if (!silent && voiceOn) speak(narration());
 }
+
+// 朗讀內容：錢幣打開時，順便念出錢幣的說法
+function narration() {
+  const s = player.data.steps[player.step];
+  return coinsOn ? `${s.cap}${$("coinCap").textContent}` : s.cap;
+}
+
+function applyCoins() {
+  $("coinFig").hidden = !coinsOn;
+  $("coinCap").hidden = !coinsOn;
+  $("coinBtn").textContent = "錢幣：" + (coinsOn ? "開" : "關");
+  $("coinBtn").setAttribute("aria-pressed", String(coinsOn));
+  $("view-level").classList.toggle("with-coins", coinsOn);
+}
+$("coinBtn").onclick = () => {
+  coinsOn = !coinsOn;
+  try { localStorage.setItem("soroban.coins", coinsOn ? "on" : "off"); } catch { /* 存不了就算了 */ }
+  applyCoins();
+};
 
 const atEnd = () => player.data && player.step >= player.data.steps.length - 1;
 
@@ -188,7 +222,7 @@ function playDemo() {
       narrate();
     }, atEnd() ? 1800 : voiceOn ? 100 : 2300);
   };
-  const narrate = () => (voiceOn ? speak(player.data.steps[player.step].cap, () => player.playing && advance()) : advance());
+  const narrate = () => (voiceOn ? speak(narration(), () => player.playing && advance()) : advance());
   narrate();
 }
 

@@ -48,13 +48,13 @@ export function buildIntroSteps() {
   return {
     toks: [],
     steps: [
-      { v: 0, hl: [], show: 0, on: [], cap: "這是算盤的一檔。中間的橫樑把珠子分成上下兩邊。" },
-      { v: 0, hl: ["r0-h"], show: 0, on: [], cap: "上面這顆是「上珠」，一顆代表 5。" },
-      { v: 0, hl: range(0, 4), show: 0, on: [], cap: "下面四顆是「下珠」，一顆代表 1。" },
-      { v: 5, hl: ["r0-h"], show: 0, on: [], cap: "上珠撥下來、靠近橫樑，就是 5。" },
-      { v: 3, hl: range(0, 3), show: 0, on: [], cap: "撥上 3 顆下珠，就是 3。" },
-      { v: 8, hl: ["r0-h", ...range(0, 3)], show: 0, on: [], cap: "上珠加上 3 顆下珠：5 + 3 = 8。" },
-      { v: 0, hl: [], show: 0, on: [], cap: "珠子全部離開橫樑，就是 0。" },
+      { v: 0, hl: [], show: 0, on: [], cap: "這是算盤的一檔。中間的橫樑把珠子分成上下兩邊。", coin: "旁邊的零錢盒和算盤一樣：上面放 5 元，下面放 1 元。" },
+      { v: 0, hl: ["r0-h"], show: 0, on: [], cap: "上面這顆是「上珠」，一顆代表 5。", coin: "上珠就像一個 5 元硬幣。" },
+      { v: 0, hl: range(0, 4), show: 0, on: [], cap: "下面四顆是「下珠」，一顆代表 1。", coin: "下珠就像 1 元硬幣，最多只能放 4 個。" },
+      { v: 5, hl: ["r0-h"], show: 0, on: [], cap: "上珠撥下來、靠近橫樑，就是 5。", coin: "放進 1 個 5 元，就是 5 元。" },
+      { v: 3, hl: range(0, 3), show: 0, on: [], cap: "撥上 3 顆下珠，就是 3。", coin: "放 3 個 1 元，就是 3 元。" },
+      { v: 8, hl: ["r0-h", ...range(0, 3)], show: 0, on: [], cap: "上珠加上 3 顆下珠：5 + 3 = 8。", coin: "1 個 5 元加 3 個 1 元，就是 8 元。" },
+      { v: 0, hl: [], show: 0, on: [], cap: "珠子全部離開橫樑，就是 0。", coin: "零錢盒空空的，就是 0 元。" },
     ],
   };
 }
@@ -76,7 +76,7 @@ export function buildDirectSteps(a, op, n) {
       { v: a, hl: [], show: 2, on: [], cap: `算盤上是 ${a}，要${plus ? "加" : "減"} ${n}。` },
       { v: a, hl: moved, show: 2, on: [1], cap: enough },
       { v: ans, hl: moved, show: 2, on: [1], cap: acts.join("，再") + "。" },
-      { v: ans, hl: [], show: 4, on: [3], cap: `${a} ${opSym(op)} ${n} = ${ans}，完成！` },
+      { v: ans, hl: [], show: 4, on: [3], cap: `${a} ${opSym(op)} ${n} = ${ans}，完成！`, coin: `${a} 元 ${opSym(op)} ${n} 元 = ${ans} 元。` },
     ],
   };
 }
@@ -92,19 +92,23 @@ export function buildFiveSteps(r, a) {
   if (plus) {
     const left = 4 - a;
     steps.push({ v: a, hl: [], show: 2, on: [], cap: `算盤上是 ${a}，要加 ${n}。` });
-    steps.push({ v: a, hl: range(a, 4), show: 2, on: [1], cap: left ? `下珠只剩 ${left} 顆，不夠加 ${n} 顆！` : `下珠一顆都不剩，不夠加 ${n}！` });
-    steps.push({ v: a, hl: [], show: 6, on: [4, 5], cap: `口訣「${c}」：${n} 的好朋友是 ${m}，所以 +${n} 變成 +5 ${MINUS}${m}。` });
+    steps.push({ v: a, hl: range(a, 4), show: 2, on: [1], cap: left ? `下珠只剩 ${left} 顆，不夠加 ${n} 顆！` : `下珠一顆都不剩，不夠加 ${n}！`,
+      coin: left ? `1 元的格子只剩 ${left} 格，放不下 ${n} 個 1 元！` : `1 元的格子滿了，放不下 ${n} 個 1 元！` });
+    steps.push({ v: a, hl: [], show: 6, on: [4, 5], cap: `口訣「${c}」：${n} 的好朋友是 ${m}，所以 +${n} 變成 +5 ${MINUS}${m}。`,
+      coin: `要放進 ${n} 元，就先放 1 個 5 元進去，再拿出 ${m} 元。` });
     steps.push({ v: 5 + a, hl: ["r0-h"], show: 6, on: [4], cap: "先 +5：把上珠撥下來。" });
     steps.push({ v: ans, hl: range(a - m, a), show: 6, on: [5], cap: `再 ${MINUS}${m}：撥掉 ${m} 顆下珠。` });
   } else {
     const k = a - 5;
     steps.push({ v: a, hl: [], show: 2, on: [], cap: `算盤上是 ${a}，要減 ${n}。` });
-    steps.push({ v: a, hl: range(0, k), show: 2, on: [1], cap: k ? `下珠只有 ${k} 顆，不夠減 ${n} 顆！` : `下珠一顆都沒有，不夠減 ${n}！` });
-    steps.push({ v: a, hl: [], show: 6, on: [4, 5], cap: `口訣「${c}」：${n} 的好朋友是 ${m}，所以 ${MINUS}${n} 變成 ${MINUS}5 +${m}。` });
+    steps.push({ v: a, hl: range(0, k), show: 2, on: [1], cap: k ? `下珠只有 ${k} 顆，不夠減 ${n} 顆！` : `下珠一顆都沒有，不夠減 ${n}！`,
+      coin: k ? `只有 ${k} 個 1 元，不夠拿走 ${n} 元！` : `一個 1 元都沒有，不夠拿走 ${n} 元！` });
+    steps.push({ v: a, hl: [], show: 6, on: [4, 5], cap: `口訣「${c}」：${n} 的好朋友是 ${m}，所以 ${MINUS}${n} 變成 ${MINUS}5 +${m}。`,
+      coin: `要拿走 ${n} 元，就先拿走 5 元，再放回 ${m} 元。` });
     steps.push({ v: k, hl: ["r0-h"], show: 6, on: [4], cap: `先 ${MINUS}5：把上珠撥上去。` });
     steps.push({ v: ans, hl: range(k, k + m), show: 6, on: [5], cap: `再 +${m}：撥上 ${m} 顆下珠。` });
   }
-  steps.push({ v: ans, hl: [], show: 8, on: [7], cap: `${a} ${opSym(r.op)} ${n} = ${ans}！記住口訣「${c}」。` });
+  steps.push({ v: ans, hl: [], show: 8, on: [7], cap: `${a} ${opSym(r.op)} ${n} = ${ans}！記住口訣「${c}」。`, coin: `${a} 元 ${opSym(r.op)} ${n} 元 = ${ans} 元。` });
   return { toks, steps };
 }
 
@@ -171,13 +175,39 @@ export function buildTenSteps(r, a) {
         cap: plus
           ? (u === 9 ? `個位已經是 9，滿了，不夠加 ${n}！` : `個位最多只能再加 ${9 - u}，不夠加 ${n}！`)
           : (u === 0 ? `個位是 0，不夠減 ${n}！` : `個位只有 ${u}，不夠減 ${n}！`),
+        coin: plus ? `個位最多只能再放 ${9 - u} 元，放不下 ${n} 元！` : `個位只有 ${u} 元，不夠拿走 ${n} 元！`,
       },
-      { v: a, hl: [], show: 6, on: [4, 5], cap: `口訣「${c}」：${n} 的好朋友是 ${m}，所以 ${opSym(r.op)}${n} 變成 ${opSym(r.op)}10 ${plus ? MINUS : "+"}${m}。` },
+      { v: a, hl: [], show: 6, on: [4, 5], cap: `口訣「${c}」：${n} 的好朋友是 ${m}，所以 ${opSym(r.op)}${n} 變成 ${opSym(r.op)}10 ${plus ? MINUS : "+"}${m}。`,
+        coin: plus ? `要放進 ${n} 元，就先放 1 個 10 元進去，再拿出 ${m} 元。` : `要拿走 ${n} 元，就先拿走 10 元，再放回 ${m} 元。` },
       { v: mid, hl: movedBeads(1, t, t2), show: 6, on: [4], cap: plus ? "先 +10：左邊的十位撥上 1。" : `先 ${MINUS}10：左邊的十位撥掉 1。` },
       { v: ans, hl: movedBeads(0, u, u2), show: 6, on: [5], cap: `再 ${plus ? MINUS : "+"}${m}：個位${describeMove(u, u2)}。` },
-      { v: ans, hl: [], show: 8, on: [7], cap: `${a} ${opSym(r.op)} ${n} = ${ans}！記住口訣「${c}」。` },
+      { v: ans, hl: [], show: 8, on: [7], cap: `${a} ${opSym(r.op)} ${n} = ${ans}！記住口訣「${c}」。`, coin: `${a} 元 ${opSym(r.op)} ${n} 元 = ${ans} 元。` },
     ],
   };
+}
+
+/* ---------- 錢幣對照（零錢盒） ---------- */
+// 個位：上珠 = 5 元、下珠 = 1 元；十位：上珠 = 50 元、下珠 = 10 元
+export const COINS = [{ big: 5, small: 1 }, { big: 50, small: 10 }];
+export function coinMoves(from, to, rods = 2) {
+  const acts = [];
+  for (let r = rods - 1; r >= 0; r--) {
+    const a = Math.floor(from / 10 ** r) % 10, b = Math.floor(to / 10 ** r) % 10, c = COINS[r];
+    const dh = (b >= 5) - (a >= 5), de = (b % 5) - (a % 5);
+    if (dh > 0) acts.push(`放進 1 個 ${c.big} 元`);
+    if (dh < 0) acts.push(`拿走 ${c.big} 元`);
+    if (de > 0) acts.push(`放進 ${de} 個 ${c.small} 元`);
+    if (de < 0) acts.push(`拿走 ${-de} 個 ${c.small} 元`);
+  }
+  return acts.join("，");
+}
+// 動畫每一步要顯示的錢幣說明：有寫 coin 就用它，否則依珠子變化自動產生
+export function coinLine(steps, i, rods = 1) {
+  const s = steps[i];
+  if (s.coin) return s.coin;
+  if (i === 0) return `零錢盒裡有 ${s.v} 元。`;
+  const moves = coinMoves(steps[i - 1].v, s.v, rods);
+  return moves ? `${moves}，現在有 ${s.v} 元。` : `現在有 ${s.v} 元。`;
 }
 
 /* ---------- 練習題 ---------- */
