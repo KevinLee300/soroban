@@ -22,6 +22,7 @@
 | ✅ Claude 完成 | 題庫可以在畫面上作答：全部寫完一次交卷、打勾打叉、給分數和星星 | Claude | `drill.js` |
 | ✅ Claude 完成 | 練習分組：第 2 關分加法／減法／混合；第 3 關分湊成 5／加法／從 5 減／減法／混合，每組各自記星星 | Claude | `logic.js`、`levels.js`、`app.js` |
 | ✅ Claude 完成 | 錢幣對照（零錢盒）：算盤旁邊的硬幣盒一起動，1 元／5 元／10 元／50 元，附錢幣說明與朗讀 | Claude | `coins.js`、`logic.js`、`app.js` |
+| ✅ Claude 完成 | 題庫新增「直接加減」（不用五的好朋友），頁面改名「算盤題庫」 | Claude | `logic.js`、`drill.js` |
 | ⬜ | 「找五還是找十？」判斷練習 | Claude | `logic.js`、`levels.js` |
 | ⬜ | PWA：加到主畫面、離線可用（manifest + service worker） | Codex | 新檔 |
 

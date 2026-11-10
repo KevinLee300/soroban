@@ -33,17 +33,22 @@
       <p id="profileError" class="tip" role="alert" hidden>名字已經有了，請換一個。</p>
     </div>
     <div class="levels" id="levels"></div>
-    <a class="lvcard drillcard" href="#drill"><span class="lvnum">題</span><span class="lvtext"><b>五的好朋友題庫</b><small>只出題目，拿實體算盤來算，可以列印</small></span></a>
+    <a class="lvcard drillcard" href="#drill"><span class="lvnum">題</span><span class="lvtext"><b>算盤題庫</b><small>直接加減、五的好朋友，拿實體算盤來算，可以列印</small></span></a>
   </section>
 
   <!-- 題庫頁：給實體算盤用 -->
   <section id="view-drill" class="stack" hidden>
     <div class="no-print">
       <a href="#home" class="back">← 回關卡地圖</a>
-      <h1>五的好朋友題庫</h1>
+      <h1>算盤題庫</h1>
       <p class="lead">拿出算盤，從上往下一個數字一個數字撥，把答案填在橫線下面。全部寫完再按「交卷」，就會看到分數。題目上的數字都在 5 以內。</p>
+      <p class="tip" id="dKindTip"></p>
     </div>
     <div class="drill-opts no-print">
+      <div class="optrow"><span class="lab">種類</span>
+        <div class="seg" id="dKind" role="group" aria-label="種類">
+          <button data-v="direct">直接加減</button><button data-v="five">五的好朋友</button>
+        </div></div>
       <div class="optrow"><span class="lab">題型</span>
         <div class="seg" id="dMode" role="group" aria-label="題型">
           <button data-v="+">加法</button><button data-v="-">減法</button><button data-v="mix">加減混合</button>
@@ -61,7 +66,7 @@
         <button class="btn" id="dPrint">列印</button>
       </div>
     </div>
-    <div class="print-only print-head"><b>五的好朋友練習</b><span>姓名：＿＿＿＿＿＿　日期：＿＿＿＿＿＿　答對：＿＿＿ 題</span></div>
+    <div class="print-only print-head"><b id="dPrintTitle">五的好朋友練習</b><span>姓名：＿＿＿＿＿＿　日期：＿＿＿＿＿＿　答對：＿＿＿ 題</span></div>
     <div class="board drill-result no-print" id="dResult" hidden>
       <div id="dStars" class="rstars"></div>
       <div class="dscore"><b id="dScore">0</b><small>分</small></div>

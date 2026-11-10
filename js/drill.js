@@ -2,7 +2,11 @@
 import { fiveDrillSet, MINUS, stars } from "./logic.js";
 
 const $ = (id) => document.getElementById(id);
-const opts = { mode: "mix", terms: 3, count: 10 };
+const opts = { kind: "direct", mode: "+", terms: 2, count: 10 };
+const KIND = {
+  direct: { name: "直接加減", tip: "珠子夠撥就直接撥，不用五的好朋友。例如 3 + 1、4 − 2。" },
+  five: { name: "五的好朋友", tip: "每題至少用到一次五的好朋友。例如 3 + 4（加五減一）、6 − 2（減五加三）。" },
+};
 let set = [];
 let checked = false;
 let confirmBlank = false;
@@ -36,12 +40,14 @@ function renderList() {
 }
 
 function newSet() {
-  set = fiveDrillSet({ mode: opts.mode, terms: opts.terms, max: 5 }, opts.count);
+  set = fiveDrillSet({ kind: opts.kind, mode: opts.mode, terms: opts.terms, max: 5 }, opts.count);
   renderList();
 }
 
 export function renderDrill() {
-  setSeg("dMode", "mode"); setSeg("dTerms", "terms"); setSeg("dCount", "count");
+  setSeg("dKind", "kind"); setSeg("dMode", "mode"); setSeg("dTerms", "terms"); setSeg("dCount", "count");
+  $("dKindTip").textContent = KIND[opts.kind].tip;
+  $("dPrintTitle").textContent = `${KIND[opts.kind].name}練習`;
   newSet();
 }
 
@@ -108,6 +114,7 @@ function bindSeg(groupId, key, toNum) {
     renderDrill();
   });
 }
+bindSeg("dKind", "kind", false);
 bindSeg("dMode", "mode", false);
 bindSeg("dTerms", "terms", true);
 bindSeg("dCount", "count", true);
