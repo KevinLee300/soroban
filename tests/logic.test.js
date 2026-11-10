@@ -156,3 +156,22 @@ test("錢幣對照：珠子變化說成放進／拿走硬幣", () => {
   assert.equal(lines.at(-1), "1 元 + 4 元 = 5 元。");
   assert.match(lines[2], /先放 1 個 5 元進去，再拿出 1 元/);
 });
+
+test("題庫：直接加減不會用到五的好朋友", () => {
+  for (const mode of ["+", "-", "mix"]) for (const terms of [2, 3, 4]) for (let k = 0; k < 300; k++) {
+    const q = L.directDrill({ mode, terms });
+    let v = q.nums[0];
+    assert.ok(v >= 1 && v <= 5);
+    for (const x of q.nums.slice(1)) {
+      const op = x > 0 ? "+" : "-";
+      assert.ok(Math.abs(x) >= 1 && Math.abs(x) <= 5);
+      assert.ok(L.isDirect(v, op, Math.abs(x)), `要用好朋友：${q.nums}`);
+      if (mode === "+") assert.equal(op, "+");
+      if (mode === "-") assert.equal(op, "-");
+      v += x;
+    }
+    assert.equal(q.answer, v);
+  }
+  const set = L.fiveDrillSet({ kind: "direct", mode: "+", terms: 2 }, 10);
+  assert.equal(set.length, 10);
+});

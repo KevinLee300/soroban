@@ -301,12 +301,39 @@ export function fiveDrill({ mode = "mix", terms = 3, max = 5, rng = Math.random 
   throw new Error("fiveDrill: 找不到符合條件的題目");
 }
 
-// 一次出 count 題，盡量不重複
+/* ---------- 題庫：直接加減（不用五的好朋友，給實體算盤用） ---------- */
+// mode："+" 只有加法、"-" 只有減法、"mix" 加減都有
+// 每一步珠子都夠撥（isDirect），所以完全不需要五的好朋友，也不會用到十。
+export function directDrill({ mode = "+", terms = 2, max = 5, rng = Math.random } = {}) {
+  const ops = mode === "+" ? ["+"] : mode === "-" ? ["-"] : ["+", "-"];
+  for (let tries = 0; tries < 5000; tries++) {
+    // 減法要先有東西可以減：第一個數字從 2 開始
+    const first = (mode === "-" ? 2 : 1) + Math.floor(rng() * (max - (mode === "-" ? 1 : 0)));
+    const nums = [first];
+    let v = first, stuck = false;
+    for (let k = 1; k < terms; k++) {
+      const cands = [];
+      for (const op of ops) for (let n = 1; n <= max; n++) if (isDirect(v, op, n)) cands.push({ op, n });
+      if (!cands.length) { stuck = true; break; }
+      const c = pick(cands, rng);
+      v = apply(v, c.op, c.n);
+      nums.push(c.op === "+" ? c.n : -c.n);
+    }
+    if (stuck) continue;
+    // 加減混合（3 個數字以上）要真的有加也有減
+    if (mode === "mix" && terms > 2 && !(nums.slice(1).some((x) => x > 0) && nums.slice(1).some((x) => x < 0))) continue;
+    return { nums, answer: v };
+  }
+  throw new Error("directDrill: 找不到符合條件的題目");
+}
+
+// 一次出 count 題，盡量不重複。kind："five" 五的好朋友、"direct" 直接加減
 export function fiveDrillSet(opts, count) {
+  const gen = opts.kind === "direct" ? directDrill : fiveDrill;
   const out = [], seen = new Set();
   while (out.length < count) {
     let q, tries = 0;
-    do { q = fiveDrill(opts); tries++; } while (seen.has(q.nums.join()) && tries < 30);
+    do { q = gen(opts); tries++; } while (seen.has(q.nums.join()) && tries < 30);
     seen.add(q.nums.join());
     out.push(q);
   }
