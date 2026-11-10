@@ -196,10 +196,43 @@ export function q2(rng = Math.random) {
   do { a = Math.floor(rng() * 10); op = rng() < 0.5 ? "+" : "-"; n = 1 + Math.floor(rng() * 9); } while (!isDirect(a, op, n));
   return { start: a, target: apply(a, op, n), text: `${a} ${opSym(op)} ${n} = ?`, hint: "珠子夠撥，直接撥上或撥掉就好。" };
 }
-export function q3(rng = Math.random) {
-  const r = pick(FIVE_RULES, rng), a = pick(fiveStarts(r), rng);
+// 直接加減，只出加法或只出減法（不用五的好朋友、也不用十）
+function directQ(op, rng) {
+  let a, n;
+  do { a = 1 + Math.floor(rng() * 9); n = 1 + Math.floor(rng() * 9); } while (!isDirect(a, op, n));
+  return {
+    start: a, target: apply(a, op, n), text: `${a} ${opSym(op)} ${n} = ?`,
+    hint: op === "+" ? "珠子夠撥，直接撥上去就好。" : "珠子夠撥，直接撥掉就好。",
+  };
+}
+export const q2add = (rng = Math.random) => directQ("+", rng);
+export const q2sub = (rng = Math.random) => directQ("-", rng);
+
+function fiveQ(r, a) {
   const [l, rr] = ruleLabel(r);
   return { start: a, target: apply(a, r.op, r.n), text: `${a} ${opSym(r.op)} ${r.n} = ?`, hint: `口訣「${chant(r)}」，${l} = ${rr}` };
+}
+const fiveRule = (op, n) => FIVE_RULES.find((r) => r.op === op && r.n === n);
+
+export function q3(rng = Math.random) {
+  const r = pick(FIVE_RULES, rng);
+  return fiveQ(r, pick(fiveStarts(r), rng));
+}
+// 五的好朋友，由淺到深：湊成 5（1+4、2+3…）→ 加法 → 從 5 減（5−1、5−2…）→ 減法
+export function q3make5(rng = Math.random) {
+  const a = 1 + Math.floor(rng() * 4);
+  return fiveQ(fiveRule("+", 5 - a), a);
+}
+export function q3plus(rng = Math.random) {
+  const r = pick(FIVE_RULES.filter((x) => x.op === "+"), rng);
+  return fiveQ(r, pick(fiveStarts(r), rng));
+}
+export function q3from5(rng = Math.random) {
+  return fiveQ(fiveRule("-", 1 + Math.floor(rng() * 4)), 5);
+}
+export function q3minus(rng = Math.random) {
+  const r = pick(FIVE_RULES.filter((x) => x.op === "-"), rng);
+  return fiveQ(r, pick(fiveStarts(r), rng));
 }
 
 export function q4(rng = Math.random) {

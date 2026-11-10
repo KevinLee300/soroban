@@ -12,13 +12,25 @@ export const LEVELS = [
   {
     id: 2, title: "直接加減", sub: "珠子夠撥，就直接撥", ready: true,
     demos: () => DIRECT.map(([a, op, n]) => ({ label: `${a} ${L.opSym(op)} ${n}`, build: () => L.buildDirectSteps(a, op, n) })),
-    question: L.q2,
+    // 練習分組：先只有加法、再只有減法，最後加減混合
+    practice: [
+      { id: "add", label: "加法", question: L.q2add },
+      { id: "sub", label: "減法", question: L.q2sub },
+      { id: "mix", label: "加減混合", question: L.q2 },
+    ],
   },
   {
     id: 3, title: "五的好朋友", sub: "下珠不夠，請五來幫忙", ready: true,
     rules: L.FIVE_RULES, label: L.ruleLabel, chantShort: L.chantShort,
     demosFor: (r) => L.fiveStarts(r).map((a) => ({ label: `${a} ${L.opSym(r.op)} ${r.n}`, build: () => L.buildFiveSteps(r, a) })),
-    question: L.q3,
+    // 練習由淺到深：湊成 5 → 加法 → 從 5 減 → 減法 → 混合
+    practice: [
+      { id: "make5", label: "湊成 5", sub: "1+4、2+3", question: L.q3make5 },
+      { id: "plus", label: "加法", sub: "3+4、4+2", question: L.q3plus },
+      { id: "from5", label: "從 5 減", sub: "5−1、5−2", question: L.q3from5 },
+      { id: "minus", label: "減法", sub: "6−2、7−3", question: L.q3minus },
+      { id: "mix", label: "加減混合", question: L.q3 },
+    ],
   },
   {
     id: 4, title: "十的好朋友", sub: "個位不夠，請十來幫忙", ready: true, rods: 2,

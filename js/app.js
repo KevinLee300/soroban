@@ -8,7 +8,7 @@ import { renderDrill } from "./drill.js";
 const $ = (id) => document.getElementById(id);
 const PRACTICE_TOTAL = 10;
 
-let level = null, rule = null, demos = [], demoIdx = 0;
+let level = null, rule = null, demos = [], demoIdx = 0, pset = null;
 let mainAb = null, quizAb = null;
 let voiceOn = canSpeak;
 const player = { data: null, step: 0, playing: false, timer: null };
@@ -32,13 +32,33 @@ function route() {
 
 const starHTML = (s) => `<span class="stars" aria-label="${s} 顆星">${"★".repeat(s)}<span class="off">${"★".repeat(3 - s)}</span></span>`;
 
+// 練習分組：沒有分組的關卡就只有一組
+const practiceSets = (lv) => lv.practice || [{ id: "", label: "", question: lv.question }];
+const starKey = (lv, set) => (set.id ? `${lv.id}.${set.id}` : String(lv.id));
+// 首頁顯示這一關所有分組裡最好的星星數
+const levelStars = (prog, lv) => Math.max(0, ...practiceSets(lv).map((s) => prog[starKey(lv, s)] || 0), prog[lv.id] || 0);
+
+function renderPracticeSets() {
+  const sets = practiceSets(level), prog = loadProgress();
+  $("pSets").hidden = sets.length < 2;
+  $("pSets").innerHTML = sets.map((s, i) => `<button data-i="${i}" aria-pressed="${s === pset}">
+      <b>${s.label}</b>${s.sub ? `<small>${s.sub}</small>` : ""}${starHTML(prog[starKey(level, s)] || 0)}</button>`).join("");
+}
+$("pSets").addEventListener("click", (ev) => {
+  const b = ev.target.closest("button");
+  if (!b) return;
+  pset = practiceSets(level)[+b.dataset.i];
+  renderPracticeSets();
+  startPractice();
+});
+
 function renderHome() {
   const picker = $("profile");
   picker.replaceChildren(...loadProfiles().map((name) => new Option(name, name)));
   picker.value = activeProfile();
   const prog = loadProgress();
   $("levels").innerHTML = LEVELS.map((l) => l.ready
-    ? `<a class="lvcard" href="#level-${l.id}"><span class="lvnum">${l.id}</span><span class="lvtext"><b>${l.title}</b><small>${l.sub}</small></span>${starHTML(prog[l.id] || 0)}</a>`
+    ? `<a class="lvcard" href="#level-${l.id}"><span class="lvnum">${l.id}</span><span class="lvtext"><b>${l.title}</b><small>${l.sub}</small></span>${starHTML(levelStars(prog, l))}</a>`
     : `<div class="lvcard locked"><span class="lvnum">${l.id}</span><span class="lvtext"><b>${l.title}</b><small>${l.sub}</small></span><span class="soon">製作中</span></div>`
   ).join("");
 }
@@ -57,6 +77,7 @@ $("addProfile").onsubmit = (event) => {
 /* ---------- 關卡 ---------- */
 function openLevel(lv) {
   level = lv;
+  pset = null;
   $("lvTitle").textContent = `第 ${lv.id} 關　${lv.title}`;
   $("lvSub").textContent = lv.sub;
   $("view-level").style.setProperty("--rods", lv.rods || 1);
@@ -203,6 +224,8 @@ $("tabPractice").onclick = () => setTab("practice");
 
 /* ---------- 練習 ---------- */
 function startPractice() {
+  if (!pset || !practiceSets(level).includes(pset)) pset = practiceSets(level)[0];
+  renderPracticeSets();
   P.i = 0; P.correct = 0; P.q = null;
   $("result").hidden = true;
   $("quizArea").hidden = false;
@@ -212,7 +235,7 @@ function startPractice() {
 function nextQ() {
   if (P.i >= PRACTICE_TOTAL) return finish();
   let q;
-  do { q = level.question(); } while (P.q && q.text === P.q.text);
+  do { q = pset.question(); } while (P.q && q.text === P.q.text);
   P.q = q; P.firstTry = true; P.done = false;
   $("qq").textContent = q.text;
   $("qprog").textContent = `第 ${P.i + 1} / ${PRACTICE_TOTAL} 題　答對 ${P.correct} 題`;
@@ -254,12 +277,13 @@ $("qnext").onclick = () => { P.i++; nextQ(); };
 
 function finish() {
   const s = L.stars(P.correct, PRACTICE_TOTAL);
-  const best = saveStars(level.id, s);
+  const best = saveStars(starKey(level, pset), s);
+  renderPracticeSets();
   $("quizArea").hidden = true;
   $("result").hidden = false;
   $("rStars").innerHTML = starHTML(s);
   $("rText").textContent = `${PRACTICE_TOTAL} 題裡第一次就答對 ${P.correct} 題。` + (s === 3 ? "太厲害了！" : s >= 1 ? "很棒，再練一次拿滿三顆星！" : "沒關係，回去看動畫再試一次。");
-  $("rBest").textContent = `這一關最好成績：${best} 顆星`;
+  $("rBest").textContent = `${pset.label ? `「${pset.label}」` : "這一關"}最好成績：${best} 顆星`;
   if (voiceOn) speak(`得到 ${s} 顆星`);
 }
 $("again").onclick = startPractice;

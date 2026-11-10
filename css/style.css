@@ -131,6 +131,17 @@ svg.abacus { width: 100%; max-width: calc(220px * var(--rods, 1)); height: auto;
 .chip[aria-pressed="true"] { border-color: var(--ink); background: var(--ink); color: var(--panel); }
 
 /* 練習 */
+.psets { display: flex; flex-wrap: wrap; gap: 8px; }
+.psets button {
+  border: 2px solid var(--line); background: var(--panel); border-radius: 14px; padding: 8px 14px;
+  display: flex; flex-direction: column; align-items: center; gap: 2px; min-width: 96px; line-height: 1.25;
+}
+.psets button b { font-family: var(--f-display); font-weight: 400; font-size: 18px; }
+.psets button small { font-family: var(--f-num); font-size: 13px; color: var(--muted); }
+.psets button .stars { font-size: 14px; letter-spacing: 1px; }
+.psets button[aria-pressed="true"] { border-color: var(--ink); background: var(--ink); color: var(--panel); }
+.psets button[aria-pressed="true"] small { color: inherit; opacity: .8; }
+.psets button[aria-pressed="true"] .stars .off { color: color-mix(in srgb, var(--panel) 35%, transparent); }
 .progress { display: flex; flex-direction: column; gap: 6px; font-size: 14px; color: var(--muted); }
 .bar { height: 10px; border-radius: 999px; background: var(--bg); overflow: hidden; }
 .bar i { display: block; height: 100%; background: var(--plus); border-radius: inherit; transition: width .4s; }
