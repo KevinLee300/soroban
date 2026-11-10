@@ -4,6 +4,7 @@
   --wood: #9A6438; --wood-dark: #6B4122; --rod: #C9B08F;
   --bead: #D64B2A; --bead-hi: #F08A63; --glow: #F2B400;
   --plus: #0F7F6C; --minus: #6A46C0; --plus-soft: #DDF2EE; --minus-soft: #ECE6FA;
+  --coin-gold: #E3B04B; --coin-gold-edge: #A87A1E; --coin-silver: #D3DAE0; --coin-silver-edge: #8995A0; --coincap-ink: #6B4122;
   --f-display: "Huninn", "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif;
   --f-body: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif;
   --f-num: "Fredoka", "Huninn", ui-rounded, system-ui, sans-serif;
@@ -15,6 +16,8 @@
     --wood: #A8703F; --wood-dark: #6E4524; --rod: #8C7860;
     --bead: #E25A37; --bead-hi: #F59B78; --glow: #FFC933;
     --plus: #3CC2A8; --minus: #A48AF0; --plus-soft: #173A35; --minus-soft: #2A2445;
+    --coin-gold: #E3B04B; --coin-gold-edge: #C0912F; --coin-silver: #C9D1D8; --coin-silver-edge: #9AA6B1;
+    --coincap-ink: #F0CB8A;
     color-scheme: dark;
   }
 }
@@ -129,6 +132,39 @@ svg.abacus { width: 100%; max-width: calc(220px * var(--rods, 1)); height: auto;
 .examples { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; color: var(--muted); font-size: 14px; }
 .chip { border: 1.5px solid var(--line); background: transparent; border-radius: 999px; padding: 2px 12px; font-family: var(--f-num); font-size: 16px; }
 .chip[aria-pressed="true"] { border-color: var(--ink); background: var(--ink); color: var(--panel); }
+
+/* 零錢盒（錢幣對照） */
+.pair { display: flex; gap: 12px; align-items: flex-start; justify-content: center; width: 100%; }
+.with-coins .pair { max-width: var(--pair-w, 100%); }
+.pair figure { margin: 0; display: flex; flex-direction: column; align-items: center; gap: 4px; min-width: 0; }
+.pair figure[hidden] { display: none; }
+.pair figcaption { font-family: var(--f-display); font-size: 14px; color: var(--muted); }
+.with-coins .pair svg { max-width: none; width: 100%; }
+svg.coins { width: 100%; height: auto; display: block; }
+.coins .tray { fill: var(--bg); stroke: var(--line); stroke-width: 3; }
+.coins .tray-bar { fill: var(--line); }
+.coins .slot { fill: none; stroke: var(--line); stroke-width: 2.5; stroke-dasharray: 6 5; }
+.coins .coin { transition: opacity .45s, transform .55s cubic-bezier(.3, 1.4, .5, 1); }
+.coins .coin.off { opacity: 0; transform: scale(.3); }
+.coins .face { stroke-width: 2; }
+.coins .rim { fill: none; stroke-width: 1.5; opacity: .6; }
+.coins .gold .face { fill: var(--coin-gold); stroke: var(--coin-gold-edge); }
+.coins .gold .rim { stroke: var(--coin-gold-edge); }
+.coins .silver .face { fill: var(--coin-silver); stroke: var(--coin-silver-edge); }
+.coins .silver .rim { stroke: var(--coin-silver-edge); }
+.coins .amt { font-family: var(--f-num); font-weight: 600; font-size: 22px; fill: #2A2118; text-anchor: middle; dominant-baseline: central; }
+.coins .amt.two { font-size: 19px; }
+.coins .halo { fill: none; stroke: var(--glow); stroke-width: 5; opacity: 0; }
+.coins .coin.hl:not(.off) .halo { opacity: 1; animation: pulse 1s ease-in-out infinite; }
+.coincap { margin: -6px 0 0; font-size: 17px; line-height: 1.5; color: var(--coincap-ink); background: color-mix(in srgb, var(--coin-gold) 18%, transparent); border-radius: 10px; padding: 6px 12px; min-height: 2.6em; }
+@media (min-width: 721px) {
+  .with-coins .board { grid-template-columns: minmax(260px, calc(230px + 140px * var(--rods, 1))) 1fr; }
+}
+@media (max-width: 720px) {
+  .with-coins #panelLearn .abacus-col { flex-direction: column; gap: 8px; }
+  .with-coins .bigval { display: flex; align-items: baseline; gap: 8px; font-size: 32px; }
+  .with-coins .bigval small { margin: 0; }
+}
 
 /* 練習 */
 .psets { display: flex; flex-wrap: wrap; gap: 8px; }

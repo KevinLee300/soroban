@@ -99,18 +99,23 @@
       <div class="board">
         <div class="abacus-col">
           <div class="bigval"><small>算盤上</small><span id="val">0</span></div>
-          <div id="abacusMain"></div>
+          <div class="pair">
+            <figure><div id="abacusMain"></div><figcaption>算盤</figcaption></figure>
+            <figure id="coinFig"><div id="coinTray"></div><figcaption>零錢盒</figcaption></figure>
+          </div>
         </div>
         <div class="lesson">
           <div class="chant" id="chant" hidden></div>
           <div class="eqline" id="eq" aria-live="polite"></div>
           <div class="caption" id="cap" aria-live="polite"></div>
+          <p class="coincap" id="coinCap"></p>
           <div class="dots" id="dots" aria-label="步驟"></div>
           <div class="ctrls">
             <button class="btn" id="prev">上一步</button>
             <button class="btn primary" id="play">播放</button>
             <button class="btn" id="next">下一步</button>
             <button class="btn" id="voice" aria-pressed="false">朗讀：關</button>
+            <button class="btn" id="coinBtn" aria-pressed="true">錢幣：開</button>
           </div>
           <div class="examples" id="exRow"><span>換一題：</span><span id="ex" class="row"></span></div>
         </div>

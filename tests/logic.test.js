@@ -142,3 +142,17 @@ test("五的好朋友分組：由淺到深", () => {
   const seen = new Set(); for (let k = 0; k < 200; k++) seen.add(L.q3make5().text);
   assert.equal(seen.size, 4);
 });
+
+test("錢幣對照：珠子變化說成放進／拿走硬幣", () => {
+  assert.equal(L.coinMoves(1, 6, 1), "放進 1 個 5 元");
+  assert.equal(L.coinMoves(6, 5, 1), "拿走 1 個 1 元");
+  assert.equal(L.coinMoves(13, 3, 2), "拿走 1 個 10 元");
+  assert.equal(L.coinMoves(48, 53, 2), "放進 1 個 50 元，拿走 4 個 10 元，拿走 5 元");
+  // 1 + 4：每一步都有錢幣說明，最後一步是 1 元 + 4 元 = 5 元
+  const r = L.FIVE_RULES.find((x) => x.op === "+" && x.n === 4);
+  const { steps } = L.buildFiveSteps(r, 1);
+  const lines = steps.map((_, i) => L.coinLine(steps, i, 1));
+  assert.ok(lines.every((t) => t.length > 0));
+  assert.equal(lines.at(-1), "1 元 + 4 元 = 5 元。");
+  assert.match(lines[2], /先放 1 個 5 元進去，再拿出 1 元/);
+});
