@@ -114,3 +114,31 @@ test("題庫：一次出一組", () => {
   assert.equal(set.length, 20);
   assert.ok(new Set(set.map((q) => q.nums.join())).size >= 15);
 });
+
+test("直接加減分組：加法只有加、減法只有減，都不用五的好朋友", () => {
+  for (let k = 0; k < 400; k++) {
+    for (const [fn, sym] of [[L.q2add, "+"], [L.q2sub, "−"]]) {
+      const q = fn(), [, a, op, n] = q.text.match(/^(\d) ([+−]) (\d)/);
+      assert.equal(op, sym, q.text);
+      assert.ok(L.isDirect(+a, sym === "+" ? "+" : "-", +n), q.text);
+      assert.ok(q.target >= 0 && q.target <= 9);
+    }
+  }
+});
+
+test("五的好朋友分組：由淺到深", () => {
+  const parse = (q) => { const [, a, op, n] = q.text.match(/^(\d) ([+−]) (\d)/); return [+a, op === "+" ? "+" : "-", +n]; };
+  for (let k = 0; k < 400; k++) {
+    let [a, op, n] = parse(L.q3make5());
+    assert.ok(op === "+" && a + n === 5 && L.needsFive(a, op, n));
+    [a, op, n] = parse(L.q3plus());
+    assert.ok(op === "+" && L.needsFive(a, op, n));
+    [a, op, n] = parse(L.q3from5());
+    assert.ok(op === "-" && a === 5 && L.needsFive(a, op, n));
+    [a, op, n] = parse(L.q3minus());
+    assert.ok(op === "-" && L.needsFive(a, op, n));
+  }
+  // 湊成 5 會出到 1+4、2+3、3+2、4+1 全部
+  const seen = new Set(); for (let k = 0; k < 200; k++) seen.add(L.q3make5().text);
+  assert.equal(seen.size, 4);
+});
