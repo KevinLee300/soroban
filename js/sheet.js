@@ -76,19 +76,38 @@ function finds(level, rng) {
 }
 
 export const SHEET_LEVELS = ["簡單", "普通", "挑戰"];
+export const SHEET_TYPES = [
+  { id: "seq", title: "接著填", tip: "照規律，把空格填上數字" },
+  { id: "compare", title: "比大小", tip: "填 >、< 或 =，開口對著大的數字" },
+  { id: "bonds", title: "分一分", tip: "上面的數字分成兩堆" },
+  { id: "adds", title: "加一加", tip: "合起來是多少" },
+  { id: "subs", title: "減一減", tip: "劃掉的是拿走的" },
+  { id: "finds", title: "找數字", tip: "格子裡是多少，算式才會對" },
+];
+const generators = { seq, compare, bonds, adds, subs, finds };
+
+// 混合題每種各一區；單一題型連續練六區，沿用相同難度與出題規則。
+export function makeSheetSections(level = 2, kind = "mix", rng = Math.random) {
+  if (kind !== "mix" && !SHEET_TYPES.some((t) => t.id === kind)) throw new RangeError("未知的練習單題型");
+  return SHEET_TYPES.map((type) => {
+    const id = kind === "mix" ? type.id : kind;
+    return { kind: id, data: generators[id](level, rng) };
+  });
+}
 export function makeSheet(level = 2, rng = Math.random) {
-  return { level, seq: seq(level, rng), compare: compare(level, rng), bonds: bonds(level, rng), adds: adds(level, rng), subs: subs(level, rng), finds: finds(level, rng) };
+  return { level, ...Object.fromEntries(makeSheetSections(level, "mix", rng).map((s) => [s.kind, s.data])) };
 }
 
 // 把整張練習單要填的格子照順序列出來：[{ ans, label }]，label 是學習紀錄裡顯示的題目
 export function sheetBlanks(s) {
+  if (Array.isArray(s)) return s.flatMap(({ kind, data }) => sheetBlanks({ [kind]: data }));
   const out = [];
-  const shown = s.seq.cells.map((c) => (c.blank ? "□" : c.v)).join("、");
-  for (const c of s.seq.cells) if (c.blank) out.push({ ans: c.v, label: `接著填：${shown}` });
-  for (const r of s.compare) out.push({ ans: r.ans, label: `比大小：${r.a} 和 ${r.b}` });
-  for (const b of s.bonds) out.push({ ans: b.ans, label: `分一分：${b.total} 分成 ${b.shown} 和 □` });
-  for (const a of s.adds) out.push({ ans: a.ans, label: `${a.a} + ${a.b}` });
-  for (const x of s.subs) out.push({ ans: x.ans, label: `${x.a} − ${x.b}` });
-  for (const f of s.finds) out.push({ ans: f.ans, label: `找數字：${f.text[0]} □ ${f.text[1]}`.replace(/\s+/g, " ") });
+  const shown = (s.seq?.cells || []).map((c) => (c.blank ? "□" : c.v)).join("、");
+  for (const c of s.seq?.cells || []) if (c.blank) out.push({ ans: c.v, label: `接著填：${shown}` });
+  for (const r of s.compare || []) out.push({ ans: r.ans, label: `比大小：${r.a} 和 ${r.b}` });
+  for (const b of s.bonds || []) out.push({ ans: b.ans, label: `分一分：${b.total} 分成 ${b.shown} 和 □` });
+  for (const a of s.adds || []) out.push({ ans: a.ans, label: `${a.a} + ${a.b}` });
+  for (const x of s.subs || []) out.push({ ans: x.ans, label: `${x.a} − ${x.b}` });
+  for (const f of s.finds || []) out.push({ ans: f.ans, label: `找數字：${f.text[0]} □ ${f.text[1]}`.replace(/\s+/g, " ") });
   return out;
 }

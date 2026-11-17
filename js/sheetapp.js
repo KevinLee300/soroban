@@ -1,44 +1,50 @@
-// 數學練習單的畫面：一頁 6 個區塊，把答案填在格子裡，最後一次交卷、給分數。出題在 sheet.js。
-import { SHEET_LEVELS, makeSheet, sheetBlanks } from "./sheet.js";
+// 練習單：混合題或單一題型連續練習；所有格子一次交卷。
+import { SHEET_LEVELS, SHEET_TYPES, makeSheetSections, sheetBlanks } from "./sheet.js";
 import { donut } from "./kids.js";
 import { stars } from "./logic.js";
 import { logSession, loadProgress, saveStars } from "./storage.js";
 
 const $ = (id) => document.getElementById(id);
 const DONUT = ["#F48FB1", "#FFD54F", "#81D4FA", "#A5D6A7", "#B39DDB"];
-let level = 2, sheet = null, blanks = [], checked = false, confirmBlank = false, t0 = 0;
+let level = 2, kind = "mix", sheet = null, blanks = [], checked = false, confirmBlank = false, t0 = 0;
+const progressId = (lv = level) => kind === "mix" ? `sheet.${lv}` : `sheet.${kind}.${lv}`;
+const kindName = () => kind === "mix" ? "混合題" : SHEET_TYPES.find((t) => t.id === kind).title;
 
-// 一個要填的格子。n 是它在整張練習單裡的第幾格（對應 sheetBlanks 的順序）
+// n 對應 sheetBlanks 的順序，畫面與答案一律依區塊順序產生。
 let n = 0;
-const box = (wide = false) => `<input class="fbox${wide ? " wide" : ""}" data-n="${n++}" inputmode="numeric" pattern="[0-9]*" maxlength="2" autocomplete="off" aria-label="第 ${n} 格">`;
+const box = () => `<input class="fbox" data-n="${n++}" inputmode="numeric" pattern="[0-9]*" maxlength="2" autocomplete="off" aria-label="第 ${n} 格">`;
 const cmpBox = () => {
   const i = n++;
-  return `<span class="cmp" data-n="${i}"><span class="fbox sym" aria-label="第 ${i + 1} 格"></span><span class="cmpbtns no-print">${[">", "<", "="].map((s) => `<button type="button" data-s="${s}" aria-label="${s === ">" ? "大於" : s === "<" ? "小於" : "等於"}">${s}</button>`).join("")}</span></span>`;
+  return `<span class="cmp" data-n="${i}"><span class="fbox sym" aria-label="第 ${i + 1} 格"></span><span class="cmpbtns no-print">${[">", "<", "="].map((s) => `<button type="button" data-s="${s}" aria-pressed="false" aria-label="第 ${i + 1} 格：${s === ">" ? "大於" : s === "<" ? "小於" : "等於"}">${s}</button>`).join("")}</span></span>`;
 };
-const pile = (k, color, eaten = 0) => `<span class="spile" style="--cols:${Math.max(1, Math.min(k, 5))}">${Array.from({ length: k }, (_, i) => `<span class="sd${i >= k - eaten ? " xed" : ""}">${donut(color)}</span>`).join("")}</span>`;
+const pile = (k, color, eaten = 0) => `<span class="spile" role="img" aria-label="${k} 個甜甜圈${eaten ? `，劃掉 ${eaten} 個` : ""}" style="--cols:${Math.max(1, Math.min(k, 5))}">${Array.from({ length: k }, (_, i) => `<span class="sd${i >= k - eaten ? " xed" : ""}">${donut(color)}</span>`).join("")}</span>`;
+const engine = '<svg class="sengine" viewBox="0 0 80 48" aria-hidden="true"><path d="M9 12h24v25H9zM33 23h29v14H33zM48 8h9v15h-9z" fill="var(--t1e)" stroke="var(--ink)" stroke-width="2" stroke-linejoin="round"/><path d="M14 17h14v12H14z" fill="var(--panel)"/><path d="M4 37h64l7 5H4" fill="var(--t4e)" stroke="var(--ink)" stroke-width="2"/><circle cx="21" cy="40" r="6" fill="var(--panel)" stroke="var(--ink)" stroke-width="3"/><circle cx="51" cy="40" r="6" fill="var(--panel)" stroke="var(--ink)" stroke-width="3"/><path d="M54 3c5-7 13 3 18-3" fill="none" stroke="var(--muted)" stroke-width="3" stroke-linecap="round"/></svg>';
 
-function render() {
-  n = 0;
-  const s = sheet, c = DONUT;
-  const panels = [
-    ["接著填", "照規律，把空格填上數字", "p1",
-      `<div class="blocks">${s.seq.cells.map((cell, i) => `<span class="blk b${i % 6}">${cell.blank ? box() : cell.v}</span>`).join("")}</div>`],
-    ["比大小", "填 >、< 或 =（開口對著大的數字）", "p2",
-      s.compare.map((r) => `<div class="srow cmprow"><span class="snum">${r.a}</span>${cmpBox()}<span class="snum">${r.b}</span></div>`).join("")],
-    ["分一分", "上面的數字分成兩堆", "p3",
-      `<div class="bondwrap">${s.bonds.map((b) => {
+function panelBody(type, data) {
+  switch (type) {
+    case "seq":
+      return `<div class="number-train">${engine}<div class="blocks">${data.cells.map((cell, i) => `<span class="blk b${i % 6}">${cell.blank ? box() : cell.v}</span>`).join("")}</div></div>`;
+    case "compare":
+      return data.map((r) => `<div class="srow cmprow"><span class="snum">${r.a}</span>${cmpBox()}<span class="snum">${r.b}</span></div>`).join("");
+    case "bonds":
+      return `<div class="bondwrap">${data.map((b) => {
         const shown = `<span class="bpart">${b.shown}</span>`, blank = `<span class="bpart blank">${box()}</span>`;
         return `<div class="bond"><svg viewBox="0 0 100 60" aria-hidden="true"><line x1="50" y1="14" x2="22" y2="50"/><line x1="50" y1="14" x2="78" y2="50"/></svg><span class="btop">${b.total}</span>${b.blankLeft ? blank + shown : shown + blank}</div>`;
-      }).join("")}</div>`],
-    ["加一加", "合起來是多少", "p4",
-      s.adds.map((a) => `${a.pic ? `<div class="srow pics">${pile(a.a, c[0])}<span class="sop">+</span>${pile(a.b, c[3])}</div>` : ""}<div class="srow"><span class="seq2">${a.a} + ${a.b} =</span>${box()}</div>`).join("")],
-    ["減一減", "劃掉的是拿走的", "p5",
-      s.subs.map((x) => `${x.pic ? `<div class="srow pics">${pile(x.a, c[1], x.b)}</div>` : ""}<div class="srow"><span class="seq2">${x.a} − ${x.b} =</span>${box()}</div>`).join("")],
-    ["找數字", "格子裡是多少，算式才會對", "p6",
-      s.finds.map((f) => `<div class="srow"><span class="seq2">${f.text[0]}</span>${box()}<span class="seq2">${f.text[1]}</span></div>`).join("")],
-  ];
-  $("sheetGrid").innerHTML = panels.map(([title, tip, cls, body]) =>
-    `<section class="spanel ${cls}"><div class="shead"><h2>${title}</h2><span>${tip}</span></div><div class="sbody">${body}</div></section>`).join("");
+      }).join("")}</div>`;
+    case "adds":
+      return data.map((a) => `<div class="squestion">${a.pic ? `<div class="srow pics">${pile(a.a, DONUT[0])}<span class="sop" aria-hidden="true">+</span>${pile(a.b, DONUT[3])}</div>` : ""}<div class="srow"><span class="seq2">${a.a} + ${a.b} =</span>${box()}</div></div>`).join("");
+    case "subs":
+      return data.map((x) => `<div class="squestion">${x.pic ? `<div class="srow pics">${pile(x.a, DONUT[1], x.b)}</div>` : ""}<div class="srow"><span class="seq2">${x.a} − ${x.b} =</span>${box()}</div></div>`).join("");
+    case "finds":
+      return data.map((f) => `<div class="srow"><span class="seq2">${f.text[0]}</span>${box()}<span class="seq2">${f.text[1]}</span></div>`).join("");
+  }
+}
+function render() {
+  n = 0;
+  $("sheetGrid").innerHTML = sheet.map(({ kind: type, data }, i) => {
+    const index = SHEET_TYPES.findIndex((t) => t.id === type), { title, tip } = SHEET_TYPES[index];
+    return `<section class="spanel p${index + 1}"><div class="shead"><h2>${title}</h2><span class="sbadge" aria-label="第 ${i + 1} 區">${String(i + 1).padStart(2, "0")}</span><p>${tip}</p></div><div class="sbody">${panelBody(type, data)}</div></section>`;
+  }).join("");
   checked = false; confirmBlank = false; t0 = Date.now();
   $("sheetGrid").classList.remove("checked");
   $("sResult").hidden = true;
@@ -50,18 +56,31 @@ function render() {
 function renderLevels() {
   const prog = loadProgress();
   $("sLevels").innerHTML = SHEET_LEVELS.map((name, i) => {
-    const st = prog[`sheet.${i + 1}`] || 0;
+    const st = prog[progressId(i + 1)] || 0;
     return `<button data-lv="${i + 1}" aria-pressed="${level === i + 1}"><b>${name}</b><span class="stars" aria-label="${st} 顆星">${"★".repeat(st)}<span class="off">${"★".repeat(3 - st)}</span></span></button>`;
   }).join("");
 }
-
+function renderKinds() {
+  $("sKinds").innerHTML = [{ id: "mix", title: "混合題" }, ...SHEET_TYPES].map((t) =>
+    `<button type="button" data-kind="${t.id}" aria-pressed="${kind === t.id}">${t.title}</button>`).join("");
+}
 function newSheet() {
-  sheet = makeSheet(level);
+  sheet = makeSheetSections(level, kind);
   blanks = sheetBlanks(sheet);
+  renderKinds();
   renderLevels();
+  $("sModeNote").textContent = kind === "mix" ? "六種題目各練一區，試試看你學會了多少。" : `這張都是「${kindName()}」，連續練六區，慢慢熟悉同一種題目。`;
+  $("sPrintTitle").textContent = `數學練習單・${kindName()}・${SHEET_LEVELS[level - 1]}`;
   render();
 }
 export function renderSheet() { newSheet(); }
+
+$("sKinds").addEventListener("click", (ev) => {
+  const b = ev.target.closest("button[data-kind]");
+  if (!b || b.dataset.kind === kind) return;
+  kind = b.dataset.kind;
+  newSheet();
+});
 
 const fields = () => [...$("sheetGrid").querySelectorAll("[data-n]")].sort((a, b) => a.dataset.n - b.dataset.n);
 const valueOf = (el) => (el.classList.contains("cmp") ? el.dataset.v || "" : el.value.trim());
@@ -129,8 +148,8 @@ $("sCheck").onclick = () => {
   });
   $("sheetGrid").classList.add("checked");
   const total = all.length, score = Math.round((correct / total) * 100), st = stars(correct, total);
-  saveStars(`sheet.${level}`, st);
-  logSession({ id: `sheet.${level}`, label: `數學練習單・${SHEET_LEVELS[level - 1]}`, correct, total, sec: (Date.now() - t0) / 1000, wrong: [...new Set(wrong)] });
+  saveStars(progressId(), st);
+  logSession({ id: progressId(), label: `數學練習單・${kindName()}・${SHEET_LEVELS[level - 1]}`, correct, total, sec: (Date.now() - t0) / 1000, wrong: [...new Set(wrong)] });
   renderLevels();
   $("sStars").innerHTML = `<span class="stars" aria-label="${st} 顆星">${"★".repeat(st)}<span class="off">${"★".repeat(3 - st)}</span></span>`;
   $("sScore").textContent = score;

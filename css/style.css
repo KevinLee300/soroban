@@ -369,8 +369,23 @@ h2 { font-family: var(--f-display); font-weight: 400; font-size: 22px; margin: 0
 .spanel.p3 { --pt: var(--t3); --pe: var(--t3e); } .spanel.p4 { --pt: var(--t4); --pe: var(--t4e); }
 .spanel.p5 { --pt: var(--t5); --pe: var(--t5e); } .spanel.p6 { --pt: var(--t6); --pe: var(--t6e); }
 .shead { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; }
-.shead h2 { font-size: 20px; background: var(--pe); color: #fff; border-radius: 999px; padding: 2px 16px; letter-spacing: .12em; text-shadow: 0 1px 0 rgb(0 0 0 / .18); }
-.shead span { font-size: 13px; color: var(--muted); }
+.shead h2 { font-size: 20px; background: var(--pe); color: var(--ink); border-radius: 999px; padding: 2px 16px; letter-spacing: .12em; }
+.shead p { flex-basis: 100%; margin: 0; font-size: 13px; color: var(--muted); font-family: var(--f-body); }
+.shead .sbadge { margin-left: auto; font-family: var(--f-num); font-size: 18px; color: var(--muted); }
+.sheet-options { display: grid; gap: 10px; }
+.sheet-options .lab { font-family: var(--f-display); font-size: 20px; }
+.sheet-options p { margin: 0; }
+.sheet-kinds { flex-wrap: wrap; }
+.sheet-kinds button { min-height: 48px; }
+.squestion { width: 100%; display: grid; justify-items: center; gap: 10px; }
+.squestion + .squestion { border-top: 1px dashed var(--pe); padding-top: 12px; }
+.number-train { width: 100%; padding-bottom: 12px; }
+.sengine { width: 76px; height: 46px; display: block; margin-bottom: 6px; }
+.number-train .blocks { font-size: clamp(20px, 6vw, 30px); display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 5px; border-bottom: 3px solid var(--line); padding-bottom: 10px; }
+.number-train .blk { width: 100%; height: 1.85em; border-radius: 9px; }
+.number-train .blk::after { content: ""; position: absolute; bottom: -8px; left: 6px; width: 7px; height: 7px; border-radius: 50%; background: var(--muted); box-shadow: 22px 0 var(--muted); }
+.spile { padding: 7px; border: 1px dashed var(--pe); border-radius: 14px; background: var(--panel); }
+.cmpbtns button { min-width: 44px; min-height: 44px; }
 .sbody { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 12px; font-family: var(--f-num); font-weight: 600; font-size: clamp(26px, 4.6vw, 34px); font-variant-numeric: tabular-nums; }
 .srow { display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap; position: relative; }
 .fbox { width: 1.7em; height: 1.55em; padding: 0; text-align: center; font: inherit; color: var(--ink); background: var(--panel); border: 3px solid var(--pe, var(--line)); border-radius: 10px; display: inline-grid; place-items: center; }
@@ -426,6 +441,17 @@ h2 { font-family: var(--f-display); font-weight: 400; font-size: 22px; margin: 0
 }
 
 /* 頁尾：安裝到主畫面、離線提示 */
+.install-card { width: 100%; display: flex; flex-wrap: wrap; align-items: center; gap: 12px; padding: 16px; border: 1px solid var(--line); background: var(--panel); border-radius: 16px; }
+.install-card > div { flex: 1 1 240px; }
+.install-card b { font-family: var(--f-display); font-size: 20px; font-weight: 400; }
+.install-dialog { width: min(480px, calc(100% - 32px)); max-height: calc(100dvh - 32px); overflow-y: auto; padding: 24px; border: 2px solid var(--line); border-radius: 20px; color: var(--ink); background: var(--panel); }
+.install-dialog::backdrop { background: rgb(0 0 0 / .45); }
+.install-dialog h2 { font-family: var(--f-display); font-size: 26px; }
+.install-dialog ol { padding-left: 24px; }
+.install-dialog li + li { margin-top: 10px; }
+.install-dialog label { display: block; font-size: 14px; margin-top: 16px; }
+.install-dialog input { display: block; width: 100%; min-width: 0; margin: 6px 0 14px; padding: 10px; font: inherit; font-size: 14px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); color: var(--ink); }
+@media print { .sengine { width: 60px; height: 36px; } .spile { padding: 4px; } .shead h2 { color: #000; } }
 .foot {
   max-width: 1040px; margin: 0 auto; display: flex; flex-direction: column; align-items: flex-start; gap: 10px;
   padding-left: max(16px, env(safe-area-inset-left)); padding-right: max(16px, env(safe-area-inset-right)); padding-bottom: 8px;

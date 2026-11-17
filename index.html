@@ -74,7 +74,7 @@
       <h1>幼兒數學</h1>
       <p class="lead">每個遊戲 10 題，有簡單、普通、挑戰三種難度。題目會念出來，小朋友點選答案就可以。</p>
     </div>
-    <a class="lvcard sheetcard" href="#sheet"><span class="lvnum">練</span><span class="lvtext"><b>數學練習單</b><small>一頁 6 種題目：接著填、比大小、分一分、加、減、找數字。把答案填在格子裡，可以列印</small></span></a>
+    <a class="lvcard sheetcard" href="#sheet"><span class="lvnum">練</span><span class="lvtext"><b>數學練習單</b><small>選一種題目連續練習，或挑戰六種混合題。填格子、一次交卷，也可以列印</small></span></a>
     <div id="mathGroups" class="stack"></div>
   </section>
 
@@ -85,6 +85,11 @@
       <h1>數學練習單</h1>
       <p class="lead">把答案填在格子裡，全部寫完再按「交卷」。也可以按「列印」印出來用筆寫。</p>
     </div>
+    <div class="sheet-options no-print">
+      <span class="lab">今天想練什麼？</span>
+      <div class="seg sheet-kinds" id="sKinds" role="group" aria-label="選擇練習單題型"></div>
+      <p class="tip" id="sModeNote" role="status"></p>
+    </div>
     <div class="gtop no-print">
       <div class="psets" id="sLevels" role="group" aria-label="選擇難度"></div>
       <div class="ctrls">
@@ -92,7 +97,7 @@
         <button class="btn" id="sPrint">列印</button>
       </div>
     </div>
-    <div class="print-only print-head"><b>數學練習單</b><span>姓名：＿＿＿＿＿＿　日期：＿＿＿＿＿＿　答對：＿＿＿ 格</span></div>
+    <div class="print-only print-head"><b id="sPrintTitle">數學練習單</b><span>姓名：＿＿＿＿＿＿　日期：＿＿＿＿＿＿　答對：＿＿＿ 格</span></div>
     <div class="board drill-result no-print" id="sResult" hidden>
       <div id="sStars" class="rstars"></div>
       <div class="dscore"><b id="sScore">0</b><small>分</small></div>
@@ -263,8 +268,21 @@
 </main>
 <footer class="foot">
   <p id="offlineNote" class="offline" role="status" hidden>現在沒有網路，用的是上次存下來的版本，可以照常練習。</p>
-  <button class="btn" id="installBtn" hidden>安裝到主畫面</button>
-  <p id="installTip" class="tip" hidden>iPhone／iPad：用 Safari 打開，按下面的「分享」按鈕，再選「加入主畫面」，就可以像 App 一樣打開。</p>
+  <div class="install-card" id="installCard">
+    <div><b>把小小珠算放到主畫面</b><p class="tip">下次點圖示就能練習，沒有網路也可以用。</p></div>
+    <button class="btn primary" id="installBtn" type="button">加入主畫面</button>
+    <a class="back" href="#install" id="installHelpLink">看安裝步驟</a>
+  </div>
+  <dialog id="installDialog" class="install-dialog" aria-labelledby="installTitle">
+    <h2 id="installTitle">加入主畫面</h2>
+    <p id="installTip" class="tip"></p>
+    <ol id="installSteps"></ol>
+    <p class="tip">需要你在裝置上確認，網站無法直接替你新增圖示。</p>
+    <label for="installUrl">安裝說明連結（可分享給家人）</label>
+    <input id="installUrl" type="url" readonly>
+    <div class="ctrls"><button class="btn" type="button" id="installCopy">複製連結</button><button class="btn primary" type="button" id="installClose">知道了</button></div>
+    <p id="installStatus" class="tip" role="status"></p>
+  </dialog>
 </footer>
 </body>
 </html>

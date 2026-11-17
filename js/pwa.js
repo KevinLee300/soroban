@@ -15,27 +15,89 @@ if ("serviceWorker" in navigator && (location.protocol === "https:" || location.
   });
 }
 
-// Android／電腦的 Chrome、Edge：瀏覽器准許安裝時才顯示按鈕
-let installEvent = null;
+// 安裝需要使用者確認；不支援安裝提示的瀏覽器顯示操作步驟。
+let installEvent = null, installed = false;
+const displayMode = matchMedia("(display-mode: standalone)");
+const isStandalone = () => installed || displayMode.matches || navigator.standalone === true;
+const ios = /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+const inApp = /line\/|fbav|fban|instagram/i.test(navigator.userAgent);
+const installUrl = new URL(location.href);
+installUrl.hash = "install";
+$("installUrl").value = installUrl.href;
+
+function updateInstall() {
+  $("installCard").hidden = isStandalone();
+  $("installBtn").textContent = installEvent ? "安裝到主畫面" : "加入主畫面";
+}
+function showInstallHelp() {
+  $("installStatus").textContent = "";
+  let tip, steps;
+  if (isStandalone()) {
+    tip = "你已經從主畫面打開小小珠算了，可以開始練習！";
+    steps = [];
+  } else if (inApp) {
+    tip = "你現在使用 App 內的瀏覽器，請先用手機瀏覽器打開。";
+    steps = ["按 App 的選單，選「用外部瀏覽器開啟」。", ios ? "用 Safari 開啟後，按「分享」。" : "用 Chrome 開啟後，按網站的「加入主畫面」。", ios ? "選「加入主畫面」，再按「加入」。" : "依照瀏覽器提示確認安裝。"];
+  } else if (ios) {
+    tip = "iPhone／iPad 請用 Safari 開啟，再依照下面的步驟加入。";
+    steps = ["按 Safari 的「分享」；有些版本需先按選單。", "往下找「加入主畫面」。", "如果有「作為網頁 App 打開」選項，將它打開，再按「加入」。"];
+  } else {
+    tip = "如果沒有出現安裝視窗，可以從瀏覽器選單加入。";
+    steps = ["用 Chrome 或 Edge 開啟這個網站。", "按瀏覽器選單，找「安裝應用程式」或「加入主畫面」。", "確認名稱後，按「安裝」或「新增」。"];
+  }
+  $("installTip").textContent = tip;
+  $("installSteps").replaceChildren(...steps.map((text) => {
+    const li = document.createElement("li");
+    li.textContent = text;
+    return li;
+  }));
+  if (!$("installDialog").open) $("installDialog").showModal();
+}
 window.addEventListener("beforeinstallprompt", (event) => {
   event.preventDefault();
   installEvent = event;
-  $("installBtn").hidden = false;
+  updateInstall();
 });
 $("installBtn").onclick = async () => {
-  if (!installEvent) return;
-  installEvent.prompt();
-  await installEvent.userChoice;
+  if (!installEvent) { showInstallHelp(); return; }
+  const event = installEvent;
   installEvent = null;
-  $("installBtn").hidden = true;
+  $("installBtn").disabled = true;
+  try {
+    await event.prompt();
+    await event.userChoice;
+  } catch {
+    showInstallHelp();
+  } finally {
+    $("installBtn").disabled = false;
+    updateInstall();
+  }
 };
-window.addEventListener("appinstalled", () => { $("installBtn").hidden = true; $("installTip").hidden = true; });
-
-// iPhone／iPad 沒有安裝按鈕，改顯示怎麼加到主畫面；已經從主畫面開啟就不用顯示
-const standalone = matchMedia("(display-mode: standalone)").matches || navigator.standalone === true;
-const ios = /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
-$("installTip").hidden = standalone || !ios;
-if (standalone) $("installBtn").hidden = true;
+window.addEventListener("appinstalled", () => {
+  installed = true;
+  installEvent = null;
+  $("installDialog").close();
+  updateInstall();
+});
+displayMode.addEventListener("change", updateInstall);
+$("installClose").onclick = () => $("installDialog").close();
+$("installCopy").onclick = async () => {
+  try {
+    await navigator.clipboard.writeText(installUrl.href);
+    $("installStatus").textContent = "已複製，可以貼給家人。";
+  } catch {
+    $("installUrl").focus();
+    $("installUrl").select();
+    $("installStatus").textContent = "請長按或按 Ctrl+C 複製上面的連結。";
+  }
+};
+$("installHelpLink").onclick = (event) => {
+  event.preventDefault();
+  showInstallHelp();
+};
+window.addEventListener("hashchange", () => { if (location.hash === "#install") showInstallHelp(); });
+if (location.hash === "#install") showInstallHelp();
+updateInstall();
 
 // 沒網路時提醒一下（還是可以照常練習）
 const showOffline = () => { $("offlineNote").hidden = navigator.onLine; };

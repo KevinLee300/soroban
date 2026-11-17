@@ -1,1 +1,2 @@
 @AGENTS.md
+@docs/CODEX_HANDOFF.md
