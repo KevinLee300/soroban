@@ -1,5 +1,5 @@
 // 幼兒數學的畫面：遊戲地圖、選難度、10 題選擇題、星星。出題在 kids.js。
-import { GROUPS, LEVEL_NAMES, describe, findGame, makeQuestion } from "./kids.js";
+import { GROUPS, LEVEL_NAMES, MIX, describe, findGame, makeQuestion } from "./kids.js";
 import { stars } from "./logic.js";
 import { canSpeak, speak, stopSpeak } from "./speech.js";
 import { loadProgress, saveStars, logSession } from "./storage.js";
@@ -17,6 +17,8 @@ const say = (text) => { if (voiceOn) speak(text); };
 export function renderMathHome() {
   leaveGame();
   const prog = loadProgress();
+  const mixBest = Math.max(0, ...[1, 2, 3].map((lv) => prog[key(MIX, lv)] || 0));
+  $("mathMix").innerHTML = `<span class="lvnum">混</span><span class="lvtext"><b>${MIX.title}</b><small>${MIX.sub}。數數、加減、形狀、時鐘、錢幣、動動腦都會出</small></span>${starHTML(mixBest)}`;
   $("mathGroups").innerHTML = GROUPS.map((grp) => `<div class="stack tight"><h2>${grp.title}</h2><div class="levels">${
     grp.games.map((g) => {
       const best = Math.max(0, ...[1, 2, 3].map((lv) => prog[key(g, lv)] || 0));
@@ -75,6 +77,8 @@ function nextQ() {
   $("gProg").textContent = `第 ${G.i + 1} / ${TOTAL} 題　答對 ${G.correct} 題`;
   $("gBar").style.width = `${(G.i / TOTAL) * 100}%`;
   $("gSay").textContent = q.say;
+  $("gTag").textContent = q.tag || "";
+  $("gTag").hidden = !q.tag;
   $("gScene").innerHTML = q.scene;
   $("gScene").hidden = !q.scene;
   $("gChoices").className = "gchoices" + (q.pic ? " pic" : "") + (q.rows ? " rows" : "") + (q.big ? " bignum" : "") + (q.text ? " text" : "");

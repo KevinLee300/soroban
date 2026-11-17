@@ -7,8 +7,8 @@ const each = (id, fn) => { for (const level of [1, 2, 3]) for (let k = 0; k < N;
 const picked = (q) => q.choices[q.answer].value;
 const donutCount = (html) => (html.match(/class="donut/g) || []).length;
 
-test("幼兒數學：18 個遊戲，每題都有題目、不重複的選項和正確答案", () => {
-  assert.equal(GAMES.length, 18);
+test("幼兒數學：18 個遊戲加綜合挑戰，每題都有題目、不重複的選項和正確答案", () => {
+  assert.equal(GAMES.length, 19); // 18 個遊戲＋綜合挑戰
   assert.equal(GROUPS.length, 5);
   for (const g of GAMES) for (const level of [1, 2, 3]) for (let k = 0; k < N; k++) {
     const q = makeQuestion(g, level);
@@ -117,4 +117,25 @@ test("哪個不一樣、數字機器", () => {
     assert.equal(picked(q), f ? f(x, k) : x * 2);
     assert.ok(picked(q) >= 0);
   });
+});
+
+test("綜合挑戰：10 題都來自不同的遊戲，題目標示是哪一種，答案正確", async () => {
+  const { MIX, describe } = await import("../js/kids.js");
+  for (const level of [1, 2, 3]) for (let k = 0; k < 40; k++) {
+    const qs = Array.from({ length: 10 }, () => makeQuestion(MIX, level));
+    const from = qs.map((q) => q.from);
+    for (let i = 1; i < from.length; i++) assert.notEqual(from[i], from[i - 1], "連續兩題同一種");
+    for (const q of qs) {
+      const g = findGame(q.from);
+      assert.ok(g && g.id !== "mix");
+      assert.equal(q.tag, g.title);
+      assert.ok(q.answer >= 0 && q.answer < q.choices.length);
+      const text = describe(MIX, q);
+      assert.ok(text.length > 2 && !/undefined|NaN/.test(text), text);
+    }
+  }
+  // 一直出下去，18 個遊戲都會輪到
+  const seen = new Set();
+  for (let i = 0; i < 18 * 3; i++) seen.add(makeQuestion(MIX, 2).from);
+  assert.equal(seen.size, 18);
 });

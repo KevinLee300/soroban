@@ -101,6 +101,7 @@
       <h1>幼兒數學</h1>
       <p class="lead">每個遊戲 10 題，有簡單、普通、挑戰三種難度。題目會念出來，小朋友點選答案就可以。</p>
     </div>
+    <a class="lvcard mixcard" href="#math-mix" id="mathMix"></a>
     <a class="lvcard clockcard" href="#clock"><span class="lvnum">鐘</span><span class="lvtext"><b>時鐘小學堂</b><small>跟著時鐘滴答、小烏龜和小兔子，一步一步學會整點和半點</small></span></a>
     <a class="lvcard sheetcard" href="#sheet"><span class="lvnum">練</span><span class="lvtext"><b>數學練習單</b><small>選一種題目連續練習，或挑戰六種混合題。填格子、一次交卷，也可以列印</small></span></a>
     <div id="mathGroups" class="stack"></div>
@@ -128,7 +129,7 @@
       <h2>從哪一關開始</h2>
       <div class="dstages" id="dStages" role="group" aria-label="選關卡"></div>
       <p class="tip" id="dBest"></p>
-      <div class="ctrls"><button class="btn primary big" id="dStart">開始守城堡</button></div>
+      <div class="ctrls"><button class="btn primary big" id="dStart">開始守城堡</button><button class="btn" id="dSound2" aria-pressed="true">聲音：開</button></div>
       <p class="tip">遊戲中每一半都有「轉向」按鈕，可以把畫面轉成自己看得順的方向。中間有「暫停」和「結束」。</p>
     </div>
     <div class="duoplay" id="duoPlay" hidden>
@@ -150,7 +151,7 @@
       </div>
       <div class="dmid">
         <canvas id="dField" aria-label="戰場"></canvas>
-        <div class="dmidbtns"><button class="btn small" id="dPause">暫停</button><button class="btn small" id="dExit">結束</button></div>
+        <div class="dmidbtns"><button class="btn small" id="dPause">暫停</button><button class="btn small" id="dSound" aria-pressed="true">聲音：開</button><button class="btn small" id="dExit">結束</button></div>
       </div>
       <div class="dpane" id="dPane1">
         <div class="inner">
@@ -334,6 +335,7 @@
     </div>
     <div class="board gboard" id="gPlay">
       <div class="progress"><div class="bar"><i id="gBar"></i></div><span id="gProg"></span></div>
+      <span class="gtag" id="gTag" hidden></span>
       <div class="gprompt"><span id="gSay" aria-live="polite"></span><button class="btn" id="gHear">再聽一次</button></div>
       <div class="gscene" id="gScene"></div>
       <div class="gchoices" id="gChoices"></div>
