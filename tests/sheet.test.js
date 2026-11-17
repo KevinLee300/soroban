@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { makeSheet, sheetBlanks } from "../js/sheet.js";
+import { SHEET_TYPES, makeSheet, makeSheetSections, sheetBlanks } from "../js/sheet.js";
 
 test("練習單：6 個區塊、13 個格子，每格都有答案", () => {
   for (const level of [1, 2, 3]) for (let k = 0; k < 300; k++) {
@@ -39,4 +39,31 @@ test("練習單：同一個區塊的兩題不會一模一樣", () => {
     assert.notDeepEqual([s.subs[0].a, s.subs[0].b], [s.subs[1].a, s.subs[1].b]);
     assert.notDeepEqual([s.bonds[0].total, s.bonds[0].shown], [s.bonds[1].total, s.bonds[1].shown]);
   }
+});
+
+test("練習單系列：六種單一題型各連續六區，答案依畫面順序排列", () => {
+  for (const level of [1, 2, 3]) for (const { id } of SHEET_TYPES) for (let k = 0; k < 100; k++) {
+    const sections = makeSheetSections(level, id);
+    assert.equal(sections.length, 6);
+    assert.ok(sections.every((s) => s.kind === id));
+    const expected = sections.flatMap(({ kind, data }) => {
+      if (kind === "seq") return data.cells.filter((c) => c.blank).map((c) => c.v);
+      return data.map((q) => q.ans);
+    });
+    const blanks = sheetBlanks(sections);
+    assert.deepEqual(blanks.map((b) => b.ans), expected);
+    assert.equal(blanks.length, id === "compare" ? 18 : 12);
+    assert.ok(blanks.every((b) => b.label.length > 2));
+  }
+});
+
+test("混合題保留六種題型、13 格與既有 makeSheet 介面", () => {
+  let seed = 17;
+  const rng = () => ((seed = (seed * 1664525 + 1013904223) >>> 0) / 2 ** 32);
+  const sections = makeSheetSections(2, "mix", rng);
+  assert.deepEqual(sections.map((s) => s.kind), SHEET_TYPES.map((t) => t.id));
+  seed = 17;
+  assert.deepEqual(sheetBlanks(sections), sheetBlanks(makeSheet(2, rng)));
+  assert.equal(sheetBlanks(sections).length, 13);
+  assert.throws(() => makeSheetSections(2, "unknown"), RangeError);
 });

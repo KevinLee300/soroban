@@ -51,3 +51,8 @@ npm run dev           # 開 http://localhost:8000 預覽（ES modules 不能直�
 - 開工前到 `docs/TASKS.md` 把工作標成「進行中」並寫上負責人，避免兩邊改同一個檔案。
 - 盡量一個工作只動自己範圍的檔案；要改共用檔（`app.js`、`style.css`、`index.html`）時，改動越小越好，並在 PR 說明。
 - 不要為了別的工作順手重構別人的程式。
+
+## Codex 接手紀錄
+- Codex 每次修改都同步更新 `docs/CODEX_HANDOFF.md`：需求、修改檔案與原因、驗證結果、已知限制／待辦、分支或 PR。
+- Claude 接回時先讀交接文件及 `docs/TASKS.md`，確認 PR 是否已合併；保留歷史紀錄，以新增日期條目的方式更新。
+- 不要把金鑰、個資或瀏覽器裡的實際學習資料寫進交接文件。
