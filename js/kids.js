@@ -1,4 +1,4 @@
-// 幼兒數學（中班、大班）：12 個小遊戲的出題。純邏輯，不碰 DOM，可以用 node --test 測試。
+// 幼兒數學（中班、大班）：18 個小遊戲的出題。純邏輯，不碰 DOM，可以用 node --test 測試。
 // 每個遊戲有 3 個難度：1 簡單、2 普通、3 挑戰。
 // 一題的格式：
 //   { say: 題目（會顯示、也會朗讀）, scene: 題目圖（HTML 字串，可以是空的）,
@@ -57,7 +57,7 @@ const shapeSvg = (s, color, cls = "kshape") => `<svg class="${cls}" viewBox="0 0
 const kid = (color) => `<svg class="kkid" viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="17" fill="${color}"/><circle cx="14" cy="17" r="2.2" fill="#3E2723"/><circle cx="26" cy="17" r="2.2" fill="#3E2723"/><path d="M13 24q7 7 14 0" fill="none" stroke="#3E2723" stroke-width="2" stroke-linecap="round"/></svg>`;
 const coin = (v) => `<span class="kcoin c${v}">${v}</span>`;
 
-/* ---------- 12 個遊戲 ---------- */
+/* ---------- 遊戲 ---------- */
 function count(level, rng) {
   if (level === 3) {
     const [x, y] = shuffle(ICING, rng), a = rnd(rng, 3, 10), b = rnd(rng, 3, 10);
@@ -215,6 +215,122 @@ function coins(level, rng) {
   };
 }
 
+/* ---------- 時鐘 ---------- */
+// 短針（紅色）指幾點，長針（藍色）指幾分
+export function clockSvg(h, m, cls = "kclock") {
+  const ha = ((h % 12) + m / 60) * 30, ma = m * 6;
+  let nums = "";
+  for (let i = 1; i <= 12; i++) {
+    const a = (i * 30 * Math.PI) / 180;
+    nums += `<text x="${(50 + 37 * Math.sin(a)).toFixed(1)}" y="${(50 - 37 * Math.cos(a)).toFixed(1)}">${i}</text>`;
+  }
+  return `<svg class="${cls}" viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="47" fill="#FFFDF7" stroke="#9A6438" stroke-width="5"/><g font-size="9.5" font-weight="700" fill="#3E2723" text-anchor="middle" dominant-baseline="central" font-family="Fredoka, sans-serif">${nums}</g><line x1="50" y1="50" x2="50" y2="17" stroke="#1E88E5" stroke-width="3.2" stroke-linecap="round" transform="rotate(${ma} 50 50)"/><line x1="50" y1="50" x2="50" y2="29" stroke="#E53935" stroke-width="5" stroke-linecap="round" transform="rotate(${ha} 50 50)"/><circle cx="50" cy="50" r="3.5" fill="#3E2723"/></svg>`;
+}
+export const timeText = (h, m) => (m === 0 ? `${h} 點` : m === 30 ? `${h} 點半` : `${h} 點 ${m} 分`);
+const textBtn = (t) => ({ html: `<span class="ktext">${t}</span>`, value: t });
+const nextHour = (h) => (h % 12) + 1;
+// 一題時鐘：正確時間，加上容易看錯的時間（下一個小時、另一種分鐘）
+function clockSet(level, rng) {
+  const h = rnd(rng, 1, 12);
+  if (level === 1) {
+    const hs = new Set([h]);
+    while (hs.size < 3) hs.add(rnd(rng, 1, 12));
+    return { time: [h, 0], all: shuffle([...hs], rng).map((x) => [x, 0]) };
+  }
+  const mins = level === 2 ? [0, 30] : [15, 45], m = pick(mins, rng), other = mins.find((x) => x !== m);
+  return { time: [h, m], all: shuffle([[h, m], [h, other], [nextHour(h), m], [nextHour(h), other]], rng) };
+}
+function clock(level, rng) {
+  const { time, all } = clockSet(level, rng), t = timeText(...time);
+  return {
+    say: "現在是幾點？", scene: `<div class="krow">${clockSvg(time[0], time[1], "kclock big")}</div>`, text: true,
+    choices: all.map((x) => textBtn(timeText(...x))), answer: all.findIndex((x) => timeText(...x) === t), meta: { time: t, h: time[0], m: time[1] },
+  };
+}
+function clockpick(level, rng) {
+  const { time, all } = clockSet(level, rng), t = timeText(...time);
+  return {
+    say: `哪一個時鐘是 ${t}？`, scene: "", pic: true,
+    choices: all.map((x) => ({ html: clockSvg(x[0], x[1]), value: timeText(...x) })), answer: all.findIndex((x) => timeText(...x) === t), meta: { time: t, h: time[0], m: time[1] },
+  };
+}
+
+/* ---------- 動動腦 ---------- */
+const NAMES = ["小明", "小華", "小美", "小安", "小樂"];
+const THINGS = [
+  { n: "糖果", u: "顆", lose: "吃掉" }, { n: "蘋果", u: "個", lose: "吃掉" }, { n: "餅乾", u: "片", lose: "吃掉" },
+  { n: "氣球", u: "個", lose: "飛走" }, { n: "貼紙", u: "張", lose: "送給朋友" }, { n: "積木", u: "塊", lose: "借給朋友" },
+];
+function story(level, rng) {
+  const [n1, n2] = shuffle(NAMES, rng), it = pick(THINGS, rng), u = it.u;
+  let say, ans;
+  if (level === 1) {
+    if (rng() < 0.5) { const a = rnd(rng, 1, 8), b = rnd(rng, 1, 10 - a - 1 + 1); ans = a + b; say = `${n1}有 ${a} ${u}${it.n}，媽媽再給 ${b} ${u}，現在有幾${u}？`; }
+    else { const a = rnd(rng, 2, 10), b = rnd(rng, 1, a - 1); ans = a - b; say = `${n1}有 ${a} ${u}${it.n}，${it.lose} ${b} ${u}，還剩幾${u}？`; }
+  } else if (level === 2) {
+    if (rng() < 0.5) { const a = rnd(rng, 1, 6), b = rnd(rng, 1, 9 - a), c = rnd(rng, 1, a + b - 1); ans = a + b - c; say = `${n1}有 ${a} ${u}${it.n}，媽媽再給 ${b} ${u}，後來${it.lose} ${c} ${u}，現在有幾${u}？`; }
+    else { const a = rnd(rng, 3, 9), b = rnd(rng, 1, a - 1), c = rnd(rng, 1, 10 - (a - b)); ans = a - b + c; say = `${n1}有 ${a} ${u}${it.n}，${it.lose} ${b} ${u}，後來媽媽再給 ${c} ${u}，現在有幾${u}？`; }
+  } else {
+    const kind = rnd(rng, 0, 3), a = rnd(rng, 3, 9), b = rnd(rng, 1, 8);
+    if (kind === 0) { ans = a + b; say = `${n1}有 ${a} ${u}${it.n}，${n2}比${n1}多 ${b} ${u}，${n2}有幾${u}？`; }
+    else if (kind === 1) { const big = a + b; ans = a; say = `${n1}有 ${big} ${u}${it.n}，${n2}比${n1}少 ${b} ${u}，${n2}有幾${u}？`; }
+    else if (kind === 2) { ans = a + b; say = `${n1}有 ${a} ${u}${it.n}，${n2}有 ${b} ${u}，兩個人一共有幾${u}？`; }
+    else { const big = a + b; ans = b; say = `${n1}有 ${big} ${u}${it.n}，${n2}有 ${a} ${u}，${n1}比${n2}多幾${u}？`; }
+  }
+  return { say, scene: "", ...numChoices(ans, rng, 4, 0), meta: { ans } };
+}
+
+const ANIMALS = ["小貓", "小狗", "小兔", "小熊", "小豬", "小猴"];
+const TRAITS = [{ hi: "高", lo: "矮" }, { hi: "重", lo: "輕" }, { hi: "快", lo: "慢" }];
+function order(level, rng) {
+  const k = level === 3 ? 4 : 3, rank = shuffle(ANIMALS, rng).slice(0, k), tr = pick(TRAITS, rng); // rank[0] 最高
+  let facts = [];
+  for (let i = 0; i < k - 1; i++) {
+    const flip = level > 1 && rng() < 0.5; // 「乙比甲矮」和「甲比乙高」是同一件事
+    facts.push(flip ? `${rank[i + 1]}比${rank[i]}${tr.lo}` : `${rank[i]}比${rank[i + 1]}${tr.hi}`);
+  }
+  if (level > 1) facts = shuffle(facts, rng);
+  const low = level > 1 && rng() < 0.5, target = low ? rank[k - 1] : rank[0], opts = shuffle(rank, rng);
+  return {
+    say: `${facts.join("，")}。誰最${low ? tr.lo : tr.hi}？`, scene: "", text: true,
+    choices: opts.map(textBtn), answer: opts.indexOf(target), meta: { rank, low, trait: low ? tr.lo : tr.hi },
+  };
+}
+
+function odd(level, rng) {
+  const n = level === 3 ? 5 : 4, at = rnd(rng, 0, n - 1), colors = shuffle(PAINT, rng);
+  let base, other, how;
+  if (level === 1) {
+    const [a, b] = shuffle(SHAPES.slice(0, 4), rng);
+    base = shapeSvg(a, colors[0]); other = shapeSvg(b, colors[0]); how = "形狀";
+  } else if (level === 2) {
+    const a = pick(SHAPES, rng);
+    base = shapeSvg(a, colors[0]);
+    if (rng() < 0.5) { other = shapeSvg(a, colors[1]); how = "顏色"; } else { other = shapeSvg(a, colors[0], "kshape tiny"); how = "大小"; }
+  } else {
+    // 一樣的形狀、一樣的顏色，只有一個轉了方向
+    const a = pick([SHAPES[1], SHAPES[3], SHAPES[6]], rng), turn = a.name === "長方形" ? 90 : 180;
+    base = shapeSvg(a, colors[0]); other = shapeSvg(a, colors[0], `kshape turn${turn}`); how = "方向";
+  }
+  return {
+    say: "哪一個跟其他的不一樣？", scene: "", pic: true,
+    choices: Array.from({ length: n }, (_, i) => ({ html: i === at ? other : base, value: i })), answer: at, meta: { at, how },
+  };
+}
+
+function machine(level, rng) {
+  const rules = level === 1 ? [["加 1", (x) => x + 1], ["加 2", (x) => x + 2]]
+    : level === 2 ? [["加 3", (x) => x + 3], ["加 4", (x) => x + 4], ["減 1", (x) => x - 1], ["減 2", (x) => x - 2]]
+    : [["變成 2 倍", (x) => x * 2], ["加 5", (x) => x + 5], ["減 3", (x) => x - 3], ["加 10", (x) => x + 10]];
+  const [name, f] = pick(rules, rng), lo = name.startsWith("減") ? 4 : 1;
+  const xs = shuffle([0, 1, 2, 3, 4, 5].map((i) => lo + i), rng).slice(0, 3), ans = f(xs[2]);
+  return {
+    say: `數字機器會把數字變一變。找找看規律，${xs[2]} 會變成多少？`,
+    scene: `<div class="kmach">${xs.map((x, i) => `<div><span>${x}</span><b>機器</b><span>${i < 2 ? f(x) : "?"}</span></div>`).join("")}</div>`,
+    ...numChoices(ans, rng, 4, 0), meta: { ans, rule: name, xs },
+  };
+}
+
 /* ---------- 遊戲清單 ---------- */
 export const LEVEL_NAMES = ["簡單", "普通", "挑戰"];
 export const GROUPS = [
@@ -236,6 +352,16 @@ export const GROUPS = [
     { id: "pattern", title: "找規律", sub: "接下來是哪一個", gen: pattern },
     { id: "coins", title: "數錢幣", sub: "一共是幾元", gen: coins },
   ] },
+  { title: "看時鐘", games: [
+    { id: "clock", title: "現在幾點", sub: "看時鐘說出時間", gen: clock },
+    { id: "clockpick", title: "找時鐘", sub: "哪一個時鐘才對", gen: clockpick },
+  ] },
+  { title: "動動腦", games: [
+    { id: "story", title: "小故事算一算", sub: "聽故事，想想看是加還是減", gen: story },
+    { id: "order", title: "誰最高", sub: "聽線索，排出順序", gen: order },
+    { id: "odd", title: "哪個不一樣", sub: "找出不同的那一個", gen: odd },
+    { id: "machine", title: "數字機器", sub: "猜猜機器的規律", gen: machine },
+  ] },
 ];
 export const GAMES = GROUPS.flatMap((g) => g.games);
 export const findGame = (id) => GAMES.find((g) => g.id === id);
@@ -253,6 +379,11 @@ export function describe(game, q) {
     case "coins": return `數錢幣：${m.ans} 元`;
     case "shape": return m.ans ? `${m.name}有幾個邊` : q.say.replace("？", "");
     case "next": return m.step ? `${m.step} 個一數，答案 ${m.ans}` : q.say.startsWith("中間") ? `中間的數字：${m.ans}` : q.say.replace("？", "");
+    case "clock": return `看時鐘：${m.time}`;
+    case "clockpick": return `找時鐘：${m.time}`;
+    case "order": return `排順序：${m.rank.length} 個動物，誰最${m.trait}`;
+    case "odd": return `找不一樣：${m.how}不同`;
+    case "machine": return `數字機器：${m.rule}`;
     default: return q.say.replace("？", "");
   }
 }

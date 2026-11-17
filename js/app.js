@@ -7,6 +7,7 @@ import { renderDrill } from "./drill.js";
 import { createCoinTray } from "./coins.js";
 import { renderMathHome, openGame, leaveGame } from "./kidsapp.js";
 import { renderDaily, renderParent } from "./records.js";
+import { renderSheet } from "./sheetapp.js";
 
 const $ = (id) => document.getElementById(id);
 const PRACTICE_TOTAL = 10;
@@ -36,19 +37,21 @@ function route() {
   const game = !!gm && openGame(gm[1]);
   const math = !lv && !game && (location.hash === "#math" || !!gm);
   const parent = !lv && location.hash === "#parent";
+  const sheet = !lv && location.hash === "#sheet";
+  $("view-sheet").hidden = !sheet;
   $("view-parent").hidden = !parent;
   $("navParent").classList.toggle("on", parent);
-  $("view-home").hidden = !!lv || drill || math || game || parent;
+  $("view-home").hidden = !!lv || drill || math || game || parent || sheet;
   $("view-level").hidden = !lv;
   $("view-drill").hidden = !drill;
   $("view-math").hidden = !math;
   $("view-game").hidden = !game;
-  $("navMath").classList.toggle("on", math || game);
-  $("navAbacus").classList.toggle("on", !(math || game || parent));
+  $("navMath").classList.toggle("on", math || game || sheet);
+  $("navAbacus").classList.toggle("on", !(math || game || parent || sheet));
   if (lv) {
     openLevel(lv);
     if (m[2]) { pset = practiceSets(lv).find((s) => s.id === m[2]) || null; setTab("practice"); }
-  } else if (drill) renderDrill(); else if (math) renderMathHome(); else if (parent) renderParent(); else if (!game) renderHome();
+  } else if (drill) renderDrill(); else if (math) renderMathHome(); else if (parent) renderParent(); else if (sheet) renderSheet(); else if (!game) renderHome();
   window.scrollTo(0, 0);
 }
 

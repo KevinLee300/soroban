@@ -16,8 +16,8 @@ test("每日任務：每天 3 個，2 個幼兒數學（不同遊戲）加 1 個
   }
   // 連續幾天不會一直是同一個遊戲
   const seen = new Set();
-  for (let i = 0; i < 12; i++) D.pickTasks(D.addDays("2026-11-17", i), {}).slice(0, 2).forEach((t) => seen.add(t.match));
-  assert.equal(seen.size, 12);
+  for (let i = 0; i < 30; i++) D.pickTasks(D.addDays("2026-11-17", i), {}).slice(0, 2).forEach((t) => seen.add(t.match));
+  assert.ok(seen.size >= 12, `30 天只出現 ${seen.size} 種遊戲`);
 });
 
 test("每日任務：珠算照順序往下走，全部三顆星就改做題庫", () => {

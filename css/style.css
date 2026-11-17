@@ -4,6 +4,7 @@
   --wood: #9A6438; --wood-dark: #6B4122; --rod: #C9B08F;
   --bead: #D64B2A; --bead-hi: #F08A63; --glow: #F2B400;
   --plus: #0F7F6C; --minus: #6A46C0; --plus-soft: #DDF2EE; --minus-soft: #ECE6FA;
+  --t1: #E3F2FD; --t1e: #64B5F6; --t2: #FDE7E4; --t2e: #EF9A9A; --t3: #E6F5E4; --t3e: #81C784; --t4: #FFF6D6; --t4e: #E6C24A; --t5: #EFE6FA; --t5e: #B39DDB; --t6: #FDE5F1; --t6e: #F48FB1;
   --coin-gold: #E3B04B; --coin-gold-edge: #A87A1E; --coin-silver: #D3DAE0; --coin-silver-edge: #8995A0; --coincap-ink: #6B4122;
   --f-display: "Huninn", "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif;
   --f-body: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif;
@@ -16,6 +17,7 @@
     --wood: #A8703F; --wood-dark: #6E4524; --rod: #8C7860;
     --bead: #E25A37; --bead-hi: #F59B78; --glow: #FFC933;
     --plus: #3CC2A8; --minus: #A48AF0; --plus-soft: #173A35; --minus-soft: #2A2445;
+    --t1: #16293A; --t1e: #4A90C8; --t2: #3A1F1D; --t2e: #C97373; --t3: #1B3220; --t3e: #5FA364; --t4: #3A3113; --t4e: #BFA033; --t5: #2A2140; --t5e: #8E79C4; --t6: #3B1E2D; --t6e: #C96C93;
     --coin-gold: #E3B04B; --coin-gold-edge: #C0912F; --coin-silver: #C9D1D8; --coin-silver-edge: #9AA6B1;
     --coincap-ink: #F0CB8A;
     color-scheme: dark;
@@ -290,6 +292,18 @@ h2 { font-family: var(--f-display); font-weight: 400; font-size: 22px; margin: 0
 .gchoices.rows .gchoice { display: block; min-height: 0; padding: 14px 12px; }
 .kbar { display: block; height: 22px; border-radius: 4px 12px 12px 4px; }
 .plate { background: var(--bg); border-radius: 18px; padding: 12px; min-height: 96px; display: grid; place-items: center; width: 100%; }
+.gchoices.text { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.ktext { font-family: var(--f-display); font-size: clamp(20px, 5vw, 26px); line-height: 1.2; }
+.kclock { width: 104px; height: 104px; display: block; }
+.kclock.big { width: 190px; height: 190px; }
+.kshape.tiny { width: 50px; height: 50px; }
+.kshape.turn90 { transform: rotate(90deg); }
+.kshape.turn180 { transform: rotate(180deg); }
+.kmach { display: flex; flex-direction: column; gap: 8px; font-family: var(--f-num); font-weight: 600; font-size: 30px; }
+.kmach div { display: grid; grid-template-columns: 1.6em auto 1.6em; align-items: center; gap: 12px; text-align: center; }
+.kmach b { font-family: var(--f-display); font-weight: 400; font-size: 16px; color: var(--panel); background: var(--ink); border-radius: 10px; padding: 6px 14px; position: relative; }
+.kmach b::before, .kmach b::after { content: "→"; position: absolute; top: 50%; transform: translateY(-50%); color: var(--muted); font-size: 16px; }
+.kmach b::before { left: -14px; } .kmach b::after { right: -14px; }
 .gchoice.right { border-color: var(--plus); background: var(--plus-soft); }
 .gchoice.wrong { border-color: var(--bead); opacity: .45; }
 @media (max-width: 420px) {
@@ -346,6 +360,71 @@ h2 { font-family: var(--f-display); font-weight: 400; font-size: 22px; margin: 0
   .topnav a { font-size: 15px; padding: 3px 10px; }
   .pday { font-size: 11px; }
 }
+/* 數學練習單：一頁 6 個區塊，填格子 */
+.sheetcard { border-color: var(--t5e); }
+.sheetcard .lvnum { background: var(--minus); font-family: var(--f-display); font-weight: 400; font-size: 20px; }
+.sheet { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+.spanel { border: 3px solid var(--pe); background: var(--pt); border-radius: 20px; padding: 14px 14px 18px; display: flex; flex-direction: column; gap: 12px; min-width: 0; break-inside: avoid; }
+.spanel.p1 { --pt: var(--t1); --pe: var(--t1e); } .spanel.p2 { --pt: var(--t2); --pe: var(--t2e); }
+.spanel.p3 { --pt: var(--t3); --pe: var(--t3e); } .spanel.p4 { --pt: var(--t4); --pe: var(--t4e); }
+.spanel.p5 { --pt: var(--t5); --pe: var(--t5e); } .spanel.p6 { --pt: var(--t6); --pe: var(--t6e); }
+.shead { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; }
+.shead h2 { font-size: 20px; background: var(--pe); color: #fff; border-radius: 999px; padding: 2px 16px; letter-spacing: .12em; text-shadow: 0 1px 0 rgb(0 0 0 / .18); }
+.shead span { font-size: 13px; color: var(--muted); }
+.sbody { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 12px; font-family: var(--f-num); font-weight: 600; font-size: clamp(26px, 4.6vw, 34px); font-variant-numeric: tabular-nums; }
+.srow { display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap; position: relative; }
+.fbox { width: 1.7em; height: 1.55em; padding: 0; text-align: center; font: inherit; color: var(--ink); background: var(--panel); border: 3px solid var(--pe, var(--line)); border-radius: 10px; display: inline-grid; place-items: center; }
+.fbox:focus { outline: 3px solid var(--glow); outline-offset: 1px; }
+.fbox.right { border-color: var(--plus); background: var(--plus-soft); }
+.fbox.wrong { border-color: var(--bead); color: var(--bead); text-decoration: line-through; }
+.sfix { color: var(--bead); font-size: .7em; min-width: 1em; }
+.blocks { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; }
+.blk { width: 1.85em; height: 1.85em; border-radius: 12px; display: grid; place-items: center; position: relative; background: var(--panel); border: 3px solid var(--line); }
+.blk.b0 { border-color: var(--t2e); } .blk.b1 { border-color: var(--t4e); } .blk.b2 { border-color: var(--t3e); }
+.blk.b3 { border-color: var(--t1e); } .blk.b4 { border-color: var(--t5e); } .blk.b5 { border-color: var(--t6e); }
+.blk .fbox { width: 100%; height: 100%; border: 0; background: transparent; border-radius: 9px; }
+.blk .sfix { position: absolute; top: -1.1em; left: 0; right: 0; text-align: center; }
+.cmprow { gap: 14px; }
+.snum { min-width: 1.4em; text-align: center; }
+.cmp { display: inline-flex; flex-direction: column; align-items: center; gap: 4px; position: relative; }
+.cmpbtns { display: flex; gap: 4px; }
+.cmpbtns button { width: 34px; height: 34px; border-radius: 8px; border: 2px solid var(--line); background: var(--panel); font-family: var(--f-num); font-weight: 600; font-size: 18px; padding: 0; }
+.cmpbtns button[aria-pressed="true"] { background: var(--ink); color: var(--panel); border-color: var(--ink); }
+.cmp .sfix { position: static; line-height: 1; }
+.cmp .sfix::before { content: "答案 "; font-family: var(--f-body); font-size: .6em; font-weight: 500; }
+.sheet.checked .cmpbtns { visibility: hidden; height: 0; }
+.bondwrap { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px 24px; }
+.bond { position: relative; display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: auto auto; gap: 14px 22px; justify-items: center; }
+.bond svg { position: absolute; inset: .8em .8em .8em .8em; width: calc(100% - 1.6em); height: calc(100% - 1.6em); z-index: 0; }
+.bond svg line { stroke: var(--muted); stroke-width: 2.5; stroke-linecap: round; }
+.btop, .bpart { position: relative; z-index: 1; width: 1.9em; height: 1.9em; border-radius: 50%; display: grid; place-items: center; background: var(--panel); border: 3px solid var(--pe); }
+.btop { grid-column: 1 / -1; border-color: var(--t1e); }
+.bpart.blank { border-style: dashed; }
+.bpart .fbox { width: 100%; height: 100%; border: 0; border-radius: 50%; background: transparent; }
+.bpart .sfix { position: absolute; bottom: -1.2em; }
+.pics { gap: 8px; }
+.spile { display: grid; grid-template-columns: repeat(var(--cols, 5), 28px); gap: 3px; }
+.spile .donut { width: 28px; height: 28px; }
+.sd { position: relative; display: block; }
+.sd.xed .donut { opacity: .45; }
+.sd.xed::after { content: ""; position: absolute; left: -2px; right: -2px; top: 50%; height: 3px; background: var(--bead); border-radius: 2px; transform: rotate(-38deg); }
+.sop { color: var(--plus); }
+.seq2 { white-space: nowrap; }
+@media (max-width: 620px) {
+  .sheet { grid-template-columns: 1fr; }
+  .spile { grid-template-columns: repeat(var(--cols, 5), 24px); }
+  .spile .donut { width: 24px; height: 24px; }
+}
+@media print {
+  #view-math, #view-game, #view-parent, #view-drill:not(:target) { }
+  .sheet { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  .spanel { background: #fff; border-color: #999; border-width: 2px; }
+  .shead h2 { background: #fff; color: #000; border: 2px solid #999; text-shadow: none; }
+  .fbox, .blk, .btop, .bpart { border-color: #666 !important; background: #fff !important; }
+  .sbody { font-size: 26px; }
+  .sfix { display: none; }
+}
+
 /* 頁尾：安裝到主畫面、離線提示 */
 .foot {
   max-width: 1040px; margin: 0 auto; display: flex; flex-direction: column; align-items: flex-start; gap: 10px;
