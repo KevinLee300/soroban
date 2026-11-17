@@ -290,6 +290,18 @@ h2 { font-family: var(--f-display); font-weight: 400; font-size: 22px; margin: 0
 .gchoices.rows .gchoice { display: block; min-height: 0; padding: 14px 12px; }
 .kbar { display: block; height: 22px; border-radius: 4px 12px 12px 4px; }
 .plate { background: var(--bg); border-radius: 18px; padding: 12px; min-height: 96px; display: grid; place-items: center; width: 100%; }
+.gchoices.text { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.ktext { font-family: var(--f-display); font-size: clamp(20px, 5vw, 26px); line-height: 1.2; }
+.kclock { width: 104px; height: 104px; display: block; }
+.kclock.big { width: 190px; height: 190px; }
+.kshape.tiny { width: 50px; height: 50px; }
+.kshape.turn90 { transform: rotate(90deg); }
+.kshape.turn180 { transform: rotate(180deg); }
+.kmach { display: flex; flex-direction: column; gap: 8px; font-family: var(--f-num); font-weight: 600; font-size: 30px; }
+.kmach div { display: grid; grid-template-columns: 1.6em auto 1.6em; align-items: center; gap: 12px; text-align: center; }
+.kmach b { font-family: var(--f-display); font-weight: 400; font-size: 16px; color: var(--panel); background: var(--ink); border-radius: 10px; padding: 6px 14px; position: relative; }
+.kmach b::before, .kmach b::after { content: "→"; position: absolute; top: 50%; transform: translateY(-50%); color: var(--muted); font-size: 16px; }
+.kmach b::before { left: -14px; } .kmach b::after { right: -14px; }
 .gchoice.right { border-color: var(--plus); background: var(--plus-soft); }
 .gchoice.wrong { border-color: var(--bead); opacity: .45; }
 @media (max-width: 420px) {

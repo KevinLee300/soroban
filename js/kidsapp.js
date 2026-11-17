@@ -77,7 +77,7 @@ function nextQ() {
   $("gSay").textContent = q.say;
   $("gScene").innerHTML = q.scene;
   $("gScene").hidden = !q.scene;
-  $("gChoices").className = "gchoices" + (q.pic ? " pic" : "") + (q.rows ? " rows" : "") + (q.big ? " bignum" : "");
+  $("gChoices").className = "gchoices" + (q.pic ? " pic" : "") + (q.rows ? " rows" : "") + (q.big ? " bignum" : "") + (q.text ? " text" : "");
   $("gChoices").innerHTML = q.choices.map((c, i) => `<button class="gchoice" data-i="${i}" aria-label="選項 ${i + 1}">${c.html}</button>`).join("");
   $("gFb").textContent = ""; $("gFb").className = "fb";
   say(q.say);
