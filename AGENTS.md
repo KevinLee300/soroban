@@ -22,6 +22,7 @@
 | `js/kidsapp.js` | 幼兒數學的畫面：遊戲地圖（`#math`）、遊戲頁（`#math-<id>`）、星星 |
 | `js/drill.js`、`js/coins.js` | 算盤題庫頁（`#drill`）、動畫旁的零錢盒 |
 | `js/daily.js`、`js/records.js` | 每日任務與學習紀錄：`daily.js` 是純邏輯（挑任務、連續天數、統計），`records.js` 是畫面（首頁任務卡、`#parent` 紀錄頁） |
+| `sw.js`、`manifest.webmanifest`、`js/pwa.js`、`icons/` | 自動更新、離線可用、加到主畫面。`sw.js` 是「先問網路，問不到才用存檔」，**不用維護檔案清單、更新時也不用改版本號** |
 | `js/speech.js` | 國語朗讀 |
 | `js/storage.js` | 進度儲存 |
 | `tests/` | `node --test` 測試 `logic.js` |

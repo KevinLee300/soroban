@@ -8,10 +8,17 @@
 <meta property="og:title" content="小小珠算">
 <meta property="og:description" content="用動畫和口訣學珠算，一關一關闖。">
 <meta name="theme-color" content="#9A6438">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icons/icon-180.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="小小珠算">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Huninn&family=Noto+Sans+TC:wght@400;500;700&family=Fredoka:wght@500;600&display=swap">
 <link rel="stylesheet" href="css/style.css">
 <script type="module" src="js/app.js"></script>
+<script type="module" src="js/pwa.js"></script>
 </head>
 <body>
 <header class="top"><div class="top-in"><a href="#home" class="brand">小小珠算</a><nav class="topnav" aria-label="主選單"><a href="#home" id="navAbacus">珠算</a><a href="#math" id="navMath">幼兒數學</a><a href="#parent" id="navParent">紀錄</a></nav></div></header>
@@ -222,5 +229,10 @@
     </div>
   </section>
 </main>
+<footer class="foot">
+  <p id="offlineNote" class="offline" role="status" hidden>現在沒有網路，用的是上次存下來的版本，可以照常練習。</p>
+  <button class="btn" id="installBtn" hidden>安裝到主畫面</button>
+  <p id="installTip" class="tip" hidden>iPhone／iPad：用 Safari 打開，按下面的「分享」按鈕，再選「加入主畫面」，就可以像 App 一樣打開。</p>
+</footer>
 </body>
 </html>

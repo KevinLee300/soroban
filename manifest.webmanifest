@@ -1,0 +1,16 @@
+{
+  "name": "小小珠算",
+  "short_name": "小小珠算",
+  "description": "給小朋友的珠算和幼兒數學練習",
+  "lang": "zh-Hant",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#EAF2F6",
+  "theme_color": "#9A6438",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}
