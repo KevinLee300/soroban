@@ -132,6 +132,12 @@
           <div class="ctrls"><button class="btn primary" id="tTimedBtn">開始挑戰</button></div>
         </div>
         <div class="board tboard">
+          <h2>應用題</h2>
+          <div class="seg" id="tStoryLevel" role="group" aria-label="應用題難度"><button data-v="1">簡單</button><button data-v="2">普通</button><button data-v="3">挑戰</button></div>
+          <p class="tip" id="tStoryTip"></p>
+          <div class="ctrls"><button class="btn primary" id="tStoryBtn">開始（10 題）</button></div>
+        </div>
+        <div class="board tboard">
           <h2>弱點加強</h2>
           <p class="tip">自動挑最常錯、最慢的 10 題。<span id="tWeakTip"></span></p>
           <div class="ctrls"><button class="btn primary" id="tWeakBtn">開始加強</button></div>
@@ -142,6 +148,8 @@
     <div id="tPlay" class="board tplay" hidden>
       <div class="tplayhead"><b id="tModeName"></b><span class="ctrls"><button class="btn small" id="tVoice" aria-pressed="false">朗讀：關</button><button class="btn small" id="tQuit">結束</button></span></div>
       <div class="progress"><div class="bar"><i id="tBar"></i></div><span id="tProg"></span></div>
+      <p class="tstory" id="tStory" aria-live="polite" hidden></p>
+      <div class="teqpick" id="tEq" hidden></div>
       <div class="tq" id="tQ" aria-live="polite"></div>
       <div class="fb" id="tFb" aria-live="polite"></div>
       <div class="tpad" id="tPad">

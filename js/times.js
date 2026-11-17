@@ -85,3 +85,105 @@ export function summary(stats = {}) {
   for (const f of FACTS) out[mastery(stats[f.key])]++;
   return out;
 }
+
+/* ---------- 乘法應用題 ---------- */
+// 難度 1：一步乘法。難度 2：一步，但混入加法、減法的題目，要先判斷用哪一種算。難度 3：兩步驟（先乘，再加或減）。
+// 回傳：{ text 題目, kind "mul"|"add"|"sub"|"two", unit 單位, answer, solution 完整算式,
+//         eq 正確的算式（沒有等號，例如 "6 × 4"）, choices 三個算式選項（兩步驟的題目沒有）, key 對應的乘法（例如 "6x4"）, why 為什麼用這種算法 }
+// 乘法照「每一份的數量 × 有幾份」的順序寫。
+const pick = (arr, rng) => arr[Math.floor(rng() * arr.length)];
+const rnd = (rng, a, b) => a + Math.floor(rng() * (b - a + 1));
+const NAMES = ["小明", "小華", "小美", "小安", "小樂"];
+const PACKS = [
+  { c: "盒", item: "雞蛋", u: "顆", use: "用掉" }, { c: "包", item: "餅乾", u: "片", use: "吃掉" }, { c: "袋", item: "橘子", u: "個", use: "吃掉" },
+  { c: "盤", item: "水餃", u: "個", use: "吃掉" }, { c: "束", item: "花", u: "朵", use: "送給老師" }, { c: "盒", item: "蠟筆", u: "枝", use: "借給同學" },
+];
+const GOODS = [{ item: "鉛筆", m: "枝" }, { item: "橡皮擦", m: "個" }, { item: "貼紙", m: "張" }, { item: "糖果", m: "顆" }, { item: "氣球", m: "個" }];
+const ROWS = [{ row: "排", thing: "座位", u: "個" }, { row: "排", thing: "小樹", u: "棵" }, { row: "隊", thing: "小朋友", u: "個" }, { row: "層", thing: "書", u: "本" }];
+const OWNED = [{ item: "貼紙", u: "張" }, { item: "彈珠", u: "顆" }, { item: "卡片", u: "張" }];
+// 每一個都有固定數量的東西（a 固定）
+const FIXED = [
+  { a: 2, text: (b) => `一輛腳踏車有 2 個輪子，${b} 輛腳踏車一共有幾個輪子？`, u: "個" },
+  { a: 3, text: (b) => `一輛三輪車有 3 個輪子，${b} 輛三輪車一共有幾個輪子？`, u: "個" },
+  { a: 4, text: (b) => `一隻小狗有 4 隻腳，${b} 隻小狗一共有幾隻腳？`, u: "隻" },
+  { a: 5, text: (b) => `一隻手有 5 根手指，${b} 隻手一共有幾根手指？`, u: "根" },
+  { a: 6, text: (b) => `一隻螞蟻有 6 隻腳，${b} 隻螞蟻一共有幾隻腳？`, u: "隻" },
+  { a: 7, text: (b) => `一個星期有 7 天，${b} 個星期一共有幾天？`, u: "天" },
+  { a: 8, text: (b) => `一隻蜘蛛有 8 隻腳，${b} 隻蜘蛛一共有幾隻腳？`, u: "隻" },
+];
+const WHY = {
+  mul: "每一份都一樣多，有好幾份，用乘法。",
+  add: "是把兩個數量合起來，用加法。",
+  sub: "是拿走一些，問剩下多少，用減法。",
+};
+
+function mulStory(a, b, rng) {
+  const fixed = FIXED.filter((f) => f.a === a), kinds = ["pack", "price", "rows", "times", ...(fixed.length ? ["fixed"] : [])];
+  const kind = pick(kinds, rng);
+  let text, unit;
+  if (kind === "pack") { const p = pick(PACKS, rng); text = `一${p.c}有 ${a} ${p.u}${p.item}，${b} ${p.c}一共有幾${p.u}？`; unit = p.u; }
+  else if (kind === "price") { const g = pick(GOODS, rng); text = `一${g.m}${g.item}賣 ${a} 元，買 ${b} ${g.m}要付幾元？`; unit = "元"; }
+  else if (kind === "rows") { const r = pick(ROWS, rng); text = `每${r.row}有 ${a} ${r.u}${r.thing}，${b} ${r.row}一共有幾${r.u}？`; unit = r.u; }
+  else if (kind === "times") {
+    const o = pick(OWNED, rng), [n1, n2] = shuffle(NAMES, rng);
+    text = `${n1}有 ${a} ${o.u}${o.item}，${n2}的${o.item}是${n1}的 ${b} 倍，${n2}有幾${o.u}？`; unit = o.u;
+  } else { const f = fixed[0]; text = f.text(b); unit = f.u; }
+  return { text, unit };
+}
+const eqChoices = (right, others, rng) => shuffle([right, ...others.filter((x) => x !== right)].slice(0, 3), rng);
+
+export function makeStory(level = 1, tables = TABLES, rng = Math.random) {
+  const ts = tables.length ? tables : TABLES, a = pick(ts, rng), b = rnd(rng, 2, 9), p = a * b, key = `${a}x${b}`;
+  const big = Math.max(a, b), small = Math.min(a, b);
+  // 難度 2：大約三分之一的題目其實是加法或減法
+  if (level === 2 && rng() < 0.35) {
+    const o = pick(OWNED, rng), [n1, n2] = shuffle(NAMES, rng), form = rnd(rng, 0, 2);
+    if (form === 0) return {
+      text: `${n1}有 ${a} ${o.u}${o.item}，${n2}有 ${b} ${o.u}，兩個人一共有幾${o.u}？`, kind: "add", unit: o.u, answer: a + b,
+      eq: `${a} + ${b}`, solution: `${a} + ${b} = ${a + b}`, choices: eqChoices(`${a} + ${b}`, [`${a} × ${b}`, `${big} − ${small}`], rng), why: WHY.add,
+    };
+    if (form === 1) return {
+      text: `${n1}有 ${a} ${o.u}${o.item}，${n2}比${n1}多 ${b} ${o.u}，${n2}有幾${o.u}？`, kind: "add", unit: o.u, answer: a + b,
+      eq: `${a} + ${b}`, solution: `${a} + ${b} = ${a + b}`, choices: eqChoices(`${a} + ${b}`, [`${a} × ${b}`, `${big} − ${small}`], rng), why: "「多幾個」是加上去，不是幾倍，用加法。",
+    };
+    const pk = pick(PACKS, rng), total = p, k = rnd(rng, 2, Math.min(9, total - 1));
+    return {
+      text: `${pk.c}子裡有 ${total} ${pk.u}${pk.item}，${pk.use} ${k} ${pk.u}，還剩幾${pk.u}？`.replace("盤子裡", "盤子上").replace("束子裡", "花瓶裡").replace("袋子裡", "袋子裡").replace("包子裡", "袋子裡"),
+      kind: "sub", unit: pk.u, answer: total - k,
+      eq: `${total} − ${k}`, solution: `${total} − ${k} = ${total - k}`, choices: eqChoices(`${total} − ${k}`, [`${total} + ${k}`, `${total} × ${k}`], rng), why: WHY.sub,
+    };
+  }
+  if (level === 3) {
+    const form = rnd(rng, 0, 2);
+    if (form === 2) {
+      const g = pick(GOODS, rng), pay = p <= 45 ? 50 : 100;
+      return {
+        text: `一${g.m}${g.item}賣 ${a} 元，買 ${b} ${g.m}，付了 ${pay} 元，可以找回幾元？`, kind: "two", unit: "元", answer: pay - p, key,
+        solution: `${a} × ${b} = ${p}，${pay} − ${p} = ${pay - p}`, why: "先算一共要付多少（乘法），再算找回多少（減法）。",
+      };
+    }
+    const pk = pick(PACKS, rng), k = rnd(rng, 1, Math.min(9, p - 1));
+    return form === 0
+      ? { text: `一${pk.c}有 ${a} ${pk.u}${pk.item}，買了 ${b} ${pk.c}，${pk.use} ${k} ${pk.u}，還剩幾${pk.u}？`, kind: "two", unit: pk.u, answer: p - k, key,
+          solution: `${a} × ${b} = ${p}，${p} − ${k} = ${p - k}`, why: "先算一共有多少（乘法），再減掉拿走的。" }
+      : { text: `一${pk.c}有 ${a} ${pk.u}${pk.item}，買了 ${b} ${pk.c}，另外又拿了 ${k} ${pk.u}，一共有幾${pk.u}？`, kind: "two", unit: pk.u, answer: p + k, key,
+          solution: `${a} × ${b} = ${p}，${p} + ${k} = ${p + k}`, why: "先算幾盒一共有多少（乘法），再加上另外拿的。" };
+  }
+  const s = mulStory(a, b, rng);
+  return {
+    ...s, kind: "mul", answer: p, key, a, b, eq: `${a} × ${b}`, solution: `${a} × ${b} = ${p}`,
+    choices: eqChoices(`${a} × ${b}`, [`${a} + ${b}`, `${big} − ${small}`], rng), why: WHY.mul,
+  };
+}
+
+// 一次出 count 題，題目文字不重複
+export function makeStories(level, tables, count = 10, rng = Math.random) {
+  const out = [], seen = new Set();
+  let guard = 0;
+  while (out.length < count && guard++ < 500) {
+    const s = makeStory(level, tables, rng);
+    if (seen.has(s.text)) continue;
+    seen.add(s.text); out.push(s);
+  }
+  return out;
+}

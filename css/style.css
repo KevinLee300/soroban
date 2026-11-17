@@ -548,6 +548,16 @@ svg.tick { width: 100%; height: auto; display: block; overflow: visible; touch-a
 .tbox.right { border-color: var(--plus); background: var(--plus-soft); }
 .tbox.wrong { border-color: var(--bead); color: var(--bead); text-decoration: line-through; }
 .tplay .fb { text-align: center; min-height: 3em; }
+.tstory { margin: 0; background: var(--t1); border: 3px solid var(--t1e); border-radius: 18px; padding: 14px 16px; font-family: var(--f-display); font-size: clamp(20px, 5vw, 24px); line-height: 1.6; }
+.teqpick { display: flex; flex-direction: column; gap: 8px; }
+.teqpick > b { font-family: var(--f-display); font-weight: 400; font-size: 18px; }
+.teqpick > div { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.teqpick .knum { font-size: clamp(22px, 6vw, 30px); white-space: nowrap; }
+.teq { font-size: .62em; white-space: nowrap; }
+.tunit { font-family: var(--f-display); font-weight: 400; font-size: .45em; color: var(--muted); }
+.tq:empty { display: none; }
+.tpad.off { opacity: .35; pointer-events: none; }
+.twrong span { text-align: left; }
 .tpad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
 .tpad button { height: 62px; border-radius: 14px; border: 2px solid var(--line); background: var(--panel); font-family: var(--f-num); font-weight: 600; font-size: 28px; color: var(--ink); touch-action: manipulation; }
 .tpad button:active { background: var(--bg); transform: scale(.97); }

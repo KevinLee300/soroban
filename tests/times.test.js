@@ -78,3 +78,46 @@ test("弱點加強：不熟的先出，熟練的最後；整體統計", () => {
   assert.deepEqual(T.summary({}), [72, 0, 0, 0]);
   assert.equal(T.weakest({}, 10).length, 10);
 });
+
+test("應用題：算式和答案一致，選項有正確算式而且不重複", () => {
+  const calc = (eq) => { const [x, op, y] = eq.split(" "); return op === "×" ? x * y : op === "+" ? +x + +y : x - y; };
+  for (const level of [1, 2, 3]) for (let k = 0; k < 600; k++) {
+    const s = T.makeStory(level);
+    assert.ok(s.text.endsWith("？") && s.text.length > 10, s.text);
+    assert.ok(!/undefined|NaN|子子|包子|束子/.test(s.text), s.text);
+    assert.ok(s.unit && s.why && s.solution, s.text);
+    assert.ok(Number.isInteger(s.answer) && s.answer >= 1 && s.answer <= 99, `${s.text} → ${s.answer}`);
+    if (s.kind === "two") {
+      assert.equal(level, 3);
+      const [first, second] = s.solution.split("，");
+      const [e1, r1] = first.split(" = "), [e2, r2] = second.split(" = ");
+      assert.equal(calc(e1), +r1); assert.equal(calc(e2), +r2); assert.equal(+r2, s.answer);
+      assert.ok(e2.includes(r1), "第二步要用到第一步的結果");
+    } else {
+      assert.equal(calc(s.eq), s.answer, s.text);
+      assert.equal(s.solution, `${s.eq} = ${s.answer}`);
+      assert.equal(s.choices.length, 3);
+      assert.equal(new Set(s.choices).size, 3, `選項重複：${s.choices}`);
+      assert.ok(s.choices.includes(s.eq));
+      // 題目裡出現的數字就是算式裡的數字
+      const nums = s.text.match(/\d+/g).map(Number), used = s.eq.match(/\d+/g).map(Number);
+      for (const n of used) assert.ok(nums.includes(n), `${s.text} / ${s.eq}`);
+    }
+    if (level === 1) assert.equal(s.kind, "mul");
+    if (s.kind === "mul" || s.kind === "two") assert.ok(T.factOf(s.key), `對應的乘法不在九九乘法裡：${s.key}`);
+  }
+});
+
+test("應用題：難度 2 有乘法也有加減；只練選的乘法；一組題目不重複", () => {
+  const kinds = new Set();
+  for (let k = 0; k < 400; k++) kinds.add(T.makeStory(2).kind);
+  assert.deepEqual([...kinds].sort(), ["add", "mul", "sub"]);
+  for (let k = 0; k < 200; k++) {
+    const s = T.makeStory(1, [7]);
+    assert.ok(s.key.startsWith("7x"), s.key);
+    assert.ok(s.text.includes(" 7 ") || s.text.includes("7 天") || s.text.includes("7 個"), s.text);
+  }
+  const set = T.makeStories(1, [2, 3, 4, 5, 6, 7, 8, 9], 10);
+  assert.equal(set.length, 10);
+  assert.equal(new Set(set.map((s) => s.text)).size, 10);
+});
