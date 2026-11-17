@@ -83,3 +83,16 @@ export function saveDaily(daily) {
   const keep = Object.fromEntries(Object.entries(daily).sort().slice(-60));
   try { localStorage.setItem(scoped(DAILY), JSON.stringify(keep)); } catch { /* Storage may be unavailable. */ }
 }
+
+/* ---------- 九九乘法的熟練度（每位家人分開存） ---------- */
+// { stats: { "7x8": { c, w, streak, ms, d } }, best60: 60 秒挑戰的最高紀錄 }
+const TIMES = "soroban.times.v1";
+export function loadTimes() {
+  try {
+    const t = JSON.parse(localStorage.getItem(scoped(TIMES))) || {};
+    return { stats: t.stats || {}, best60: t.best60 || 0 };
+  } catch { return { stats: {}, best60: 0 }; }
+}
+export function saveTimes(times) {
+  try { localStorage.setItem(scoped(TIMES), JSON.stringify(times)); } catch { /* Storage may be unavailable. */ }
+}

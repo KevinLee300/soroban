@@ -22,7 +22,7 @@
 <script type="module" src="js/voiceui.js"></script>
 </head>
 <body>
-<header class="top"><div class="top-in"><a href="#home" class="brand">小小珠算</a><nav class="topnav" aria-label="主選單"><a href="#home" id="navAbacus">珠算</a><a href="#math" id="navMath">幼兒數學</a><a href="#parent" id="navParent">紀錄</a></nav></div></header>
+<header class="top"><div class="top-in"><a href="#home" class="brand">小小珠算</a><nav class="topnav" aria-label="主選單"><a href="#home" id="navAbacus">珠算</a><a href="#math" id="navMath">幼兒數學</a><a href="#times" id="navTimes">九九乘法</a><a href="#parent" id="navParent">紀錄</a></nav></div></header>
 
 <main class="wrap">
   <!-- 首頁：關卡地圖 -->
@@ -42,6 +42,7 @@
     </div>
     <div class="board daily" id="daily"></div>
     <div class="levels" id="levels"></div>
+    <a class="lvcard timescard" href="#times"><span class="lvnum">×</span><span class="lvtext"><b>九九乘法</b><small>乘法表、練習、限時 60 秒挑戰、弱點加強</small></span></a>
     <a class="lvcard mathcard" href="#math"><span class="lvnum">數</span><span class="lvtext"><b>幼兒數學</b><small>數甜甜圈、比大小、形狀、規律、錢幣、時鐘、動動腦，共 18 個小遊戲</small></span></a>
     <a class="lvcard drillcard" href="#drill"><span class="lvnum">題</span><span class="lvtext"><b>算盤題庫</b><small>直接加減、五的好朋友，拿實體算盤來算，可以列印</small></span></a>
   </section>
@@ -100,6 +101,75 @@
     <a class="lvcard clockcard" href="#clock"><span class="lvnum">鐘</span><span class="lvtext"><b>時鐘小學堂</b><small>跟著時鐘滴答、小烏龜和小兔子，一步一步學會整點和半點</small></span></a>
     <a class="lvcard sheetcard" href="#sheet"><span class="lvnum">練</span><span class="lvtext"><b>數學練習單</b><small>選一種題目連續練習，或挑戰六種混合題。填格子、一次交卷，也可以列印</small></span></a>
     <div id="mathGroups" class="stack"></div>
+  </section>
+
+  <!-- 九九乘法 -->
+  <section id="view-times" class="stack" hidden>
+    <div id="tHome" class="stack">
+      <div>
+        <h1>九九乘法</h1>
+        <p class="lead">現在練習的是「<b id="tWho"></b>」。每答一題，乘法表上那一格的顏色就會更新。</p>
+      </div>
+      <div class="board tboard">
+        <h2>乘法表</h2>
+        <div class="tlegend" id="tSummary"></div>
+        <div class="tablewrap"><table class="ttable" id="tTable"></table></div>
+        <p class="tfact" id="tFact" aria-live="polite"></p>
+      </div>
+      <div class="board tboard">
+        <h2>練習</h2>
+        <div class="optrow"><span class="lab">練幾的乘法</span><div class="seg ttables" id="tTables" role="group" aria-label="選要練幾的乘法"></div>
+          <button class="btn small" id="tAll">全選</button><button class="btn small" id="tNone">全不選</button></div>
+        <div class="optrow"><span class="lab">順序</span><div class="seg" id="tOrder" role="group" aria-label="順序"><button data-v="random">打亂</button><button data-v="seq">照順序背</button></div></div>
+        <div class="optrow"><span class="lab">題型</span><div class="seg" id="tType" role="group" aria-label="題型"><button data-v="ans">算答案 7×8=□</button><button data-v="blank">填空 7×□=56</button><button data-v="mix">混合</button></div></div>
+        <div class="optrow"><span class="lab">題數</span><div class="seg" id="tCount" role="group" aria-label="題數"><button data-v="10">10 題</button><button data-v="20">20 題</button><button data-v="30">30 題</button></div></div>
+        <div class="ctrls"><button class="btn primary big" id="tStart">開始練習</button></div>
+      </div>
+      <div class="tmodes">
+        <div class="board tboard">
+          <h2>限時 60 秒</h2>
+          <p class="tip">60 秒可以答對幾題？用上面選的乘法和題型。<span id="tBest"></span></p>
+          <div class="ctrls"><button class="btn primary" id="tTimedBtn">開始挑戰</button></div>
+        </div>
+        <div class="board tboard">
+          <h2>應用題</h2>
+          <div class="seg" id="tStoryLevel" role="group" aria-label="應用題難度"><button data-v="1">簡單</button><button data-v="2">普通</button><button data-v="3">挑戰</button></div>
+          <p class="tip" id="tStoryTip"></p>
+          <div class="ctrls"><button class="btn primary" id="tStoryBtn">開始（10 題）</button></div>
+        </div>
+        <div class="board tboard">
+          <h2>弱點加強</h2>
+          <p class="tip">自動挑最常錯、最慢的 10 題。<span id="tWeakTip"></span></p>
+          <div class="ctrls"><button class="btn primary" id="tWeakBtn">開始加強</button></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="tPlay" class="board tplay" hidden>
+      <div class="tplayhead"><b id="tModeName"></b><span class="ctrls"><button class="btn small" id="tVoice" aria-pressed="false">朗讀：關</button><button class="btn small" id="tQuit">結束</button></span></div>
+      <div class="progress"><div class="bar"><i id="tBar"></i></div><span id="tProg"></span></div>
+      <p class="tstory" id="tStory" aria-live="polite" hidden></p>
+      <div class="teqpick" id="tEq" hidden></div>
+      <div class="tq" id="tQ" aria-live="polite"></div>
+      <div class="fb" id="tFb" aria-live="polite"></div>
+      <div class="tpad" id="tPad">
+        <button data-k="1">1</button><button data-k="2">2</button><button data-k="3">3</button>
+        <button data-k="4">4</button><button data-k="5">5</button><button data-k="6">6</button>
+        <button data-k="7">7</button><button data-k="8">8</button><button data-k="9">9</button>
+        <button data-k="del" class="tdel" aria-label="刪除">刪除</button><button data-k="0">0</button><button id="tGo" class="tok" type="button" data-k="ok">確定</button>
+      </div>
+    </div>
+
+    <div id="tResult" class="board result" hidden>
+      <div id="tStars" class="rstars"></div>
+      <div class="dscore"><b id="tScore">0</b><small id="tUnit">分</small></div>
+      <p id="tText" class="caption"></p>
+      <div class="twrong" id="tWrong"></div>
+      <div class="ctrls">
+        <button class="btn primary" id="tAgain">再來一次</button>
+        <button class="btn" id="tHomeBtn">回九九乘法</button>
+      </div>
+    </div>
   </section>
 
   <!-- 時鐘小學堂：引導式教學（長針、短針、整點、半點） -->

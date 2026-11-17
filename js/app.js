@@ -9,6 +9,7 @@ import { renderMathHome, openGame, leaveGame } from "./kidsapp.js";
 import { renderDaily, renderParent } from "./records.js";
 import { renderSheet } from "./sheetapp.js";
 import { renderClock, leaveClock } from "./clockapp.js";
+import { renderTimes, leaveTimes } from "./timesapp.js";
 
 const $ = (id) => document.getElementById(id);
 const PRACTICE_TOTAL = 10;
@@ -43,19 +44,23 @@ function route() {
   const clock = !lv && location.hash === "#clock";
   $("view-clock").hidden = !clock;
   leaveClock();
+  const times = !lv && location.hash === "#times";
+  $("view-times").hidden = !times;
+  $("navTimes").classList.toggle("on", times);
+  if (!times) leaveTimes();
   $("view-parent").hidden = !parent;
   $("navParent").classList.toggle("on", parent);
-  $("view-home").hidden = !!lv || drill || math || game || parent || sheet || clock;
+  $("view-home").hidden = !!lv || drill || math || game || parent || sheet || clock || times;
   $("view-level").hidden = !lv;
   $("view-drill").hidden = !drill;
   $("view-math").hidden = !math;
   $("view-game").hidden = !game;
   $("navMath").classList.toggle("on", math || game || sheet || clock);
-  $("navAbacus").classList.toggle("on", !(math || game || parent || sheet || clock));
+  $("navAbacus").classList.toggle("on", !(math || game || parent || sheet || clock || times));
   if (lv) {
     openLevel(lv);
     if (m[2]) { pset = practiceSets(lv).find((s) => s.id === m[2]) || null; setTab("practice"); }
-  } else if (drill) renderDrill(); else if (math) renderMathHome(); else if (parent) renderParent(); else if (sheet) renderSheet(); else if (clock) renderClock(); else if (!game) renderHome();
+  } else if (drill) renderDrill(); else if (math) renderMathHome(); else if (parent) renderParent(); else if (sheet) renderSheet(); else if (clock) renderClock(); else if (times) renderTimes(); else if (!game) renderHome();
   window.scrollTo(0, 0);
 }
 
