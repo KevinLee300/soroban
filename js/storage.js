@@ -106,3 +106,19 @@ export function loadGrade() {
 export function saveGrade(grade) {
   try { localStorage.setItem(scoped(GRADE), grade === "school" ? "school" : "kinder"); } catch { /* Storage may be unavailable. */ }
 }
+
+/* ---------- 兩個人一起玩 ---------- */
+// 一起守城堡打到第幾關（整台裝置共用，不分家人）
+const DUO = "soroban.duo.v1";
+export function loadDuo() {
+  try { const d = JSON.parse(localStorage.getItem(DUO)) || {}; return { best: d.best || 0 }; } catch { return { best: 0 }; }
+}
+export function saveDuo(d) {
+  try { localStorage.setItem(DUO, JSON.stringify({ best: d.best || 0 })); } catch { /* Storage may be unavailable. */ }
+}
+// 把成績記到指定家人的學習紀錄（兩個人一起玩時，各記各的）
+export function logSessionAs(name, entry) {
+  const keep = activeProfile();
+  if (name === keep || !loadProfiles().includes(name)) { logSession(entry); return; }
+  try { localStorage.setItem(ACTIVE, name); logSession(entry); } finally { try { localStorage.setItem(ACTIVE, keep); } catch { /* 存不了就算了 */ } }
+}

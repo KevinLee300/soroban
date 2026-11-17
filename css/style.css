@@ -518,6 +518,67 @@ svg.tick { width: 100%; height: auto; display: block; overflow: visible; touch-a
   .bubble::before { left: 40px; top: -15px; border: 9px solid transparent; border-bottom-color: var(--t1e); border-top: 0; }
 }
 
+/* 一起守城堡（兩人合作塔防） */
+.duocard { border-color: #F57C00; }
+.duocard .lvnum { background: linear-gradient(90deg, #F57C00 50%, #1E88E5 50%); font-family: var(--f-display); font-weight: 400; font-size: 20px; }
+.dsetup { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
+.dsetup .dp0 { border-top: 6px solid #F57C00; } .dsetup .dp1 { border-top: 6px solid #1E88E5; }
+.dsetup select { font: inherit; color: var(--ink); background: var(--panel); border: 2px solid var(--line); border-radius: 12px; padding: 8px 10px; min-height: 46px; }
+.dlab { font-family: var(--f-display); font-size: 17px; }
+.dtypes button { font-size: 15px; }
+.dstages { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 8px; }
+.dstages button { border: 2px solid var(--line); background: var(--panel); border-radius: 14px; padding: 8px; display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.dstages button[aria-pressed="true"] { border-color: var(--ink); background: var(--t4); }
+.dstages button:disabled { opacity: .45; }
+.dstages .dmon svg { width: 64px; height: 54px; display: block; }
+.dstages small { color: var(--muted); font-size: 12px; }
+body.duo-on { overflow: hidden; }
+.duoplay { position: fixed; inset: 0; z-index: 60; background: #1F2A1C; display: grid; grid-template-rows: 1fr minmax(0, 1.25fr) 1fr; touch-action: manipulation; user-select: none; -webkit-user-select: none; }
+.duoplay.land { grid-template-rows: none; grid-template-columns: 1fr minmax(0, 1.25fr) 1fr; }
+.dpane { position: relative; overflow: hidden; container-type: size; background: var(--bg); }
+#dPane0 { --pc: #F57C00; } #dPane1 { --pc: #1E88E5; }
+.dpane .inner { position: absolute; left: 50%; top: 50%; width: 100cqw; height: 100cqh; transform: translate(-50%, -50%) rotate(var(--rot, 0deg)); display: flex; flex-direction: column; gap: 6px; padding: 8px 12px; border: 5px solid var(--pc); }
+.dpane[data-side="side"] .inner { width: 100cqh; height: 100cqw; }
+.phead { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; font-size: 14px; }
+.phead .pname { font-family: var(--f-display); font-size: 20px; color: var(--pc); }
+.phead .hearts { color: #E53935; letter-spacing: 1px; }
+.phead .pstat { color: var(--muted); }
+.phead .rotbtn { margin-left: auto; }
+.pbody { flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; align-items: center; }
+.quiz { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; min-width: 0; }
+.quiz .qscene .dgrid.small { --d: 22px; }
+.qtext { font-family: var(--f-num); font-weight: 600; font-size: clamp(28px, 9cqmin, 52px); line-height: 1.1; }
+.choices { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; width: 100%; max-width: 460px; }
+.choices button { min-height: 56px; border-radius: 14px; border: 3px solid var(--line); background: var(--panel); font-family: var(--f-num); font-weight: 600; font-size: clamp(24px, 7cqmin, 40px); color: var(--ink); }
+.choices button.right { border-color: var(--plus); background: var(--plus-soft); }
+.choices button.wrong { border-color: var(--bead); color: var(--bead); }
+.dpane.stun .choices { opacity: .55; }
+.cards { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.cards .ctitle { font-family: var(--f-display); font-weight: 400; font-size: 18px; color: var(--pc); text-align: center; }
+.cards > div { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.card { border: 3px solid var(--pc); background: var(--panel); border-radius: 14px; padding: 8px 6px; display: flex; flex-direction: column; gap: 2px; text-align: center; min-height: 70px; animation: cardin .3s ease-out; }
+.card b { font-family: var(--f-display); font-weight: 400; font-size: 17px; line-height: 1.25; }
+.card small { color: var(--muted); font-size: 12px; line-height: 1.3; }
+.card.k-atk { background: #FFEBEE; } .card.k-spd { background: #E3F2FD; } .card.k-new { background: #FFF8E1; } .card.k-up { background: #F3E5F5; }
+@keyframes cardin { from { transform: scale(.8); opacity: 0; } }
+.gear { display: flex; flex-direction: column; gap: 4px; align-items: stretch; max-width: 120px; }
+.chip { font-size: 12px; border-radius: 999px; padding: 2px 8px; background: var(--panel); border: 1.5px solid var(--line); white-space: nowrap; text-align: center; }
+.chip.w-arrow { border-color: #8D6E63; } .chip.w-laser { border-color: #E53935; } .chip.w-wave { border-color: #7E57C2; } .chip.w-bolt { border-color: #FBC02D; } .chip.w-ice { border-color: #4FC3F7; }
+.flash { position: absolute; left: 50%; top: 40%; transform: translate(-50%, -50%); font-family: var(--f-display); font-size: 30px; color: var(--pc); pointer-events: none; opacity: 0; text-shadow: 0 2px 0 #fff; }
+.flash.go { animation: flashup .9s ease-out; }
+@keyframes flashup { 0% { opacity: 0; transform: translate(-50%, -30%) scale(.7); } 20% { opacity: 1; transform: translate(-50%, -50%) scale(1.1); } 100% { opacity: 0; transform: translate(-50%, -90%) scale(1); } }
+.msg { position: absolute; inset: 0; background: color-mix(in srgb, var(--panel) 94%, transparent); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; text-align: center; padding: 12px; }
+.msg > b { font-family: var(--f-display); font-weight: 400; font-size: 30px; color: var(--pc); }
+.msg > span { font-size: 17px; max-width: 34em; }
+.msg .msum { margin: 0; font-size: 16px; }
+.msg .mbtns { display: flex; gap: 10px; }
+.dmid { position: relative; min-width: 0; min-height: 0; }
+#dField { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.dmidbtns { position: absolute; left: 50%; bottom: 6px; transform: translateX(-50%); display: flex; gap: 6px; }
+.duoplay.land .dmidbtns { bottom: auto; top: 50%; flex-direction: column; transform: translate(-50%, 60px); }
+.dmidbtns .btn { opacity: .85; }
+@media (prefers-reduced-motion: reduce) { .card, .flash.go { animation: none; } .flash.go { opacity: 1; } }
+
 /* 九九乘法 */
 .gradepick { display: inline-flex; align-items: center; gap: 8px; }
 .gradepick label { font-family: var(--f-display); font-size: 18px; }
