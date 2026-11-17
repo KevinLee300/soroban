@@ -55,3 +55,12 @@ test("比長短：答案是最長（或最短），而且長度差得夠明顯",
   const sorted = [...lens].sort((a, b) => a - b);
   for (let i = 1; i < sorted.length; i++) assert.ok(sorted[i] - sorted[i - 1] >= (level === 1 ? 18 : 9));
 }));
+
+test("學習紀錄用的題目說明：每個遊戲都說得出是哪一題", async () => {
+  const { describe } = await import("../js/kids.js");
+  for (const g of GAMES) for (const level of [1, 2, 3]) for (let k = 0; k < 50; k++) {
+    const text = describe(g, makeQuestion(g, level));
+    assert.ok(text.length >= 3 && !text.includes("undefined") && !text.includes("NaN"), `${g.id}: ${text}`);
+  }
+  assert.match(describe(findGame("numcmp"), makeQuestion(findGame("numcmp"), 3)), /^比大小：\d+、\d+、\d+$/);
+});

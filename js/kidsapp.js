@@ -1,8 +1,8 @@
 // 幼兒數學的畫面：遊戲地圖、選難度、10 題選擇題、星星。出題在 kids.js。
-import { GROUPS, LEVEL_NAMES, findGame, makeQuestion } from "./kids.js";
+import { GROUPS, LEVEL_NAMES, describe, findGame, makeQuestion } from "./kids.js";
 import { stars } from "./logic.js";
 import { canSpeak, speak, stopSpeak } from "./speech.js";
-import { loadProgress, saveStars } from "./storage.js";
+import { loadProgress, saveStars, logSession } from "./storage.js";
 
 const $ = (id) => document.getElementById(id);
 const TOTAL = 10;
@@ -60,7 +60,7 @@ $("gLevels").addEventListener("click", (ev) => {
 
 function start() {
   clearTimeout(G.timer);
-  G.i = 0; G.correct = 0; G.q = null;
+  G.i = 0; G.correct = 0; G.q = null; G.wrong = []; G.t0 = Date.now();
   renderLevels();
   $("gResult").hidden = true;
   $("gPlay").hidden = false;
@@ -94,6 +94,7 @@ $("gChoices").addEventListener("click", (ev) => {
     say("答對了！");
     G.timer = setTimeout(() => { G.i++; nextQ(); }, 1300);
   } else {
+    if (G.firstTry) G.wrong.push(describe(G.game, G.q));
     G.firstTry = false;
     b.classList.add("wrong"); b.disabled = true;
     $("gFb").textContent = "再想想看，再選一次。"; $("gFb").className = "fb no";
@@ -103,6 +104,10 @@ $("gChoices").addEventListener("click", (ev) => {
 
 function finish() {
   const s = stars(G.correct, TOTAL), best = saveStars(key(G.game, G.level), s);
+  logSession({
+    id: key(G.game, G.level), label: `幼兒數學 ${G.game.title}・${LEVEL_NAMES[G.level - 1]}`,
+    correct: G.correct, total: TOTAL, sec: (Date.now() - G.t0) / 1000, wrong: [...new Set(G.wrong)],
+  });
   renderLevels();
   $("gPlay").hidden = true;
   $("gResult").hidden = false;

@@ -240,3 +240,19 @@ export const GROUPS = [
 export const GAMES = GROUPS.flatMap((g) => g.games);
 export const findGame = (id) => GAMES.find((g) => g.id === id);
 export function makeQuestion(game, level, rng = Math.random) { return game.gen(level, rng); }
+
+// 學習紀錄用：把一題說成家長看得懂的一句話（題目本身太籠統時，補上實際的數字）
+export function describe(game, q) {
+  const m = q.meta || {};
+  switch (game.id) {
+    case "count": return `數甜甜圈：${m.n} 個`;
+    case "more": return `比多少：${m.a} 個和 ${m.b} 個`;
+    case "numcmp": return `比大小：${m.vals.join("、")}`;
+    case "length": return `比長短：找最${m.short ? "短" : "長"}的`;
+    case "pattern": return m.step ? `數字規律：每次${m.step > 0 ? "加" : "減"} ${Math.abs(m.step)}` : "圖形規律";
+    case "coins": return `數錢幣：${m.ans} 元`;
+    case "shape": return m.ans ? `${m.name}有幾個邊` : q.say.replace("？", "");
+    case "next": return m.step ? `${m.step} 個一數，答案 ${m.ans}` : q.say.startsWith("中間") ? `中間的數字：${m.ans}` : q.say.replace("？", "");
+    default: return q.say.replace("？", "");
+  }
+}

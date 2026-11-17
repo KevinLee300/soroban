@@ -1,5 +1,6 @@
 // 題庫頁：小朋友用實體算盤算，把答案填在畫面上，全部寫完再一次交卷、看分數。也可以列印成紙本。
 import { fiveDrillSet, MINUS, stars } from "./logic.js";
+import { logSession } from "./storage.js";
 
 const $ = (id) => document.getElementById(id);
 const opts = { kind: "direct", mode: "+", terms: 2, count: 10 };
@@ -19,7 +20,11 @@ function setSeg(groupId, key) {
 
 const inputs = () => [...$("drillList").querySelectorAll(".ain")];
 
+let t0 = Date.now();
+const MODE = { "+": "加法", "-": "減法", mix: "加減混合" };
+
 function renderList() {
+  t0 = Date.now();
   checked = false;
   confirmBlank = false;
   $("drillList").innerHTML = set.map((q, i) => {
@@ -92,6 +97,12 @@ $("dCheck").onclick = () => {
     if (!ok) li.querySelector(".dfix").textContent = el.value === "" ? `沒寫，答案是 ${set[i].answer}` : `答案是 ${set[i].answer}`;
   });
   const total = set.length, score = Math.round((correct / total) * 100), s = stars(correct, total);
+  logSession({
+    id: `drill.${opts.kind}.${opts.mode}`, label: `算盤題庫 ${KIND[opts.kind].name}・${MODE[opts.mode]}`,
+    correct, total, sec: (Date.now() - t0) / 1000,
+    wrong: set.filter((q, i) => all[i].value === "" || +all[i].value !== q.answer)
+      .map((q) => q.nums.map((x, k) => (k === 0 ? x : `${x > 0 ? "+" : MINUS} ${Math.abs(x)}`)).join(" ")),
+  });
   $("dStars").innerHTML = `<span class="stars" aria-label="${s} 顆星">${"★".repeat(s)}<span class="off">${"★".repeat(3 - s)}</span></span>`;
   $("dScore").textContent = score;
   $("dText").textContent = `${total} 題答對 ${correct} 題。` +

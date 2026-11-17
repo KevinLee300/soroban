@@ -2,10 +2,11 @@ import { createAbacus } from "./abacus.js";
 import * as L from "./logic.js";
 import { LEVELS } from "./levels.js";
 import { canSpeak, speak, stopSpeak } from "./speech.js";
-import { loadProgress, saveStars, loadProfiles, activeProfile, selectProfile, addProfile } from "./storage.js";
+import { loadProgress, saveStars, loadProfiles, activeProfile, selectProfile, addProfile, logSession } from "./storage.js";
 import { renderDrill } from "./drill.js";
 import { createCoinTray } from "./coins.js";
 import { renderMathHome, openGame, leaveGame } from "./kidsapp.js";
+import { renderDaily, renderParent } from "./records.js";
 
 const $ = (id) => document.getElementById(id);
 const PRACTICE_TOTAL = 10;
@@ -25,7 +26,8 @@ else { $("voice").textContent = "朗讀：開"; $("voice").setAttribute("aria-pr
 /* ---------- 路由 ---------- */
 function route() {
   stopDemo();
-  const m = location.hash.match(/^#level-(\d+)$/);
+  // #level-2 是關卡；#level-2-add 是直接進這一關的「加法」練習（每日任務用）
+  const m = location.hash.match(/^#level-(\d+)(?:-([a-z0-9]+))?$/);
   const lv = m && LEVELS.find((l) => l.id === +m[1] && l.ready);
   const drill = !lv && location.hash === "#drill";
   // 幼兒數學：#math 是遊戲地圖，#math-count 這種是一個遊戲
@@ -33,14 +35,20 @@ function route() {
   leaveGame();
   const game = !!gm && openGame(gm[1]);
   const math = !lv && !game && (location.hash === "#math" || !!gm);
-  $("view-home").hidden = !!lv || drill || math || game;
+  const parent = !lv && location.hash === "#parent";
+  $("view-parent").hidden = !parent;
+  $("navParent").classList.toggle("on", parent);
+  $("view-home").hidden = !!lv || drill || math || game || parent;
   $("view-level").hidden = !lv;
   $("view-drill").hidden = !drill;
   $("view-math").hidden = !math;
   $("view-game").hidden = !game;
   $("navMath").classList.toggle("on", math || game);
-  $("navAbacus").classList.toggle("on", !(math || game));
-  if (lv) openLevel(lv); else if (drill) renderDrill(); else if (math) renderMathHome(); else if (!game) renderHome();
+  $("navAbacus").classList.toggle("on", !(math || game || parent));
+  if (lv) {
+    openLevel(lv);
+    if (m[2]) { pset = practiceSets(lv).find((s) => s.id === m[2]) || null; setTab("practice"); }
+  } else if (drill) renderDrill(); else if (math) renderMathHome(); else if (parent) renderParent(); else if (!game) renderHome();
   window.scrollTo(0, 0);
 }
 
@@ -67,6 +75,7 @@ $("pSets").addEventListener("click", (ev) => {
 });
 
 function renderHome() {
+  renderDaily();
   const picker = $("profile");
   picker.replaceChildren(...loadProfiles().map((name) => new Option(name, name)));
   picker.value = activeProfile();
@@ -270,7 +279,7 @@ $("tabPractice").onclick = () => setTab("practice");
 function startPractice() {
   if (!pset || !practiceSets(level).includes(pset)) pset = practiceSets(level)[0];
   renderPracticeSets();
-  P.i = 0; P.correct = 0; P.q = null;
+  P.i = 0; P.correct = 0; P.q = null; P.wrong = []; P.t0 = Date.now();
   $("result").hidden = true;
   $("quizArea").hidden = false;
   nextQ();
@@ -312,6 +321,7 @@ $("check").onclick = () => {
     $("qnext").textContent = P.i + 1 >= PRACTICE_TOTAL ? "看成績" : "下一題";
     $("qnext").focus();
   } else {
+    if (P.firstTry) P.wrong.push(P.q.text.replace(" = ?", ""));
     P.firstTry = false;
     setFb(`現在是 ${v}，再試一次。提示：${P.q.hint}`, "no");
   }
@@ -322,6 +332,10 @@ $("qnext").onclick = () => { P.i++; nextQ(); };
 function finish() {
   const s = L.stars(P.correct, PRACTICE_TOTAL);
   const best = saveStars(starKey(level, pset), s);
+  logSession({
+    id: starKey(level, pset), label: `珠算 第 ${level.id} 關 ${level.title}${pset.label ? `・${pset.label}` : ""}`,
+    correct: P.correct, total: PRACTICE_TOTAL, sec: (Date.now() - P.t0) / 1000, wrong: P.wrong,
+  });
   renderPracticeSets();
   $("quizArea").hidden = true;
   $("result").hidden = false;
