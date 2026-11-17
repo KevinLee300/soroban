@@ -74,7 +74,39 @@
       <h1>幼兒數學</h1>
       <p class="lead">每個遊戲 10 題，有簡單、普通、挑戰三種難度。題目會念出來，小朋友點選答案就可以。</p>
     </div>
+    <a class="lvcard sheetcard" href="#sheet"><span class="lvnum">練</span><span class="lvtext"><b>數學練習單</b><small>一頁 6 種題目：接著填、比大小、分一分、加、減、找數字。把答案填在格子裡，可以列印</small></span></a>
     <div id="mathGroups" class="stack"></div>
+  </section>
+
+  <!-- 數學練習單：填格子，一次交卷 -->
+  <section id="view-sheet" class="stack" hidden>
+    <div class="no-print">
+      <a href="#math" class="back">← 回幼兒數學</a>
+      <h1>數學練習單</h1>
+      <p class="lead">把答案填在格子裡，全部寫完再按「交卷」。也可以按「列印」印出來用筆寫。</p>
+    </div>
+    <div class="gtop no-print">
+      <div class="psets" id="sLevels" role="group" aria-label="選擇難度"></div>
+      <div class="ctrls">
+        <button class="btn" id="sNew">換一張</button>
+        <button class="btn" id="sPrint">列印</button>
+      </div>
+    </div>
+    <div class="print-only print-head"><b>數學練習單</b><span>姓名：＿＿＿＿＿＿　日期：＿＿＿＿＿＿　答對：＿＿＿ 格</span></div>
+    <div class="board drill-result no-print" id="sResult" hidden>
+      <div id="sStars" class="rstars"></div>
+      <div class="dscore"><b id="sScore">0</b><small>分</small></div>
+      <p id="sText" class="caption"></p>
+      <div class="ctrls">
+        <button class="btn primary" id="sRetry">同一張再寫一次</button>
+        <button class="btn" id="sNew2">換一張</button>
+      </div>
+    </div>
+    <div class="sheet" id="sheetGrid"></div>
+    <div class="drill-submit no-print" id="sSubmit">
+      <p id="sNote" class="dnote" role="status" hidden></p>
+      <button class="btn primary big" id="sCheck">寫完了，交卷！</button>
+    </div>
   </section>
 
   <!-- 幼兒數學：一個遊戲 -->
