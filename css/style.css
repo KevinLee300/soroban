@@ -518,6 +518,52 @@ svg.tick { width: 100%; height: auto; display: block; overflow: visible; touch-a
   .bubble::before { left: 40px; top: -15px; border: 9px solid transparent; border-bottom-color: var(--t1e); border-top: 0; }
 }
 
+/* 九九乘法 */
+.timescard { border-color: var(--minus); }
+.timescard .lvnum { background: var(--minus); font-family: var(--f-num); font-size: 26px; }
+.board.tboard { display: flex; flex-direction: column; align-items: stretch; gap: 12px; }
+.tmodes { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; }
+.btn.small { padding: 6px 12px; font-size: 14px; min-height: 40px; }
+.tlegend { display: flex; flex-wrap: wrap; gap: 6px; font-size: 13px; }
+.tl { border-radius: 999px; padding: 2px 10px; border: 2px solid transparent; }
+.tl.m3, .tcell.m3 { background: var(--plus-soft); border-color: var(--plus); }
+.tl.m2, .tcell.m2 { background: var(--t4); border-color: var(--t4e); }
+.tl.m1, .tcell.m1 { background: var(--t2); border-color: var(--bead); }
+.tl.m0, .tcell.m0 { background: var(--bg); border-color: var(--line); }
+.ttable { border-collapse: separate; border-spacing: 3px; margin: 0 auto; font-family: var(--f-num); font-variant-numeric: tabular-nums; }
+.ttable th { font-weight: 600; font-size: 14px; color: var(--muted); padding: 0 4px; }
+.ttable tbody th { font-size: 18px; color: var(--ink); }
+.tcell { width: 100%; min-width: 34px; height: 36px; border-radius: 8px; border-width: 2px; border-style: solid; font: inherit; font-weight: 600; font-size: 16px; color: var(--ink); padding: 0; }
+.tfact { margin: 0; min-height: 2.2em; display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 14px; }
+.tfact b { font-family: var(--f-num); font-size: 26px; }
+.tfact span { font-family: var(--f-display); font-size: 20px; }
+.tfact small { color: var(--muted); }
+.tboard .optrow .lab { width: auto; min-width: 5.5em; }
+.ttables button { min-width: 46px; font-family: var(--f-num); font-weight: 600; font-size: 18px; }
+.board.tplay { display: flex; flex-direction: column; align-items: stretch; gap: 14px; max-width: 520px; margin: 0 auto; width: 100%; }
+.tplayhead { display: flex; align-items: center; justify-content: space-between; gap: 10px; font-family: var(--f-display); font-size: 20px; }
+.tq { display: flex; align-items: center; justify-content: center; gap: 12px; font-family: var(--f-num); font-weight: 600; font-size: clamp(44px, 13vw, 68px); line-height: 1; font-variant-numeric: tabular-nums; padding-block: 8px; }
+.tq .tsym { color: var(--muted); font-size: .7em; }
+.tbox { min-width: 1.6em; height: 1.35em; padding: 0 .1em; border: 4px solid var(--minus); border-radius: 14px; display: inline-grid; place-items: center; background: var(--bg); }
+.tbox.right { border-color: var(--plus); background: var(--plus-soft); }
+.tbox.wrong { border-color: var(--bead); color: var(--bead); text-decoration: line-through; }
+.tplay .fb { text-align: center; min-height: 3em; }
+.tpad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.tpad button { height: 62px; border-radius: 14px; border: 2px solid var(--line); background: var(--panel); font-family: var(--f-num); font-weight: 600; font-size: 28px; color: var(--ink); touch-action: manipulation; }
+.tpad button:active { background: var(--bg); transform: scale(.97); }
+.tpad .tdel { font-family: var(--f-body); font-size: 17px; font-weight: 500; color: var(--muted); }
+.tpad .tok { font-family: var(--f-display); font-weight: 400; font-size: 22px; background: var(--ink); color: var(--panel); border-color: var(--ink); }
+.twrong { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px 10px; font-size: 15px; }
+.twrong b { flex-basis: 100%; font-weight: 500; }
+.twrong span { background: var(--t2); border-radius: 10px; padding: 3px 10px; font-family: var(--f-num); }
+@media (max-width: 420px) {
+  .tcell { min-width: 0; height: 32px; font-size: 14px; border-radius: 6px; }
+  .ttable { border-spacing: 2px; width: 100%; table-layout: fixed; }
+  .ttable th { padding: 0; font-size: 12px; }
+  .topnav a { font-size: 14px; padding: 3px 8px; }
+  .tpad button { height: 56px; }
+}
+
 /* 朗讀聲音設定 */
 .vgrid { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 10px 14px; align-items: center; max-width: 520px; }
 .vgrid label { font-family: var(--f-display); font-size: 17px; }
