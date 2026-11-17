@@ -24,7 +24,7 @@
 | ✅ Claude 完成 | 錢幣對照（零錢盒）：算盤旁邊的硬幣盒一起動，1 元／5 元／10 元／50 元，附錢幣說明與朗讀 | Claude | `coins.js`、`logic.js`、`app.js` |
 | ✅ Claude 完成 | 題庫新增「直接加減」（不用五的好朋友），頁面改名「算盤題庫」 | Claude | `logic.js`、`drill.js` |
 | ⬜ | 「找五還是找十？」判斷練習 | Claude | `logic.js`、`levels.js` |
-| ⬜ | PWA：加到主畫面、離線可用（manifest + service worker） | Codex | 新檔 |
+| ✅ Claude 完成 | PWA：加到主畫面、離線可用、更新後不用按 Ctrl+F5（`sw.js` 先問網路、問不到才用存檔） | Claude | `sw.js`、`manifest.webmanifest`、`js/pwa.js`、`icons/` |
 
 ## 之後
 - 第 5 關 五和十一起用、第 6 關 兩位數、第 7 關 珠心算（閃電數字）
