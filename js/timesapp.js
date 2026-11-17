@@ -45,12 +45,20 @@ function showFact(key) {
   if (canSpeak) speak(`${chant(f.a, f.b)}`);
 }
 
-export function renderTimes() {
+export function renderTimes(mode, arg) {
   bind();
   stopRun();
   $("tHome").hidden = false; $("tPlay").hidden = true; $("tResult").hidden = true;
   renderTable(); renderOpts();
   $("tFact").innerHTML = `<span>點乘法表的格子，可以看口訣。</span>`;
+  if (!["practice", "timed", "weak", "story"].includes(mode)) return;
+  // 從每日任務點進來：用全部的乘法、標準設定，直接開始
+  history.replaceState(null, "", "#times"); // 網址改回來，重新整理不會又自動開始
+  opts.tables = new Set(TABLES); opts.order = "random"; opts.type = "ans"; opts.count = 20;
+  if (mode === "story") opts.story = Math.min(3, Math.max(1, +arg || 1));
+  if (mode === "weak" && !Object.keys(loadTimes().stats).length) mode = "practice"; // 還沒練過，沒有弱點可以挑
+  renderOpts();
+  start(mode);
 }
 export function leaveTimes() { stopRun(); }
 

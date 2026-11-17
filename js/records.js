@@ -1,6 +1,6 @@
 // 首頁的「今天的任務」和給家長看的「學習紀錄」頁。計算在 daily.js，存檔在 storage.js。
 import { pickTasks, taskDone, allDone, streak, summarizeDays, summarizeItems, recentWrong } from "./daily.js";
-import { activeProfile, clearLog, loadDaily, loadLog, loadProgress, saveDaily, today } from "./storage.js";
+import { activeProfile, clearLog, loadDaily, loadGrade, loadLog, loadProgress, loadTimes, saveDaily, today } from "./storage.js";
 
 const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
@@ -11,8 +11,12 @@ const weekday = (d) => WEEK[new Date(`${d}T00:00:00`).getDay()];
 /* ---------- 今天的任務（首頁） ---------- */
 export function renderDaily() {
   const day = today(), daily = loadDaily(), log = loadLog();
-  // 今天第一次打開時決定任務，之後整天不變
-  if (!daily[day]) { daily[day] = pickTasks(day, loadProgress()); saveDaily(daily); }
+  // 今天第一次打開時決定任務，之後整天不變；改了年級就重新排
+  const grade = loadGrade();
+  if (!daily[day] || (daily[day][0]?.g || "kinder") !== grade) {
+    daily[day] = pickTasks(day, loadProgress(), { grade, timesStarted: Object.keys(loadTimes().stats).length > 0 });
+    saveDaily(daily);
+  }
   const tasks = daily[day], done = tasks.filter((t) => taskDone(t, log, day)).length;
   const run = streak(daily, log, day), finished = allDone(tasks, log, day);
   $("daily").innerHTML = `
@@ -22,7 +26,7 @@ export function renderDaily() {
       return `<li class="${ok ? "done" : ""}"><span class="tmark" aria-hidden="true">${ok ? "✓" : ""}</span><span class="ttitle">${esc(t.title)}</span>${
         ok ? `<span class="tstate">完成了</span>` : `<a class="btn primary" href="${esc(t.href)}">開始</a>`}</li>`;
     }).join("")}</ol>
-    <p class="${finished ? "dfinish" : "tip"}">${finished ? "今天的任務全部完成了，好棒！明天再來。" : "每個任務做完 10 題就算完成，大約 10–15 分鐘。"}</p>`;
+    <p class="${finished ? "dfinish" : "tip"}">${finished ? "今天的任務全部完成了，好棒！明天再來。" : (grade === "school" ? "每個任務做完一次就算完成，大約 10 分鐘。" : "每個任務做完 10 題就算完成，大約 10–15 分鐘。")}</p>`;
 }
 
 /* ---------- 學習紀錄（家長） ---------- */

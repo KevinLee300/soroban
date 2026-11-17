@@ -133,7 +133,11 @@ function mulStory(a, b, rng) {
 const eqChoices = (right, others, rng) => shuffle([right, ...others.filter((x) => x !== right)].slice(0, 3), rng);
 
 export function makeStory(level = 1, tables = TABLES, rng = Math.random) {
-  const ts = tables.length ? tables : TABLES, a = pick(ts, rng), b = rnd(rng, 2, 9), p = a * b, key = `${a}x${b}`;
+  // 應用題的兩個數字不要一樣：一樣的話「6 − 6」這種選項一看就知道不對，失去判斷的意義（6 × 6 在一般練習裡會練到）
+  const ts = tables.length ? tables : TABLES, a = pick(ts, rng);
+  let b;
+  do { b = rnd(rng, 2, 9); } while (b === a);
+  const p = a * b, key = `${a}x${b}`;
   const big = Math.max(a, b), small = Math.min(a, b);
   // 難度 2：大約三分之一的題目其實是加法或減法
   if (level === 2 && rng() < 0.35) {

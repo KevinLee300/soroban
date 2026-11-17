@@ -121,3 +121,15 @@ test("應用題：難度 2 有乘法也有加減；只練選的乘法；一組�
   assert.equal(set.length, 10);
   assert.equal(new Set(set.map((s) => s.text)).size, 10);
 });
+
+test("應用題：錯的選項也要像樣（兩個數字不一樣，沒有答案是 0 的算式）", () => {
+  const calc = (eq) => { const [x, op, y] = eq.split(" "); return op === "×" ? x * y : op === "+" ? +x + +y : x - y; };
+  for (const level of [1, 2]) for (const tables of [[2], [6], [9], [2, 3, 4, 5, 6, 7, 8, 9]]) for (let k = 0; k < 300; k++) {
+    const s = T.makeStory(level, tables);
+    for (const c of s.choices) {
+      const [x, , y] = c.split(" ");
+      assert.notEqual(x, y, `選項兩個數字一樣：${c}（${s.text}）`);
+      assert.ok(calc(c) > 0, `選項答案是 0 或負數：${c}`);
+    }
+  }
+});

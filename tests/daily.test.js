@@ -69,3 +69,26 @@ test("學習紀錄整理：每天、每個項目、答錯的題目", () => {
   const wrong = D.recentWrong(log, 2);
   assert.deepEqual(wrong.map((w) => w.q), ["2 加 7 是多少？", "5 加 4 是多少？"]);
 });
+
+test("每日任務：國小排九九乘法，幼兒園維持原本的組合", () => {
+  const day = "2026-11-17";
+  const kinder = D.pickTasks(day, {});
+  assert.ok(kinder.every((t) => t.g === "kinder"));
+  assert.deepEqual(D.pickTasks(day, {}, { grade: "kinder" }).map((t) => t.match), kinder.map((t) => t.match));
+  // 還沒練過九九乘法：先練習
+  const first = D.pickTasks(day, {}, { grade: "school" });
+  assert.equal(first.length, 3);
+  assert.ok(first.every((t) => t.g === "school" && t.href.startsWith("#times-")));
+  assert.deepEqual(first.map((t) => t.match), ["times.practice", "times.timed", "times.story."]);
+  assert.equal(first[2].href, "#times-story-1");
+  // 練過之後：弱點加強；應用題拿到三顆星就升一級
+  const later = D.pickTasks(day, { "times.story.1": 3 }, { grade: "school", timesStarted: true });
+  assert.equal(later[0].match, "times.weak");
+  assert.equal(later[2].href, "#times-story-2");
+  assert.match(later[2].title, /普通/);
+  assert.equal(D.pickTasks(day, { "times.story.1": 3, "times.story.2": 3 }, { grade: "school", timesStarted: true })[2].href, "#times-story-3");
+  // 應用題任務：哪一種難度做完都算
+  const log = [{ d: day, id: "times.story.1", c: 8, n: 10 }];
+  assert.equal(D.taskDone(later[2], log, day), true);
+  assert.equal(D.taskDone(later[1], log, day), false);
+});
