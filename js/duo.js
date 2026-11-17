@@ -1,6 +1,6 @@
 // 一起守城堡（兩人合作）：兩個孩子各自的題目。戰場在 battle.js。純邏輯，不碰 DOM，可以用 node --test 測試。
 // 兩個孩子各做自己程度的題目，答對就幫自己的砲塔升級。
-import { donut } from "./kids.js";
+import { clockSvg, donut } from "./kids.js";
 
 const rnd = (rng, a, b) => a + Math.floor(rng() * (b - a + 1));
 function shuffle(arr, rng) {
@@ -33,7 +33,7 @@ export const TYPES = [
     return { text: `${a} + ${b}`, scene: "", ans: p, ...three(p, [p - 1, p + 1, p - 2, p + 2], rng, 1) };
   } },
   { id: "addsub10", name: "10 以內加減", make(rng) {
-    if (rng() < 0.5) return TYPES[2].make(rng);
+    if (rng() < 0.5) return typeOf("add10").make(rng);
     const a = rnd(rng, 2, 10), b = rnd(rng, 1, a - 1), p = a - b;
     return { text: `${a} − ${b}`, scene: "", ans: p, ...three(p, [p - 1, p + 1, p + 2, a + b], rng, 0) };
   } },
@@ -43,4 +43,66 @@ export const TYPES = [
     return { text: `${a} × ${b}`, scene: "", ans: p, ...three(p, [a * (b + 1), a * (b - 1), (a + 1) * b, (a - 1) * b], rng, 1) };
   } },
 ];
-export const typeOf = (id) => TYPES.find((t) => t.id === id) || TYPES[2];
+export const typeOf = (id) => TYPES.find((t) => t.id === id) || TYPES.find((t) => t.id === "add10");
+
+/* ---------- 綜合題：每一題換一種，只用數字和圖，不用識字 ---------- */
+// 題目多一個 full：text 已經是完整的式子（裡面有 ?），畫面不用再接「= ?」；solved 是答錯時要顯示的完整式子
+const coin = (v) => `<span class="kcoin c${v}">${v}</span>`;
+const KINDER = {
+  count: (rng) => typeOf("count").make(rng),
+  add: (rng) => typeOf("add10").make(rng),
+  sub(rng) {
+    const a = rnd(rng, 2, 10), b = rnd(rng, 1, a - 1), p = a - b;
+    return { text: `${a} − ${b}`, scene: "", ans: p, ...three(p, [p - 1, p + 1, p + 2], rng, 0) };
+  },
+  missing(rng) { // ? + 3 = 7
+    const c = rnd(rng, 3, 10), b = rnd(rng, 1, c - 1), a = c - b;
+    return { text: `? + ${b} = ${c}`, full: true, solved: `${a} + ${b} = ${c}`, scene: "", ans: a, ...three(a, [a - 1, a + 1, c, b], rng, 0) };
+  },
+  next(rng) { // 2 3 4 ?
+    const s = rnd(rng, 1, 7), seq = [s, s + 1, s + 2], ans = s + 3;
+    return { text: `${seq.join("  ")}  ?`, full: true, solved: `${seq.join("  ")}  ${ans}`, scene: "", ans, ...three(ans, [ans - 1, ans + 1, ans + 2], rng, 1) };
+  },
+  coins(rng) { // 數錢：1 元和 5 元
+    const fives = rnd(rng, 0, 2), ones = rnd(rng, fives ? 0 : 2, 4), ans = fives * 5 + ones;
+    return { text: "?", scene: `<div class="krow coins">${coin(5).repeat(fives)}${coin(1).repeat(ones)}</div>`, ans, ...three(ans, [ans - 1, ans + 1, fives + ones, ans + 5], rng, 1) };
+  },
+  clock(rng) { // 整點：短針指幾就是幾點
+    const h = rnd(rng, 1, 12);
+    return { text: "?", scene: `<div class="krow">${clockSvg(h, 0, "kclock")}</div>`, ans: h, ...three(h, [h % 12 + 1, (h + 10) % 12 + 1, 12], rng, 1) };
+  },
+};
+const SCHOOL = {
+  times: (rng) => typeOf("times").make(rng),
+  blank(rng) { // 7 × ? = 56
+    const a = rnd(rng, 2, 9), b = rnd(rng, 2, 9), p = a * b;
+    return { text: `${a} × ? = ${p}`, full: true, solved: `${a} × ${b} = ${p}`, scene: "", ans: b, ...three(b, [b - 1, b + 1, a], rng, 1) };
+  },
+  add20(rng) {
+    const a = rnd(rng, 5, 15), b = rnd(rng, 3, 20 - a), p = a + b;
+    return { text: `${a} + ${b}`, scene: "", ans: p, ...three(p, [p - 1, p + 1, p + 10, p - 2], rng, 1) };
+  },
+  sub20(rng) {
+    const a = rnd(rng, 11, 20), b = rnd(rng, 2, 9), p = a - b;
+    return { text: `${a} − ${b}`, scene: "", ans: p, ...three(p, [p - 1, p + 1, p + 10, a + b], rng, 0) };
+  },
+};
+// 輪流出：同一輪每種都出過才重複，連續兩題不會同一種
+function mixer(table) {
+  let queue = [], last = null;
+  return (rng) => {
+    if (!queue.length) {
+      queue = Object.keys(table);
+      for (let i = queue.length - 1; i > 0; i--) { const j = Math.floor(rng() * (i + 1)); [queue[i], queue[j]] = [queue[j], queue[i]]; }
+      if (queue[0] === last) queue.push(queue.shift());
+    }
+    last = queue.shift();
+    return { ...table[last](rng), kind: last };
+  };
+}
+TYPES.unshift(
+  { id: "mixk", name: "綜合（幼稚園）", make: mixer(KINDER) },
+  { id: "mixs", name: "綜合（小二）", make: mixer(SCHOOL) },
+);
+export const MIX_KINDS = { mixk: Object.keys(KINDER), mixs: Object.keys(SCHOOL) };
+

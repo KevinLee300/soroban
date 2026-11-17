@@ -62,7 +62,7 @@ function renderSetup() {
   const names = loadProfiles(), { best } = loadDuo();
   setup.forEach((s, i) => {
     if (!names.includes(s.name)) s.name = names[Math.min(i, names.length - 1)];
-    if (!s.type) s.type = gradeOf(s.name) === "school" ? "times" : "add10";
+    if (!s.type) s.type = gradeOf(s.name) === "school" ? "mixs" : "mixk";
     $(`dName${i}`).innerHTML = names.map((n) => `<option>${n.replace(/</g, "&lt;")}</option>`).join("");
     $(`dName${i}`).value = s.name;
     $(`dType${i}`).innerHTML = TYPES.map((t) => `<button data-v="${t.id}" aria-pressed="${s.type === t.id}">${t.name}</button>`).join("");
@@ -203,7 +203,7 @@ function renderSide(k) {
   if (!p.q) return;
   q$(k, ".qscene").innerHTML = p.q.scene;
   q$(k, ".qscene").hidden = !p.q.scene;
-  q$(k, ".qtext").textContent = p.q.scene ? p.q.text : `${p.q.text} = ?`;
+  q$(k, ".qtext").textContent = p.q.scene || p.q.full ? p.q.text : `${p.q.text} = ?`;
   q$(k, ".choices").innerHTML = p.q.choices.map((c, i) => `<button data-i="${i}">${c}</button>`).join("");
 }
 
@@ -222,7 +222,7 @@ function answer(k, i) {
     p.wrong++; p.locked = true;
     btns[i].classList.add("wrong");
     btns[p.q.answer].classList.add("right");
-    q$(k, ".qtext").textContent = p.q.scene ? `${p.q.ans}` : `${p.q.text} = ${p.q.ans}`;
+    q$(k, ".qtext").textContent = p.q.solved || (p.q.scene ? `${p.q.ans}` : `${p.q.text} = ${p.q.ans}`);
     play("wrong");
     pane(k).classList.add("stun");
     later(() => { pane(k).classList.remove("stun"); if (G.on) nextQ(k); }, LOCK_MS);
