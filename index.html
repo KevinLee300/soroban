@@ -14,7 +14,7 @@
 <script type="module" src="js/app.js"></script>
 </head>
 <body>
-<header class="top"><div class="top-in"><a href="#home" class="brand">小小珠算</a></div></header>
+<header class="top"><div class="top-in"><a href="#home" class="brand">小小珠算</a><nav class="topnav" aria-label="主選單"><a href="#home" id="navAbacus">珠算</a><a href="#math" id="navMath">幼兒數學</a><a href="#parent" id="navParent">紀錄</a></nav></div></header>
 
 <main class="wrap">
   <!-- 首頁：關卡地圖 -->
@@ -32,8 +32,72 @@
       </form>
       <p id="profileError" class="tip" role="alert" hidden>名字已經有了，請換一個。</p>
     </div>
+    <div class="board daily" id="daily"></div>
     <div class="levels" id="levels"></div>
+    <a class="lvcard mathcard" href="#math"><span class="lvnum">數</span><span class="lvtext"><b>幼兒數學</b><small>數甜甜圈、比大小、形狀、長短、規律、錢幣，共 12 個小遊戲</small></span></a>
     <a class="lvcard drillcard" href="#drill"><span class="lvnum">題</span><span class="lvtext"><b>算盤題庫</b><small>直接加減、五的好朋友，拿實體算盤來算，可以列印</small></span></a>
+  </section>
+
+  <!-- 學習紀錄：給家長看 -->
+  <section id="view-parent" class="stack" hidden>
+    <div>
+      <h1>學習紀錄</h1>
+      <p class="lead">給家長看的。現在看的是「<b id="pWho"></b>」的紀錄，要看別人請回首頁換「誰在練習」。紀錄只存在這台裝置。</p>
+    </div>
+    <div class="board pboard">
+      <h2>最近 7 天</h2>
+      <div class="pdays" id="pDays"></div>
+      <p class="tip" id="pSum"></p>
+    </div>
+    <div class="board pboard">
+      <h2>每個項目</h2>
+      <p class="tip">答對率低的排在前面。答對率是指第一次就答對的比例。</p>
+      <div class="tablewrap"><table class="ptable" id="pItems"></table></div>
+    </div>
+    <div class="board pboard">
+      <h2>最近答錯的題目</h2>
+      <ul class="pwrong" id="pWrong"></ul>
+    </div>
+    <div class="ctrls"><button class="btn" id="pClear">清除這位家人的紀錄</button><span class="tip" id="pClearNote" role="status"></span></div>
+  </section>
+
+  <!-- 幼兒數學：遊戲地圖 -->
+  <section id="view-math" class="stack" hidden>
+    <div>
+      <h1>幼兒數學</h1>
+      <p class="lead">每個遊戲 10 題，有簡單、普通、挑戰三種難度。題目會念出來，小朋友點選答案就可以。</p>
+    </div>
+    <div id="mathGroups" class="stack"></div>
+  </section>
+
+  <!-- 幼兒數學：一個遊戲 -->
+  <section id="view-game" class="stack" hidden>
+    <div>
+      <a href="#math" class="back">← 回幼兒數學</a>
+      <h1 id="gTitle"></h1>
+      <p class="lead" id="gSub"></p>
+    </div>
+    <div class="gtop">
+      <div class="psets" id="gLevels" role="group" aria-label="選擇難度"></div>
+      <button class="btn" id="gVoice" aria-pressed="true">朗讀：開</button>
+    </div>
+    <div class="board gboard" id="gPlay">
+      <div class="progress"><div class="bar"><i id="gBar"></i></div><span id="gProg"></span></div>
+      <div class="gprompt"><span id="gSay" aria-live="polite"></span><button class="btn" id="gHear">再聽一次</button></div>
+      <div class="gscene" id="gScene"></div>
+      <div class="gchoices" id="gChoices"></div>
+      <div class="fb" id="gFb" aria-live="polite"></div>
+    </div>
+    <div class="board result" id="gResult" hidden>
+      <div id="gStars" class="rstars"></div>
+      <p id="gText" class="caption"></p>
+      <p id="gBest" class="tip"></p>
+      <div class="ctrls">
+        <button class="btn primary" id="gAgain">再玩一次</button>
+        <button class="btn primary" id="gHarder" hidden>挑戰更難的</button>
+        <a class="btn" href="#math">換一個遊戲</a>
+      </div>
+    </div>
   </section>
 
   <!-- 題庫頁：給實體算盤用 -->
