@@ -97,8 +97,54 @@
       <h1>幼兒數學</h1>
       <p class="lead">每個遊戲 10 題，有簡單、普通、挑戰三種難度。題目會念出來，小朋友點選答案就可以。</p>
     </div>
+    <a class="lvcard clockcard" href="#clock"><span class="lvnum">鐘</span><span class="lvtext"><b>時鐘小學堂</b><small>跟著時鐘滴答、小烏龜和小兔子，一步一步學會整點和半點</small></span></a>
     <a class="lvcard sheetcard" href="#sheet"><span class="lvnum">練</span><span class="lvtext"><b>數學練習單</b><small>選一種題目連續練習，或挑戰六種混合題。填格子、一次交卷，也可以列印</small></span></a>
     <div id="mathGroups" class="stack"></div>
+  </section>
+
+  <!-- 時鐘小學堂：引導式教學（長針、短針、整點、半點） -->
+  <section id="view-clock" class="stack" hidden>
+    <div>
+      <a href="#math" class="back">← 回幼兒數學</a>
+      <h1>時鐘小學堂</h1>
+      <p class="lead">跟著時鐘滴答，認識短針小烏龜和長針小兔子，學會看整點和半點。</p>
+    </div>
+    <div class="cchapters" id="cChapters" role="group" aria-label="選一堂課"></div>
+    <div class="board cboard" id="cStage">
+      <div class="cleft">
+        <div id="clockHost"></div>
+        <div class="cscene" id="cScene" hidden></div>
+      </div>
+      <div class="lesson">
+        <div class="progress"><div class="bar"><i id="cBar"></i></div><span id="cStep"></span></div>
+        <p class="bubble" id="cSay" aria-live="polite"></p>
+        <div class="ctry" id="cTry" hidden>
+          <b id="cTryTitle">點點看</b>
+          <div class="seg" id="cHands" role="group" aria-label="要撥哪一根針" hidden>
+            <button data-hand="short" class="hshort">撥短針（紅色）</button><button data-hand="long" class="hlong">撥長針（藍色）</button>
+          </div>
+          <span class="cnow" id="cNow" hidden></span>
+          <div class="gchoices text" id="cChoices" hidden></div>
+        </div>
+        <div class="fb" id="cFb" aria-live="polite"></div>
+        <div class="ctrls">
+          <button class="btn" id="cPrev">上一步</button>
+          <button class="btn primary big" id="cNext">下一步</button>
+          <button class="btn" id="cHear">再聽一次</button>
+          <button class="btn" id="cVoice" aria-pressed="true">朗讀：開</button>
+        </div>
+      </div>
+    </div>
+    <div class="board result" id="cDone" hidden>
+      <div class="rstars"><span class="stars">★★★</span></div>
+      <p class="caption" id="cDoneText"></p>
+      <div class="ctrls">
+        <button class="btn primary" id="cNextCh">上下一課</button>
+        <a class="btn primary" id="cGames" href="#math-clock" hidden>去玩「現在幾點」</a>
+        <button class="btn" id="cAgain">這一課再上一次</button>
+        <a class="btn" href="#math">回幼兒數學</a>
+      </div>
+    </div>
   </section>
 
   <!-- 數學練習單：填格子，一次交卷 -->
