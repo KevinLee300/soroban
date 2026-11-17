@@ -44,6 +44,7 @@
     </div>
     <div class="board daily" id="daily"></div>
     <div class="levels" id="levels"></div>
+    <a class="lvcard duocard" href="#duo"><span class="lvnum">守</span><span class="lvtext"><b>一起守城堡</b><small>兩個人用同一台平板，各自答題升級砲塔，一起打退湧進來的怪物</small></span></a>
     <a class="lvcard timescard" href="#times"><span class="lvnum">×</span><span class="lvtext"><b>九九乘法</b><small>乘法表、練習、限時 60 秒挑戰、弱點加強</small></span></a>
     <a class="lvcard mathcard" href="#math"><span class="lvnum">數</span><span class="lvtext"><b>幼兒數學</b><small>數甜甜圈、比大小、形狀、規律、錢幣、時鐘、動動腦，共 18 個小遊戲</small></span></a>
     <a class="lvcard drillcard" href="#drill"><span class="lvnum">題</span><span class="lvtext"><b>算盤題庫</b><small>直接加減、五的好朋友，拿實體算盤來算，可以列印</small></span></a>
@@ -103,6 +104,71 @@
     <a class="lvcard clockcard" href="#clock"><span class="lvnum">鐘</span><span class="lvtext"><b>時鐘小學堂</b><small>跟著時鐘滴答、小烏龜和小兔子，一步一步學會整點和半點</small></span></a>
     <a class="lvcard sheetcard" href="#sheet"><span class="lvnum">練</span><span class="lvtext"><b>數學練習單</b><small>選一種題目連續練習，或挑戰六種混合題。填格子、一次交卷，也可以列印</small></span></a>
     <div id="mathGroups" class="stack"></div>
+  </section>
+
+  <!-- 一起守城堡（兩人合作塔防） -->
+  <section id="view-duo" class="stack" hidden>
+    <div>
+      <h1>一起守城堡</h1>
+      <p class="lead">兩個人合作！平板橫放在兩人中間，各自答自己的題目。答對砲塔就會放大絕招，答對兩題可以選一個升級：攻擊力、攻擊速度，或學會新武器（弓箭、雷射光、衝擊波、閃電、冰凍）。左邊的砲塔守左半邊，右邊的守右半邊。</p>
+    </div>
+    <div class="dsetup">
+      <div class="board tboard dp0">
+        <h2>玩家 1（坐左邊）</h2>
+        <label class="dlab" for="dName0">誰</label><select id="dName0"></select>
+        <div class="seg dtypes" id="dType0" role="group" aria-label="玩家 1 的題目"></div>
+      </div>
+      <div class="board tboard dp1">
+        <h2>玩家 2（坐右邊）</h2>
+        <label class="dlab" for="dName1">誰</label><select id="dName1"></select>
+        <div class="seg dtypes" id="dType1" role="group" aria-label="玩家 2 的題目"></div>
+      </div>
+    </div>
+    <div class="board tboard">
+      <h2>從哪一關開始</h2>
+      <div class="dstages" id="dStages" role="group" aria-label="選關卡"></div>
+      <p class="tip" id="dBest"></p>
+      <div class="ctrls"><button class="btn primary big" id="dStart">開始守城堡</button></div>
+      <p class="tip">遊戲中每一半都有「轉向」按鈕，可以把畫面轉成自己看得順的方向。中間有「暫停」和「結束」。</p>
+    </div>
+    <div class="duoplay" id="duoPlay" hidden>
+      <div class="dpane" id="dPane0">
+        <div class="inner">
+          <div class="phead"><b class="pname"></b><span class="hearts"></span><span class="pstat"></span><button class="btn small rotbtn" type="button">轉向</button></div>
+          <div class="pbody">
+            <div class="quiz">
+              <div class="qscene"></div>
+              <div class="qtext"></div>
+              <div class="choices"></div>
+            </div>
+            <div class="cards" hidden></div>
+            <div class="gear"></div>
+          </div>
+          <div class="flash" aria-hidden="true"></div>
+          <div class="msg" hidden></div>
+        </div>
+      </div>
+      <div class="dmid">
+        <canvas id="dField" aria-label="戰場"></canvas>
+        <div class="dmidbtns"><button class="btn small" id="dPause">暫停</button><button class="btn small" id="dExit">結束</button></div>
+      </div>
+      <div class="dpane" id="dPane1">
+        <div class="inner">
+          <div class="phead"><b class="pname"></b><span class="hearts"></span><span class="pstat"></span><button class="btn small rotbtn" type="button">轉向</button></div>
+          <div class="pbody">
+            <div class="quiz">
+              <div class="qscene"></div>
+              <div class="qtext"></div>
+              <div class="choices"></div>
+            </div>
+            <div class="cards" hidden></div>
+            <div class="gear"></div>
+          </div>
+          <div class="flash" aria-hidden="true"></div>
+          <div class="msg" hidden></div>
+        </div>
+      </div>
+    </div>
   </section>
 
   <!-- 九九乘法 -->
