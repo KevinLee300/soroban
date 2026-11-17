@@ -22,7 +22,7 @@ const DONUT = ["#F48FB1", "#FFD54F", "#81D4FA", "#A5D6A7", "#B39DDB"];
 export const TYPES = [
   { id: "count", name: "數甜甜圈（10 以內）", make(rng) {
     const n = rnd(rng, 2, 10), c = DONUT[rnd(rng, 0, DONUT.length - 1)];
-    return { text: "有幾個？", scene: `<div class="dgrid small" style="--cols:5">${Array.from({ length: n }, () => donut(c)).join("")}</div>`, ans: n, ...three(n, [n - 1, n + 1, n - 2, n + 2], rng, 1) };
+    return { text: "?", scene: `<div class="dgrid small" style="--cols:5">${Array.from({ length: n }, () => donut(c)).join("")}</div>`, ans: n, ...three(n, [n - 1, n + 1, n - 2, n + 2], rng, 1) };
   } },
   { id: "add5", name: "5 以內加法", make(rng) {
     const a = rnd(rng, 1, 4), b = rnd(rng, 1, 5 - a), p = a + b;

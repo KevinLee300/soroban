@@ -554,14 +554,23 @@ body.duo-on { overflow: hidden; }
 .choices button.wrong { border-color: var(--bead); color: var(--bead); }
 .dpane.stun .choices { opacity: .55; }
 .cards { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
-.cards .ctitle { font-family: var(--f-display); font-weight: 400; font-size: 18px; color: var(--pc); text-align: center; }
+.cards .ctitle { font-weight: 700; font-size: 18px; color: var(--pc); text-align: center; letter-spacing: 6px; animation: pulse 1s ease-in-out infinite; }
 .cards > div { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
 .card { border: 3px solid var(--pc); background: var(--panel); border-radius: 14px; padding: 8px 6px; display: flex; flex-direction: column; gap: 2px; text-align: center; min-height: 70px; animation: cardin .3s ease-out; }
-.card b { font-family: var(--f-display); font-weight: 400; font-size: 17px; line-height: 1.25; }
+.card { position: relative; align-items: center; justify-content: center; }
+.card .ico.big { width: clamp(56px, 22cqmin, 84px); height: clamp(56px, 22cqmin, 84px); }
+.card small { font-size: 11px; }
+.card .badge { position: absolute; top: 4px; left: 6px; font-size: 16px; line-height: 1; }
+.card .badge.new { color: #F9A825; } .card .badge.up { color: var(--plus); }
+.dots { white-space: nowrap; font-size: 11px; letter-spacing: 1px; color: var(--pc, var(--plus)); line-height: 1; } .dots .off { color: var(--line); }
+.ico { width: 22px; height: 22px; flex: none; }
+.gear .chip { display: flex; align-items: center; gap: 4px; padding: 2px 6px; }
+.flash .ico.big { width: 84px; height: 84px; filter: drop-shadow(0 2px 4px rgb(0 0 0 / .25)); }
+.mmon svg { width: 96px; height: 80px; display: block; }
 .card small { color: var(--muted); font-size: 12px; line-height: 1.3; }
 .card.k-atk { background: #FFEBEE; } .card.k-spd { background: #E3F2FD; } .card.k-new { background: #FFF8E1; } .card.k-up { background: #F3E5F5; }
 @keyframes cardin { from { transform: scale(.8); opacity: 0; } }
-.gear { display: flex; flex-direction: column; gap: 4px; align-items: stretch; max-width: 120px; }
+.gear { display: flex; flex-direction: column; gap: 4px; align-items: stretch; max-width: 110px; }
 .chip { font-size: 12px; border-radius: 999px; padding: 2px 8px; background: var(--panel); border: 1.5px solid var(--line); white-space: nowrap; text-align: center; }
 .chip.w-arrow { border-color: #8D6E63; } .chip.w-laser { border-color: #E53935; } .chip.w-wave { border-color: #7E57C2; } .chip.w-bolt { border-color: #FBC02D; } .chip.w-ice { border-color: #4FC3F7; }
 .flash { position: absolute; left: 50%; top: 40%; transform: translate(-50%, -50%); font-family: var(--f-display); font-size: 30px; color: var(--pc); pointer-events: none; opacity: 0; text-shadow: 0 2px 0 #fff; }

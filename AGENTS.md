@@ -22,6 +22,7 @@
 | `js/sheet.js`、`js/sheetapp.js` | 數學練習單（`#sheet`）：一頁 6 個區塊填格子、一次交卷。`sheet.js` 是純邏輯出題，`sheetapp.js` 是畫面 |
 | `js/clocklesson.js`、`js/clockapp.js` | 時鐘小學堂（`#clock`）：引導式教學，只教長針、短針、整點、半點。`clocklesson.js` 是課程內容和純邏輯，`clockapp.js` 是卡通時鐘和畫面 |
 | `js/times.js`、`js/timesapp.js` | 九九乘法（`#times`，給小二）：乘法表依熟練度變色、練習、限時 60 秒、弱點加強。`times.js` 是純邏輯（口訣、出題、熟練度），`timesapp.js` 是畫面和數字鍵盤 |
+| `js/sfx.js` | 遊戲音效和背景音樂（Web Audio 當場合成，沒有音檔），開關存在 `soroban.sound.v1` |
 | `js/battle.js`、`js/duo.js`、`js/duoapp.js` | 一起守城堡（`#duo`，兩人同一台平板合作塔防）：`battle.js` 是戰場模擬（純邏輯、有平衡測試），`duo.js` 是兩人各自的題目，`duoapp.js` 是分割畫面、轉向和畫布 |
 | `js/kidsapp.js` | 幼兒數學的畫面：遊戲地圖（`#math`）、遊戲頁（`#math-<id>`）、星星 |
 | `js/drill.js`、`js/coins.js` | 算盤題庫頁（`#drill`）、動畫旁的零錢盒 |

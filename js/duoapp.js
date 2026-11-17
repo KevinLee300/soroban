@@ -5,6 +5,27 @@
 import { TYPES, typeOf } from "./duo.js";
 import { CASTLE_HP, STAGES, WEAPONS, castlePos, choose, correct, createBattle, nextStage, step, takeEvents } from "./battle.js";
 import { activeProfile, loadDuo, loadGrade, loadProfiles, logSessionAs, saveDuo } from "./storage.js";
+import { play, setSoundOn, soundOn, startMusic, stopMusic, unlock } from "./sfx.js";
+
+/* ---------- 升級圖示（幼稚園看不懂字，升級卡和裝備都用圖示） ---------- */
+const ICON = {
+  atk: `<path d="M34 6l8 8-20 20-4-4z" fill="#CFD8DC" stroke="#455A64" stroke-width="2.5" stroke-linejoin="round"/><path d="M12 26l10 10M8 40l8-8" stroke="#8D6E63" stroke-width="5" stroke-linecap="round"/><path d="M10 24l14 14" stroke="#FFB300" stroke-width="4" stroke-linecap="round"/>`,
+  spd: `<path d="M8 12l12 12-12 12M22 12l12 12-12 12" fill="none" stroke="#FB8C00" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M36 14h8M38 24h8M36 34h8" stroke="#FFCC80" stroke-width="3.5" stroke-linecap="round"/>`,
+  arrow: `<path d="M12 6c14 4 22 14 22 36" fill="none" stroke="#8D6E63" stroke-width="4" stroke-linecap="round"/><path d="M12 6v36" stroke="#BCAAA4" stroke-width="1.6"/><path d="M6 24h32" stroke="#5D4037" stroke-width="3" stroke-linecap="round"/><path d="M44 24l-8-5v10z" fill="#5D4037"/><path d="M6 24l-3-4M6 24l-3 4" stroke="#E53935" stroke-width="3" stroke-linecap="round"/>`,
+  laser: `<rect x="3" y="18" width="14" height="12" rx="3" fill="#90A4AE" stroke="#455A64" stroke-width="2"/><path d="M17 24h28" stroke="#FFCDD2" stroke-width="10" stroke-linecap="round"/><path d="M17 24h28" stroke="#E53935" stroke-width="4" stroke-linecap="round"/>`,
+  wave: `<circle cx="24" cy="24" r="5" fill="#7E57C2"/><circle cx="24" cy="24" r="12" fill="none" stroke="#9575CD" stroke-width="3.5"/><circle cx="24" cy="24" r="20" fill="none" stroke="#B39DDB" stroke-width="3.5"/>`,
+  bolt: `<path d="M28 3L9 27h13l-4 18 21-26H26z" fill="#FFD600" stroke="#F57F17" stroke-width="2.5" stroke-linejoin="round"/>`,
+  ice: `<g stroke="#29B6F6" stroke-width="3.5" stroke-linecap="round"><path d="M24 4v40M7 14l34 20M7 34l34-20"/><path d="M24 4l-5 5M24 4l5 5M24 44l-5-5M24 44l5-5M7 14l2 7M7 14l7-2M41 34l-2-7M41 34l-7 2M7 34l7 2M7 34l2-7M41 14l-7-2M41 14l-2 7"/></g>`,
+};
+const icon = (id, cls = "ico") => `<svg class="${cls}" viewBox="0 0 48 48" aria-hidden="true">${ICON[id]}</svg>`;
+const dots = (n, max = 5) => `<span class="dots" aria-label="${n} 級">${"●".repeat(Math.min(n, max))}<span class="off">${"●".repeat(Math.max(0, max - n))}</span></span>`;
+// 一張升級卡的圖示：哪一種升級＋升級後是幾級。新武器有星星，升級有向上的箭頭
+function cardFace(c, t) {
+  const id = c.kind === "atk" ? "atk" : c.kind === "spd" ? "spd" : c.w;
+  const next = c.kind === "atk" ? t.atk + 1 : c.kind === "spd" ? t.spd + 1 : c.kind === "new" ? 1 : t.weapons[c.w] + 1;
+  const badge = c.kind === "new" ? `<span class="badge new">★</span>` : `<span class="badge up">▲</span>`;
+  return `${badge}${icon(id, "ico big")}${dots(next)}<small>${c.title}</small>`;
+}
 
 const $ = (id) => document.getElementById(id);
 const LOCK_MS = 1500;          // 答錯停多久
@@ -91,6 +112,7 @@ function toScreen(x, y) {
 /* ---------- 開始、關卡 ---------- */
 function start() {
   logged = false;
+  unlock(); startMusic();
   G.players = setup.map((s, i) => ({ name: s.name, type: typeOf(s.type), correct: 0, wrong: 0, locked: false, q: null, color: COLORS[i], rot: 0, autoRot: true, pickT: 0 }));
   G.fx = []; G.timers = []; G.t0 = Date.now(); G.on = true;
   $("duoPlay").hidden = false;
@@ -113,7 +135,8 @@ function speedFix() { G.b.speedK = Math.max(1, G.b.aspect / 0.75); }
 function stageIntro() {
   const st = STAGES[G.b.stage];
   G.phase = "intro";
-  for (const k of [0, 1]) { renderSide(k); showMsg(k, `<b>第 ${G.b.stage + 1} 關</b><span>${st.name}來了！一起守住城堡！</span>`); }
+  play("stage");
+  for (const k of [0, 1]) { renderSide(k); showMsg(k, `<span class="mmon">${svgOf(st.monster)}</span><b>第 ${G.b.stage + 1} 關</b><span>${st.name}來了！</span>`); }
   later(() => { G.phase = "play"; for (const k of [0, 1]) { hideMsg(k); if (!G.players[k].q) nextQ(k); } }, 2200);
 }
 
@@ -137,11 +160,13 @@ function afterStep() {
   if (b.state === "clear") {
     G.phase = "between";
     const d = loadDuo(); if (b.stage + 1 > d.best) { d.best = b.stage + 1; saveDuo(d); }
-    for (const k of [0, 1]) showMsg(k, `<b>守住了！</b><span>打倒${STAGES[b.stage].name}大王！城堡補 3 顆心，下一關是${STAGES[b.stage + 1].name}。</span>`);
+    play("clear");
+    for (const k of [0, 1]) showMsg(k, `<b>守住了！</b><span class="mmon">${svgOf(STAGES[b.stage + 1].monster)}</span><span>下一關：${STAGES[b.stage + 1].name}</span>`);
     later(() => { nextStage(b); stageIntro(); }, 2600);
   } else if (b.state === "win" || b.state === "lose") {
     G.phase = "end";
     const win = b.state === "win";
+    stopMusic(); play(win ? "win" : "lose");
     if (win) { const d = loadDuo(); d.best = STAGES.length; saveDuo(d); }
     finishLog();
     for (const k of [0, 1]) {
@@ -166,13 +191,13 @@ function renderSide(k) {
   const p = G.players[k], t = G.b.turrets[k];
   q$(k, ".hearts").textContent = `城堡 ${"♥".repeat(G.b.castle)}${"♡".repeat(CASTLE_HP - G.b.castle)}`;
   q$(k, ".pstat").textContent = `答對 ${p.correct}　第 ${G.b.stage + 1} 關`;
-  q$(k, ".gear").innerHTML = Object.entries(t.weapons).map(([w, lv]) => `<span class="chip w-${w}">${WEAPONS[w].name} ${lv}</span>`).join("")
-    + (t.atk ? `<span class="chip">攻擊力 +${t.atk}</span>` : "") + (t.spd ? `<span class="chip">速度 +${t.spd}</span>` : "");
+  q$(k, ".gear").innerHTML = Object.entries(t.weapons).map(([w, lv]) => `<span class="chip" title="${WEAPONS[w].name}">${icon(w)}${dots(lv)}</span>`).join("")
+    + (t.atk ? `<span class="chip" title="攻擊力">${icon("atk")}${dots(t.atk)}</span>` : "") + (t.spd ? `<span class="chip" title="攻擊速度">${icon("spd")}${dots(t.spd)}</span>` : "");
   const offer = t.offer;
   q$(k, ".cards").hidden = !offer;
   q$(k, ".quiz").hidden = !!offer;
   if (offer) {
-    q$(k, ".cards").innerHTML = `<b class="ctitle">升級了！選一張</b><div>${offer.map((c) => `<button class="card k-${c.kind}${c.w ? ` w-${c.w}` : ""}" data-card="${c.id}"><b>${c.title}</b><small>${c.desc}</small></button>`).join("")}</div>`;
+    q$(k, ".cards").innerHTML = `<b class="ctitle">▲ ▲ ▲</b><div>${offer.map((c) => `<button class="card k-${c.kind}" data-card="${c.id}" aria-label="${c.title}">${cardFace(c, t)}</button>`).join("")}</div>`;
     return;
   }
   if (!p.q) return;
@@ -189,6 +214,7 @@ function answer(k, i) {
   if (i === p.q.answer) {
     p.correct++; p.locked = true;
     btns[i].classList.add("right");
+    play("correct");
     correct(G.b, k);
     handleEvents(takeEvents(G.b));
     later(() => nextQ(k), 300);
@@ -196,7 +222,8 @@ function answer(k, i) {
     p.wrong++; p.locked = true;
     btns[i].classList.add("wrong");
     btns[p.q.answer].classList.add("right");
-    q$(k, ".qtext").textContent = p.q.scene ? `有 ${p.q.ans} 個` : `${p.q.text} = ${p.q.ans}`;
+    q$(k, ".qtext").textContent = p.q.scene ? `${p.q.ans}` : `${p.q.text} = ${p.q.ans}`;
+    play("wrong");
     pane(k).classList.add("stun");
     later(() => { pane(k).classList.remove("stun"); if (G.on) nextQ(k); }, LOCK_MS);
   }
@@ -219,16 +246,20 @@ function tickPick(k, dt) {
 /* ---------- 特效 ---------- */
 function handleEvents(events) {
   for (const e of events) {
-    if (["arrow", "laser", "wave", "bolt", "ice", "special"].includes(e.type)) G.fx.push({ ...e, life: e.type === "wave" ? 0.5 : e.type === "special" ? 0.45 : 0.25, age: 0 });
-    else if (e.type === "kill") G.fx.push({ type: "puff", x: e.x, y: e.y, boss: e.boss, life: 0.5, age: 0 });
-    else if (e.type === "castle") { G.fx.push({ type: "ouch", life: 0.6, age: 0 }); for (const k of [0, 1]) renderSide(k); }
-    else if (e.type === "offer" || e.type === "upgrade") { renderSide(e.p); if (e.type === "upgrade") flash(e.p, `${e.card.title}！`); }
-    else if (e.type === "special") flash(e.p, "大絕招！");
+    if (["arrow", "laser", "wave", "bolt", "ice", "special"].includes(e.type)) { G.fx.push({ ...e, life: e.type === "wave" ? 0.5 : e.type === "special" ? 0.45 : 0.25, age: 0 }); play(e.type); }
+    else if (e.type === "kill") { G.fx.push({ type: "puff", x: e.x, y: e.y, boss: e.boss, life: 0.5, age: 0 }); play(e.boss ? "boss" : "kill"); }
+    else if (e.type === "castle") { G.fx.push({ type: "ouch", life: 0.6, age: 0 }); play("castle"); for (const k of [0, 1]) renderSide(k); }
+    else if (e.type === "offer") { renderSide(e.p); play("offer"); }
+    else if (e.type === "upgrade") {
+      renderSide(e.p); play("upgrade");
+      const c = e.card, id = c.kind === "atk" ? "atk" : c.kind === "spd" ? "spd" : c.w;
+      flash(e.p, icon(id, "ico big"));
+    }
   }
 }
 function flash(k, text) {
   const f = q$(k, ".flash");
-  f.textContent = text; f.classList.remove("go"); void f.offsetWidth; f.classList.add("go");
+  f.innerHTML = text; f.classList.remove("go"); void f.offsetWidth; f.classList.add("go");
 }
 
 /* ---------- 畫戰場 ---------- */
@@ -324,6 +355,7 @@ function finishLog() {
 function stopGame(log = true) {
   if (G.on && log) finishLog();
   G.on = false;
+  stopMusic();
   cancelAnimationFrame(G.raf);
   G.timers.forEach(clearTimeout); G.timers = [];
   if ($("duoPlay")) $("duoPlay").hidden = true;
@@ -353,14 +385,17 @@ function bind() {
   }
   $("dStages").addEventListener("click", (ev) => { const b = ev.target.closest("button"); if (b && !b.disabled) { startStage = +b.dataset.v; renderSetup(); } });
   $("dStart").onclick = start;
+  const soundLabel = () => { const on = soundOn(); for (const id of ["dSound", "dSound2"]) { $(id).textContent = on ? "聲音：開" : "聲音：關"; $(id).setAttribute("aria-pressed", String(on)); } };
+  for (const id of ["dSound", "dSound2"]) $(id).onclick = () => { unlock(); setSoundOn(!soundOn()); if (soundOn() && G.on && G.phase === "play") startMusic(); else if (!soundOn()) stopMusic(); soundLabel(); };
+  soundLabel();
   $("dExit").onclick = () => { stopGame(); renderSetup(); };
   $("dPause").onclick = () => {
     if (!G.on) return;
     if (G.phase === "pause") {
-      G.phase = "play"; $("dPause").textContent = "暫停";
+      G.phase = "play"; $("dPause").textContent = "暫停"; startMusic();
       for (const k of [0, 1]) hideMsg(k);
     } else if (G.phase === "play") {
-      G.phase = "pause"; $("dPause").textContent = "繼續";
+      G.phase = "pause"; $("dPause").textContent = "繼續"; stopMusic();
       for (const k of [0, 1]) showMsg(k, "<b>暫停中</b><span>按中間的「繼續」接著玩。</span>");
     }
   };
