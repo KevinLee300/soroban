@@ -13,6 +13,7 @@
 ### 基準與分支
 - Repo：KevinLee300/soroban；基準 main：`96bf0a58c3e8d7edfbb03abffe76ae756da1e5c6`。
 - 分支：`codex/worksheet-series-install`。
+- PR：[#12 練習單系列與主畫面安裝](https://github.com/KevinLee300/soroban/pull/12)，建立時尚未合併。接回前請確認 PR 最新狀態。
 - 開工登記提交：`2d992394e804f041e0e09aaaa492afaedc8498b0`。
 - 透過 GitHub 連線修改分支，未 clone；測試使用同一份原始碼的暫存快照，不需要安裝依賴。
 - 本次交接以 PR 為單位，合併後才會進入 main／GitHub Pages。
