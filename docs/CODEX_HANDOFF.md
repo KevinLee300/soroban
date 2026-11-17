@@ -57,3 +57,24 @@
 - 未新增套件、後端、帳號或更動既有學習資料格式；沒有改其他待辦功能。
 - 若繼續擴充題型，注意渲染與 sheetBlanks 的順序必須一致，並檢查星星 key 的相容性。
 - 安裝 API 參考：[MDN beforeinstallprompt](https://developer.mozilla.org/en-US/docs/Web/API/Window/beforeinstallprompt_event)；[Apple 加到主畫面說明](https://support.apple.com/guide/iphone/bookmark-a-website-iph42ab2f3a7/ios)。
+
+## 2026-11-17｜Claude：朗讀聲音挑選與設定
+
+### 使用者需求
+朗讀聲音太生硬、像機器人，希望改成免費、自然、甜美可愛的台灣女聲。
+
+### 狀態
+- 分支 `claude/voice`，基準 main `3d444b8`（PR #12 合併後）。交接時尚未合併。
+- PR #12 已由 Claude 驗證並由使用者合併；Claude 原本重複做的安裝按鈕草稿已捨棄，沒有推送。
+
+### 完成內容
+- `js/speech.js`：`taiwanVoices`／`voiceScore`／`voiceTier`／`pickVoice`，只用台灣國語的聲音，依自然程度排序（Edge 的曉臻、曉雨 > 高品質下載聲音 > Google 國語 > 美佳 > Windows 舊聲音；男聲排後面但品質標示不受影響）。`speak()` 改用設定的聲音、速度、音調。
+- 設定存在 `localStorage` 的 `soroban.voice.v1`（`{ uri, rate, pitch }`），是「每台裝置」一份，不分家人。預設速度 0.88、音調 1，跟原本一樣。
+- `js/voiceui.js` ＋ `index.html` 的 `#voiceCard`（在 `#parent` 紀錄頁）：選聲音、速度、音調、試聽，並附 Windows／iPhone／Mac／Android 取得自然聲音的步驟。
+- 測試：`tests/speech.test.js` 新增 2 項，共 45 項全過。
+
+### 限制
+- 仍是裝置內建語音，沒有雲端 TTS：靜態網站放不了 API 金鑰，而且免費的雲端 TTS 都有額度或授權限制。
+- 這個開發環境沒有喇叭和真的語音引擎，聲音好不好聽無法在這裡驗證，只用模擬的聲音清單驗證了挑選、設定保存與套用。
+- 若之後改用預錄音檔：固定句子可以預錄，數字會變的句子（故事題、線索題）仍需用內建語音或分段錄音。
+
