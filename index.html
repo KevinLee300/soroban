@@ -38,6 +38,8 @@
         <input id="profileName" aria-label="新家人的名字" placeholder="輸入名字" maxlength="20" required>
         <button class="btn" type="submit">加入家人</button>
       </form>
+      <span class="gradepick"><label for="grade">年級</label>
+        <select id="grade" aria-label="這位家人的年級"><option value="kinder">幼兒園（中班、大班）</option><option value="school">國小（九九乘法）</option></select></span>
       <p id="profileError" class="tip" role="alert" hidden>名字已經有了，請換一個。</p>
     </div>
     <div class="board daily" id="daily"></div>

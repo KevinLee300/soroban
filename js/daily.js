@@ -11,9 +11,26 @@ export function addDays(dateStr, n) {
   return `${t.getUTCFullYear()}-${String(t.getUTCMonth() + 1).padStart(2, "0")}-${String(t.getUTCDate()).padStart(2, "0")}`;
 }
 
-/* ---------- 每日任務：2 個幼兒數學（不同分類）＋ 1 個珠算 ---------- */
-// 任務格式：{ match: 對應紀錄的項目代號（結尾是 . 表示開頭符合就算）, title, href }
-export function pickTasks(dateStr, prog = {}) {
+/* ---------- 每日任務 ---------- */
+// 任務格式：{ match: 對應紀錄的項目代號（結尾是 . 表示開頭符合就算）, title, href, g: 年級 }
+// 幼兒園：2 個幼兒數學（不同分類）＋ 1 個珠算。國小：九九乘法 3 個。
+export const STORY_NAMES = ["", "簡單", "普通", "挑戰"];
+export function pickTasks(dateStr, prog = {}, { grade = "kinder", timesStarted = false } = {}) {
+  const tasks = grade === "school" ? schoolTasks(prog, timesStarted) : kinderTasks(dateStr, prog);
+  return tasks.map((t) => ({ ...t, g: grade }));
+}
+// 國小：先練熟（還沒練過就先做一次練習），再練快，再練應用題；應用題拿到三顆星就升一級
+function schoolTasks(prog, timesStarted) {
+  const story = (prog["times.story.1"] || 0) < 3 ? 1 : (prog["times.story.2"] || 0) < 3 ? 2 : 3;
+  return [
+    timesStarted
+      ? { match: "times.weak", title: "九九乘法：弱點加強", href: "#times-weak" }
+      : { match: "times.practice", title: "九九乘法：練習 20 題", href: "#times-practice" },
+    { match: "times.timed", title: "九九乘法：限時 60 秒", href: "#times-timed" },
+    { match: "times.story.", title: `九九乘法：應用題（${STORY_NAMES[story]}）`, href: `#times-story-${story}` },
+  ];
+}
+function kinderTasks(dateStr, prog) {
   const day = dayNumber(dateStr), tasks = [];
   // 幼兒數學：每天輪兩個分類，優先挑還沒全部拿到三顆星的遊戲
   for (const gi of [day % GROUPS.length, (day + 1) % GROUPS.length]) {

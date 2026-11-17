@@ -2,7 +2,7 @@ import { createAbacus } from "./abacus.js";
 import * as L from "./logic.js";
 import { LEVELS } from "./levels.js";
 import { canSpeak, speak, stopSpeak } from "./speech.js";
-import { loadProgress, saveStars, loadProfiles, activeProfile, selectProfile, addProfile, logSession } from "./storage.js";
+import { loadProgress, saveStars, loadProfiles, activeProfile, selectProfile, addProfile, logSession, loadGrade, saveGrade } from "./storage.js";
 import { renderDrill } from "./drill.js";
 import { createCoinTray } from "./coins.js";
 import { renderMathHome, openGame, leaveGame } from "./kidsapp.js";
@@ -44,7 +44,9 @@ function route() {
   const clock = !lv && location.hash === "#clock";
   $("view-clock").hidden = !clock;
   leaveClock();
-  const times = !lv && location.hash === "#times";
+  // #times 是九九乘法首頁；#times-weak、#times-story-2 這種是直接開始那個練習（每日任務用）
+  const tm = !lv && location.hash.match(/^#times(?:-([a-z]+)(?:-(\d))?)?$/);
+  const times = !!tm;
   $("view-times").hidden = !times;
   $("navTimes").classList.toggle("on", times);
   if (!times) leaveTimes();
@@ -60,7 +62,7 @@ function route() {
   if (lv) {
     openLevel(lv);
     if (m[2]) { pset = practiceSets(lv).find((s) => s.id === m[2]) || null; setTab("practice"); }
-  } else if (drill) renderDrill(); else if (math) renderMathHome(); else if (parent) renderParent(); else if (sheet) renderSheet(); else if (clock) renderClock(); else if (times) renderTimes(); else if (!game) renderHome();
+  } else if (drill) renderDrill(); else if (math) renderMathHome(); else if (parent) renderParent(); else if (sheet) renderSheet(); else if (clock) renderClock(); else if (times) renderTimes(tm[1], tm[2]); else if (!game) renderHome();
   window.scrollTo(0, 0);
 }
 
@@ -87,6 +89,7 @@ $("pSets").addEventListener("click", (ev) => {
 });
 
 function renderHome() {
+  $("grade").value = loadGrade();
   renderDaily();
   const picker = $("profile");
   picker.replaceChildren(...loadProfiles().map((name) => new Option(name, name)));
@@ -98,6 +101,7 @@ function renderHome() {
   ).join("");
 }
 
+$("grade").onchange = (event) => { saveGrade(event.target.value); renderHome(); };
 $("profile").onchange = (event) => { selectProfile(event.target.value); renderHome(); };
 $("addProfile").onsubmit = (event) => {
   event.preventDefault();

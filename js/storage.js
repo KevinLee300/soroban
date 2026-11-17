@@ -96,3 +96,13 @@ export function loadTimes() {
 export function saveTimes(times) {
   try { localStorage.setItem(scoped(TIMES), JSON.stringify(times)); } catch { /* Storage may be unavailable. */ }
 }
+
+/* ---------- 年級（每位家人分開存）：決定每日任務排什麼 ---------- */
+// "kinder" 幼兒園（幼兒數學＋珠算）、"school" 國小（九九乘法）
+const GRADE = "soroban.grade.v1";
+export function loadGrade() {
+  try { return localStorage.getItem(scoped(GRADE)) === "school" ? "school" : "kinder"; } catch { return "kinder"; }
+}
+export function saveGrade(grade) {
+  try { localStorage.setItem(scoped(GRADE), grade === "school" ? "school" : "kinder"); } catch { /* Storage may be unavailable. */ }
+}

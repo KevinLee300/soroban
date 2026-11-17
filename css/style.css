@@ -519,6 +519,9 @@ svg.tick { width: 100%; height: auto; display: block; overflow: visible; touch-a
 }
 
 /* 九九乘法 */
+.gradepick { display: inline-flex; align-items: center; gap: 8px; }
+.gradepick label { font-family: var(--f-display); font-size: 18px; }
+.gradepick select { font: inherit; color: var(--ink); background: var(--panel); border: 2px solid var(--line); border-radius: 12px; padding: 8px 10px; min-height: 48px; }
 .timescard { border-color: var(--minus); }
 .timescard .lvnum { background: var(--minus); font-family: var(--f-num); font-size: 26px; }
 .board.tboard { display: flex; flex-direction: column; align-items: stretch; gap: 12px; }
