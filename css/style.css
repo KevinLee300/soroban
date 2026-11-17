@@ -579,6 +579,11 @@ body.duo-on { overflow: hidden; }
 .dmidbtns .btn { opacity: .85; }
 @media (prefers-reduced-motion: reduce) { .card, .flash.go { animation: none; } .flash.go { opacity: 1; } }
 
+/* 幼兒數學：綜合挑戰 */
+.mixcard { border-color: var(--plus); background: linear-gradient(90deg, var(--plus-soft), var(--panel) 60%); }
+.mixcard .lvnum { background: var(--plus); font-family: var(--f-display); font-weight: 400; font-size: 20px; }
+.gtag { align-self: flex-start; font-size: 14px; font-weight: 500; color: var(--plus); background: var(--plus-soft); border-radius: 999px; padding: 2px 12px; }
+
 /* 九九乘法 */
 .gradepick { display: inline-flex; align-items: center; gap: 8px; }
 .gradepick label { font-family: var(--f-display); font-size: 18px; }

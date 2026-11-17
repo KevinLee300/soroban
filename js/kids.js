@@ -363,12 +363,26 @@ export const GROUPS = [
     { id: "machine", title: "數字機器", sub: "猜猜機器的規律", gen: machine },
   ] },
 ];
-export const GAMES = GROUPS.flatMap((g) => g.games);
+// 綜合挑戰：每一題從不同的遊戲抽，同一輪（18 題）內不重複，避免一直做同一種題目太無聊
+let mixQueue = [], mixLast = null;
+function mix(level, rng) {
+  if (!mixQueue.length) {
+    mixQueue = GROUPS.flatMap((g) => g.games);
+    for (let i = mixQueue.length - 1; i > 0; i--) { const j = Math.floor(rng() * (i + 1)); [mixQueue[i], mixQueue[j]] = [mixQueue[j], mixQueue[i]]; }
+    if (mixQueue[0] === mixLast) mixQueue.push(mixQueue.shift()); // 新的一輪不要跟上一題同一種
+  }
+  const g = mixQueue.shift();
+  mixLast = g;
+  return { ...g.gen(level, rng), from: g.id, tag: g.title };
+}
+export const MIX = { id: "mix", title: "綜合挑戰", sub: "各種題目混在一起，每一題都不一樣", gen: mix };
+export const GAMES = [MIX, ...GROUPS.flatMap((g) => g.games)];
 export const findGame = (id) => GAMES.find((g) => g.id === id);
 export function makeQuestion(game, level, rng = Math.random) { return game.gen(level, rng); }
 
 // 學習紀錄用：把一題說成家長看得懂的一句話（題目本身太籠統時，補上實際的數字）
 export function describe(game, q) {
+  if (game.id === "mix" && q.from) return describe(findGame(q.from), q);
   const m = q.meta || {};
   switch (game.id) {
     case "count": return `數甜甜圈：${m.n} 個`;
