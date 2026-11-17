@@ -5,6 +5,7 @@ import { canSpeak, speak, stopSpeak } from "./speech.js";
 import { loadProgress, saveStars, loadProfiles, activeProfile, selectProfile, addProfile } from "./storage.js";
 import { renderDrill } from "./drill.js";
 import { createCoinTray } from "./coins.js";
+import { renderMathHome, openGame, leaveGame } from "./kidsapp.js";
 
 const $ = (id) => document.getElementById(id);
 const PRACTICE_TOTAL = 10;
@@ -27,10 +28,19 @@ function route() {
   const m = location.hash.match(/^#level-(\d+)$/);
   const lv = m && LEVELS.find((l) => l.id === +m[1] && l.ready);
   const drill = !lv && location.hash === "#drill";
-  $("view-home").hidden = !!lv || drill;
+  // 幼兒數學：#math 是遊戲地圖，#math-count 這種是一個遊戲
+  const gm = !lv && location.hash.match(/^#math-([a-z]+)$/);
+  leaveGame();
+  const game = !!gm && openGame(gm[1]);
+  const math = !lv && !game && (location.hash === "#math" || !!gm);
+  $("view-home").hidden = !!lv || drill || math || game;
   $("view-level").hidden = !lv;
   $("view-drill").hidden = !drill;
-  if (lv) openLevel(lv); else if (drill) renderDrill(); else renderHome();
+  $("view-math").hidden = !math;
+  $("view-game").hidden = !game;
+  $("navMath").classList.toggle("on", math || game);
+  $("navAbacus").classList.toggle("on", !(math || game));
+  if (lv) openLevel(lv); else if (drill) renderDrill(); else if (math) renderMathHome(); else if (!game) renderHome();
   window.scrollTo(0, 0);
 }
 
