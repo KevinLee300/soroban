@@ -12,12 +12,12 @@
 ## 檔案
 | 檔案 | 負責什麼 |
 |---|---|
-| `index.html` | 頁面結構（首頁關卡地圖、關卡頁：看動畫／練習） |
+| `index.html` | 頁面結構：首頁 `#home`（誰在練習、年級、每日任務、全部的練習）、珠算關卡地圖 `#abacus`、關卡頁 `#level-N`（看動畫／練習）等 |
 | `css/style.css` | 所有樣式，顏色都用 `:root` 的變數 |
 | `js/logic.js` | **純邏輯**：口訣、動畫步驟產生器、出題、星星計算。不可碰 DOM。 |
 | `js/abacus.js` | 算盤 SVG 元件，支援多檔（`rods`），檔位 0 = 個位 |
 | `js/levels.js` | 關卡清單與設定 |
-| `js/app.js` | 畫面控制：路由（`#home`、`#level-N`）、動畫播放、練習流程 |
+| `js/app.js` | 畫面控制：路由（`#home`、`#abacus`、`#level-N`…）、首頁（`renderHome`）、珠算關卡地圖（`renderAbacus`）、動畫播放、練習流程 |
 | `js/kids.js` | **幼兒數學出題（純邏輯）**：18 個小遊戲 × 3 個難度，題目格式 `{ say, scene, choices, answer }` |
 | `js/sheet.js`、`js/sheetapp.js` | 數學練習單（`#sheet`）：一頁 6 個區塊填格子、一次交卷。`sheet.js` 是純邏輯出題，`sheetapp.js` 是畫面 |
 | `js/clocklesson.js`、`js/clockapp.js` | 時鐘小學堂（`#clock`）：引導式教學，只教長針、短針、整點、半點。`clocklesson.js` 是課程內容和純邏輯，`clockapp.js` 是卡通時鐘和畫面 |

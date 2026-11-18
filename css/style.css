@@ -592,6 +592,12 @@ body.duo-on { overflow: hidden; }
 .dmidbtns .btn { opacity: .85; }
 @media (prefers-reduced-motion: reduce) { .card, .flash.go { animation: none; } .flash.go { opacity: 1; } }
 
+/* 首頁 */
+.homecards { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 12px; }
+.abacuscard { border-color: var(--bead); }
+.abacuscard .lvnum { font-family: var(--f-display); font-weight: 400; font-size: 20px; }
+#abacusStars .stars { font-size: 15px; letter-spacing: 0; color: var(--coin-gold-edge); }
+
 /* 幼兒數學：綜合挑戰 */
 .mixcard { border-color: var(--plus); background: linear-gradient(90deg, var(--plus-soft), var(--panel) 60%); }
 .mixcard .lvnum { background: var(--plus); font-family: var(--f-display); font-weight: 400; font-size: 20px; }
@@ -652,7 +658,8 @@ body.duo-on { overflow: hidden; }
   .tcell { min-width: 0; height: 32px; font-size: 14px; border-radius: 6px; }
   .ttable { border-spacing: 2px; width: 100%; table-layout: fixed; }
   .ttable th { padding: 0; font-size: 12px; }
-  .topnav a { font-size: 14px; padding: 3px 8px; }
+  .topnav a { font-size: 13px; padding: 3px 7px; }
+  .topnav { gap: 4px; }
   .tpad button { height: 56px; }
 }
 
