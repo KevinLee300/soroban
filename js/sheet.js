@@ -50,7 +50,7 @@ function adds(level, rng) {
     if (level === 1) { a = rnd(rng, 1, 4); b = rnd(rng, 1, 5 - a); }
     else if (level === 2) { a = rnd(rng, 1, 9); b = rnd(rng, 1, 10 - a); }
     else { a = rnd(rng, 2, 9); b = rnd(rng, 2, 9); }
-    return { a, b, ans: a + b, pic: i === 0 && a + b <= 10 }; // 第一題有圖可以數
+    return { a, b, ans: a + b, pic: a + b <= 10 }; // 10 以內都有圖可以數
   }, (x) => `${x.a},${x.b}`);
 }
 
@@ -60,7 +60,7 @@ function subs(level, rng) {
     if (level === 1) { a = rnd(rng, 2, 5); b = rnd(rng, 1, a - 1); }
     else if (level === 2) { a = rnd(rng, 4, 10); b = rnd(rng, 1, a - 1); }
     else { b = rnd(rng, 2, 9); a = b + rnd(rng, 2, 9); }
-    return { a, b, ans: a - b, pic: i === 0 && a <= 10 };
+    return { a, b, ans: a - b, pic: a <= 10 }; // 劃掉的甜甜圈就是拿走的
   }, (x) => `${x.a},${x.b}`);
 }
 

@@ -17,6 +17,16 @@ function three(ans, near, rng, min = 0) {
   return { choices, answer: choices.indexOf(ans) };
 }
 const DONUT = ["#F48FB1", "#FFD54F", "#81D4FA", "#A5D6A7", "#B39DDB"];
+const pileOf = (n, color, eaten = 0) => `<div class="dgrid small" style="--cols:${Math.max(1, Math.min(n, 5))}">${Array.from({ length: n }, (_, i) => donut(color, i >= n - eaten ? "eaten" : "")).join("")}</div>`;
+// 10 以內的加減法都配甜甜圈，小朋友可以用數的：加法是兩堆，減法是劃掉拿走的
+function addQ(a, b, rng) {
+  const p = a + b, [c1, c2] = [DONUT[rnd(rng, 0, 1)], DONUT[rnd(rng, 2, 4)]];
+  return { text: `${a} + ${b} = ?`, full: true, solved: `${a} + ${b} = ${p}`, scene: `<div class="krow">${pileOf(a, c1)}<span class="kop">+</span>${pileOf(b, c2)}</div>`, ans: p, ...three(p, [p - 1, p + 1, p - 2, p + 2], rng, 1) };
+}
+function subQ(a, b, rng) {
+  const p = a - b;
+  return { text: `${a} − ${b} = ?`, full: true, solved: `${a} − ${b} = ${p}`, scene: pileOf(a, DONUT[rnd(rng, 0, 4)], b), ans: p, ...three(p, [p - 1, p + 1, p + 2, a + b], rng, 0) };
+}
 
 // 題目格式：{ text 算式或題目, scene 圖（HTML，可以是空的）, choices [三個數字], answer 正確選項的位置, ans 答案 }
 export const TYPES = [
@@ -25,17 +35,17 @@ export const TYPES = [
     return { text: "?", scene: `<div class="dgrid small" style="--cols:5">${Array.from({ length: n }, () => donut(c)).join("")}</div>`, ans: n, ...three(n, [n - 1, n + 1, n - 2, n + 2], rng, 1) };
   } },
   { id: "add5", name: "5 以內加法", make(rng) {
-    const a = rnd(rng, 1, 4), b = rnd(rng, 1, 5 - a), p = a + b;
-    return { text: `${a} + ${b}`, scene: "", ans: p, ...three(p, [p - 1, p + 1, p + 2], rng, 1) };
+    const a = rnd(rng, 1, 4), b = rnd(rng, 1, 5 - a);
+    return addQ(a, b, rng);
   } },
   { id: "add10", name: "10 以內加法", make(rng) {
-    const a = rnd(rng, 1, 9), b = rnd(rng, 1, 10 - a), p = a + b;
-    return { text: `${a} + ${b}`, scene: "", ans: p, ...three(p, [p - 1, p + 1, p - 2, p + 2], rng, 1) };
+    const a = rnd(rng, 1, 9), b = rnd(rng, 1, 10 - a);
+    return addQ(a, b, rng);
   } },
   { id: "addsub10", name: "10 以內加減", make(rng) {
     if (rng() < 0.5) return typeOf("add10").make(rng);
-    const a = rnd(rng, 2, 10), b = rnd(rng, 1, a - 1), p = a - b;
-    return { text: `${a} − ${b}`, scene: "", ans: p, ...three(p, [p - 1, p + 1, p + 2, a + b], rng, 0) };
+    const a = rnd(rng, 2, 10), b = rnd(rng, 1, a - 1);
+    return subQ(a, b, rng);
   } },
   { id: "times", name: "九九乘法", make(rng) {
     const a = rnd(rng, 2, 9), b = rnd(rng, 2, 9), p = a * b;
@@ -52,8 +62,8 @@ const KINDER = {
   count: (rng) => typeOf("count").make(rng),
   add: (rng) => typeOf("add10").make(rng),
   sub(rng) {
-    const a = rnd(rng, 2, 10), b = rnd(rng, 1, a - 1), p = a - b;
-    return { text: `${a} − ${b}`, scene: "", ans: p, ...three(p, [p - 1, p + 1, p + 2], rng, 0) };
+    const a = rnd(rng, 2, 10), b = rnd(rng, 1, a - 1);
+    return subQ(a, b, rng);
   },
   missing(rng) { // ? + 3 = 7
     const c = rnd(rng, 3, 10), b = rnd(rng, 1, c - 1), a = c - b;

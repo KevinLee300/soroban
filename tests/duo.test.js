@@ -43,3 +43,16 @@ test("綜合題：每一種都會出、連續兩題不同種、不用識字、�
     assert.deepEqual([...kinds].sort(), [...MIX_KINDS[id]].sort());
   }
 });
+
+test("加減法配甜甜圈：加法兩堆加起來，減法劃掉的就是拿走的", () => {
+  const count = (html, re) => (html.match(re) || []).length;
+  for (const id of ["add5", "add10", "addsub10", "mixk"]) for (let k = 0; k < 400; k++) {
+    const q = typeOf(id).make(Math.random);
+    const m = q.text.match(/^(\d+) ([+−]) (\d+) = \?$/);
+    if (!m) continue; // 綜合題的其他題型
+    const a = +m[1], b = +m[3], all = count(q.scene, /class="donut/g), xed = count(q.scene, /class="donut eaten/g);
+    if (m[2] === "+") { assert.equal(all, a + b, q.text); assert.equal(xed, 0); }
+    else { assert.equal(all, a, q.text); assert.equal(xed, b, `${q.text} 劃掉的數量不對`); assert.equal((q.scene.match(/#E53935/g) || []).length, b, "每個拿走的都有紅色斜線"); }
+    assert.equal(q.solved, q.text.replace("?", String(q.ans)));
+  }
+});

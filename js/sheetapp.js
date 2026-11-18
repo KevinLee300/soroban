@@ -17,7 +17,7 @@ const cmpBox = () => {
   const i = n++;
   return `<span class="cmp" data-n="${i}"><span class="fbox sym" aria-label="第 ${i + 1} 格"></span><span class="cmpbtns no-print">${[">", "<", "="].map((s) => `<button type="button" data-s="${s}" aria-pressed="false" aria-label="第 ${i + 1} 格：${s === ">" ? "大於" : s === "<" ? "小於" : "等於"}">${s}</button>`).join("")}</span></span>`;
 };
-const pile = (k, color, eaten = 0) => `<span class="spile" role="img" aria-label="${k} 個甜甜圈${eaten ? `，劃掉 ${eaten} 個` : ""}" style="--cols:${Math.max(1, Math.min(k, 5))}">${Array.from({ length: k }, (_, i) => `<span class="sd${i >= k - eaten ? " xed" : ""}">${donut(color)}</span>`).join("")}</span>`;
+const pile = (k, color, eaten = 0) => `<span class="spile" role="img" aria-label="${k} 個甜甜圈${eaten ? `，劃掉 ${eaten} 個` : ""}" style="--cols:${Math.max(1, Math.min(k, 5))}">${Array.from({ length: k }, (_, i) => `<span class="sd">${donut(color, i >= k - eaten ? "eaten" : "")}</span>`).join("")}</span>`;
 const engine = '<svg class="sengine" viewBox="0 0 80 48" aria-hidden="true"><path d="M9 12h24v25H9zM33 23h29v14H33zM48 8h9v15h-9z" fill="var(--t1e)" stroke="var(--ink)" stroke-width="2" stroke-linejoin="round"/><path d="M14 17h14v12H14z" fill="var(--panel)"/><path d="M4 37h64l7 5H4" fill="var(--t4e)" stroke="var(--ink)" stroke-width="2"/><circle cx="21" cy="40" r="6" fill="var(--panel)" stroke="var(--ink)" stroke-width="3"/><circle cx="51" cy="40" r="6" fill="var(--panel)" stroke="var(--ink)" stroke-width="3"/><path d="M54 3c5-7 13 3 18-3" fill="none" stroke="var(--muted)" stroke-width="3" stroke-linecap="round"/></svg>';
 
 function panelBody(type, data) {
