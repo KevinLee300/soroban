@@ -267,7 +267,7 @@ h2 { font-family: var(--f-display); font-weight: 400; font-size: 22px; margin: 0
 .dgrid { --d: 44px; display: grid; grid-template-columns: repeat(var(--cols, 5), var(--d)); gap: 6px; justify-content: center; }
 .dgrid.small { --d: 30px; gap: 4px; }
 .donut { width: var(--d, 44px); height: var(--d, 44px); display: block; }
-.donut.eaten { opacity: .22; filter: grayscale(1); }
+.donut.eaten circle { opacity: .5; }
 .krow { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 12px; }
 .kop { font-family: var(--f-num); font-weight: 600; font-size: 34px; color: var(--plus); }
 .keq { font-family: var(--f-num); font-weight: 600; font-size: clamp(30px, 6vw, 44px); line-height: 1.1; font-variant-numeric: tabular-nums; }
@@ -421,8 +421,7 @@ h2 { font-family: var(--f-display); font-weight: 400; font-size: 22px; margin: 0
 .spile { display: grid; grid-template-columns: repeat(var(--cols, 5), 28px); gap: 3px; }
 .spile .donut { width: 28px; height: 28px; }
 .sd { position: relative; display: block; }
-.sd.xed .donut { opacity: .45; }
-.sd.xed::after { content: ""; position: absolute; left: -2px; right: -2px; top: 50%; height: 3px; background: var(--bead); border-radius: 2px; transform: rotate(-38deg); }
+
 .sop { color: var(--plus); }
 .seq2 { white-space: nowrap; }
 @media (max-width: 620px) {
@@ -546,7 +545,8 @@ body.duo-on { overflow: hidden; }
 .phead .rotbtn { margin-left: auto; }
 .pbody { flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; align-items: center; }
 .quiz { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; min-width: 0; }
-.quiz .qscene .dgrid.small { --d: 22px; }
+.quiz .qscene .dgrid.small { --d: clamp(24px, 9cqmin, 38px); gap: 4px; }
+.quiz .qscene .kop { font-size: 26px; }
 .quiz .qscene .kclock { width: clamp(80px, 26cqmin, 120px); height: auto; }
 .quiz .qscene .kcoin { width: 38px; height: 38px; font-size: 17px; }
 .quiz .qscene .kcoin.c5 { width: 46px; height: 46px; font-size: 20px; }

@@ -67,3 +67,12 @@ test("混合題保留六種題型、13 格與既有 makeSheet 介面", () => {
   assert.equal(sheetBlanks(sections).length, 13);
   assert.throws(() => makeSheetSections(2, "unknown"), RangeError);
 });
+
+test("練習單：10 以內的加減法每一題都有甜甜圈圖", async () => {
+  const { makeSheet } = await import("../js/sheet.js");
+  for (const level of [1, 2]) for (let k = 0; k < 200; k++) {
+    const s = makeSheet(level);
+    for (const a of s.adds) assert.equal(a.pic, a.a + a.b <= 10);
+    for (const x of s.subs) assert.equal(x.pic, x.a <= 10);
+  }
+});

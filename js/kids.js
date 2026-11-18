@@ -17,8 +17,10 @@ const ICING = [
   { name: "粉紅色", c: "#F48FB1" }, { name: "咖啡色", c: "#8D5A3B" }, { name: "黃色", c: "#FFD54F" },
   { name: "藍色", c: "#81D4FA" }, { name: "紫色", c: "#B39DDB" }, { name: "綠色", c: "#A5D6A7" },
 ];
+// cls 有 "eaten"：被拿走的甜甜圈，畫一條紅色斜線（像紙本題目的刪除線）
 export function donut(color, cls = "") {
-  return `<svg class="donut ${cls}" viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="12" fill="none" stroke="#D9A066" stroke-width="13"/><circle cx="20" cy="20" r="12" fill="none" stroke="${color}" stroke-width="8"/><path d="M12 12l2 1M27 11l-1 2M30 22h-2M24 30l1-2M11 26l2-1M19 8v2" stroke="#fff" stroke-width="1.6" stroke-linecap="round"/></svg>`;
+  const x = /\beaten\b/.test(cls) ? `<path d="M5 35L35 5" stroke="#fff" stroke-width="7.5" stroke-linecap="round"/><path d="M5 35L35 5" stroke="#E53935" stroke-width="4.5" stroke-linecap="round"/>` : "";
+  return `<svg class="donut ${cls}" viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="12" fill="none" stroke="#D9A066" stroke-width="13"/><circle cx="20" cy="20" r="12" fill="none" stroke="${color}" stroke-width="8"/><path d="M12 12l2 1M27 11l-1 2M30 22h-2M24 30l1-2M11 26l2-1M19 8v2" stroke="#fff" stroke-width="1.6" stroke-linecap="round"/>${x}</svg>`;
 }
 // 一盤甜甜圈，5 個一排（方便一眼看出 5 和 10）。eaten：最後幾個被吃掉
 function donuts(n, color, { eaten = 0, small = false } = {}) {
