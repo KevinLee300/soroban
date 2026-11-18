@@ -56,17 +56,20 @@ function route() {
   if (!duo) leaveDuo();
   $("view-parent").hidden = !parent;
   $("navParent").classList.toggle("on", parent);
-  $("view-home").hidden = !!lv || drill || math || game || parent || sheet || clock || times || duo;
+  const abacus = !lv && location.hash === "#abacus";
+  $("view-abacus").hidden = !abacus;
+  $("view-home").hidden = !!lv || drill || math || game || parent || sheet || clock || times || duo || abacus;
   $("view-level").hidden = !lv;
   $("view-drill").hidden = !drill;
   $("view-math").hidden = !math;
   $("view-game").hidden = !game;
   $("navMath").classList.toggle("on", math || game || sheet || clock);
-  $("navAbacus").classList.toggle("on", !(math || game || parent || sheet || clock || times || duo));
+  $("navAbacus").classList.toggle("on", abacus || !!lv);
+  $("navHome").classList.toggle("on", !(lv || abacus || drill || math || game || parent || sheet || clock || times || duo));
   if (lv) {
     openLevel(lv);
     if (m[2]) { pset = practiceSets(lv).find((s) => s.id === m[2]) || null; setTab("practice"); }
-  } else if (drill) renderDrill(); else if (math) renderMathHome(); else if (parent) renderParent(); else if (sheet) renderSheet(); else if (clock) renderClock(); else if (times) renderTimes(tm[1], tm[2]); else if (duo) renderDuo(); else if (!game) renderHome();
+  } else if (drill) renderDrill(); else if (math) renderMathHome(); else if (parent) renderParent(); else if (sheet) renderSheet(); else if (clock) renderClock(); else if (times) renderTimes(tm[1], tm[2]); else if (duo) renderDuo(); else if (abacus) renderAbacus(); else if (!game) renderHome();
   window.scrollTo(0, 0);
 }
 
@@ -92,12 +95,21 @@ $("pSets").addEventListener("click", (ev) => {
   startPractice();
 });
 
+// 首頁：誰在練習、年級、今天的任務、全部的練習
 function renderHome() {
   $("grade").value = loadGrade();
   renderDaily();
   const picker = $("profile");
   picker.replaceChildren(...loadProfiles().map((name) => new Option(name, name)));
   picker.value = activeProfile();
+  // 珠算卡片顯示拿到幾顆星（所有關卡加起來）
+  const prog = loadProgress(), ready = LEVELS.filter((l) => l.ready);
+  const got = ready.reduce((n, l) => n + levelStars(prog, l), 0);
+  $("abacusStars").innerHTML = `<span class="stars" aria-label="珠算拿到 ${got} 顆星，共 ${ready.length * 3} 顆">★ ${got} / ${ready.length * 3}</span>`;
+}
+
+// 珠算：關卡地圖
+function renderAbacus() {
   const prog = loadProgress();
   $("levels").innerHTML = LEVELS.map((l) => l.ready
     ? `<a class="lvcard" href="#level-${l.id}"><span class="lvnum">${l.id}</span><span class="lvtext"><b>${l.title}</b><small>${l.sub}</small></span>${starHTML(levelStars(prog, l))}</a>`

@@ -22,14 +22,14 @@
 <script type="module" src="js/voiceui.js"></script>
 </head>
 <body>
-<header class="top"><div class="top-in"><a href="#home" class="brand">小小珠算</a><nav class="topnav" aria-label="主選單"><a href="#home" id="navAbacus">珠算</a><a href="#math" id="navMath">幼兒數學</a><a href="#times" id="navTimes">九九乘法</a><a href="#parent" id="navParent">紀錄</a></nav></div></header>
+<header class="top"><div class="top-in"><a href="#home" class="brand">小小珠算</a><nav class="topnav" aria-label="主選單"><a href="#home" id="navHome">首頁</a><a href="#abacus" id="navAbacus">珠算</a><a href="#math" id="navMath">幼兒數學</a><a href="#times" id="navTimes">九九乘法</a><a href="#parent" id="navParent">紀錄</a></nav></div></header>
 
 <main class="wrap">
   <!-- 首頁：關卡地圖 -->
   <section id="view-home" class="stack">
     <div>
-      <h1>今天要闖哪一關？</h1>
-      <p class="lead">每一關先看動畫學撥法，再練習 10 題。第一次就答對 9 題以上，可以拿到三顆星。</p>
+      <h1>今天要練什麼？</h1>
+      <p class="lead">先選誰在練習，做完今天的任務，再挑喜歡的來玩。</p>
     </div>
     <div class="family-picker">
       <label for="profile">誰在練習？</label>
@@ -43,10 +43,24 @@
       <p id="profileError" class="tip" role="alert" hidden>名字已經有了，請換一個。</p>
     </div>
     <div class="board daily" id="daily"></div>
-    <div class="levels" id="levels"></div>
+    <h2>全部的練習</h2>
+    <div class="homecards">
+    <a class="lvcard abacuscard" href="#abacus"><span class="lvnum">珠</span><span class="lvtext"><b>珠算闖關</b><small>看動畫學口訣，再撥算盤練習，一關一關闖</small></span><span id="abacusStars"></span></a>
     <a class="lvcard duocard" href="#duo"><span class="lvnum">守</span><span class="lvtext"><b>一起守城堡</b><small>兩個人用同一台平板，各自答題升級砲塔，一起打退湧進來的怪物</small></span></a>
     <a class="lvcard timescard" href="#times"><span class="lvnum">×</span><span class="lvtext"><b>九九乘法</b><small>乘法表、練習、限時 60 秒挑戰、弱點加強</small></span></a>
     <a class="lvcard mathcard" href="#math"><span class="lvnum">數</span><span class="lvtext"><b>幼兒數學</b><small>數甜甜圈、比大小、形狀、規律、錢幣、時鐘、動動腦，共 18 個小遊戲</small></span></a>
+    <a class="lvcard drillcard" href="#drill"><span class="lvnum">題</span><span class="lvtext"><b>算盤題庫</b><small>直接加減、五的好朋友，拿實體算盤來算，可以列印</small></span></a>
+    </div>
+  </section>
+
+  <!-- 珠算：關卡地圖 -->
+  <section id="view-abacus" class="stack" hidden>
+    <div>
+      <a href="#home" class="back">← 回首頁</a>
+      <h1>今天要闖哪一關？</h1>
+      <p class="lead">每一關先看動畫學撥法，再練習 10 題。第一次就答對 9 題以上，可以拿到三顆星。</p>
+    </div>
+    <div class="levels" id="levels"></div>
     <a class="lvcard drillcard" href="#drill"><span class="lvnum">題</span><span class="lvtext"><b>算盤題庫</b><small>直接加減、五的好朋友，拿實體算盤來算，可以列印</small></span></a>
   </section>
 
@@ -356,7 +370,7 @@
   <!-- 題庫頁：給實體算盤用 -->
   <section id="view-drill" class="stack" hidden>
     <div class="no-print">
-      <a href="#home" class="back">← 回關卡地圖</a>
+      <a href="#home" class="back">← 回首頁</a>
       <h1>算盤題庫</h1>
       <p class="lead">拿出算盤，從上往下一個數字一個數字撥，把答案填在橫線下面。全部寫完再按「交卷」，就會看到分數。題目上的數字都在 5 以內。</p>
       <p class="tip" id="dKindTip"></p>
@@ -403,7 +417,7 @@
   <!-- 關卡頁 -->
   <section id="view-level" class="stack" hidden>
     <div>
-      <a href="#home" class="back">← 回關卡地圖</a>
+      <a href="#abacus" class="back">← 回珠算關卡</a>
       <h1 id="lvTitle"></h1>
       <p class="lead" id="lvSub"></p>
     </div>
@@ -469,7 +483,7 @@
         <p id="rBest" class="tip"></p>
         <div class="ctrls">
           <button class="btn primary" id="again">再練一次</button>
-          <a class="btn" href="#home">回關卡地圖</a>
+          <a class="btn" href="#abacus">回珠算關卡</a>
         </div>
       </div>
     </div>
