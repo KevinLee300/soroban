@@ -31,6 +31,7 @@ const $ = (id) => document.getElementById(id);
 const LOCK_MS = 1500;          // 答錯停多久
 const AUTO_PICK_S = 12;        // 升級卡太久沒選就自動選
 const COLORS = ["#F57C00", "#1E88E5"];
+const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)");
 const setup = [{ name: "", type: "" }, { name: "", type: "" }];
 let startStage = 0, bound = false, logged = false;
 const G = { on: false, b: null, raf: 0, last: 0, timers: [], players: [], fx: [], land: true, L: 1, S: 1, t0: 0, phase: "" };
@@ -44,8 +45,11 @@ const ART = {
   ghost: `<path d="M26 90V50c0-22 15-34 34-34s34 12 34 34v40l-8-7-9 7-9-7-8 7-8-7-9 7-9-7z" fill="#F5F7FF" stroke="#9FA8DA" stroke-width="3" stroke-linejoin="round"/>${EYES(48, 12)}<ellipse cx="60" cy="66" rx="6" ry="7" fill="#2B1B17"/>`,
   rock: `<path d="M20 84l-6-26 12-26 22-14 28 2 22 18 6 26-8 20z" fill="#A1887F" stroke="#5D4037" stroke-width="3" stroke-linejoin="round"/><path d="M40 38l12 4M80 38l-12 4" stroke="#3E2723" stroke-width="4" stroke-linecap="round"/>${EYES(50, 14)}${MOUTH(68)}`,
   dragon: `<path d="M30 52C16 40 8 44 4 34c10 2 14-4 22 2" fill="#FFB74D" stroke="#E65100" stroke-width="2.5"/><path d="M90 52c14-12 22-8 26-18-10 2-14-4-22 2" fill="#FFB74D" stroke="#E65100" stroke-width="2.5"/><path d="M42 24l-6-14 14 8M78 24l6-14-14 8" fill="#FFF3E0" stroke="#E65100" stroke-width="2.5" stroke-linejoin="round"/><ellipse cx="60" cy="56" rx="34" ry="32" fill="#FF8A65" stroke="#D84315" stroke-width="3"/><ellipse cx="60" cy="68" rx="20" ry="16" fill="#FFE0B2"/>${EYES(46, 13)}<path d="M50 70q10 8 20 0" fill="none" stroke="#2B1B17" stroke-width="3" stroke-linecap="round"/>`,
+  mushroom: `<path d="M37 60q-4 32 23 32t23-32" fill="#FFF2D7" stroke="#8B543F" stroke-width="3"/><path d="M10 61C13 33 35 15 60 15s47 18 50 46Q60 75 10 61Z" fill="#F67276" stroke="#A73557" stroke-width="3"/><circle cx="58" cy="35" r="10" fill="#FFF3DD"/><circle cx="33" cy="51" r="6" fill="#FFF3DD"/><circle cx="84" cy="48" r="7" fill="#FFF3DD"/>${EYES(73, 10)}${MOUTH(85)}`,
+  crystal: `<path d="M16 69 27 35 45 47 58 9 81 31 89 55 102 34 111 71 91 89H29Z" fill="#8A9DFD" stroke="#4947A9" stroke-width="3" stroke-linejoin="round"/><path d="m58 10-4 49 27-28m-65 38 38-10 37 30m-2-34 22 16" fill="none" stroke="#DDE6FF" stroke-width="3" stroke-linejoin="round"/>${EYES(53, 12)}${MOUTH(71)}`,
+  bee: `<ellipse cx="37" cy="33" rx="16" ry="25" transform="rotate(-34 37 33)" fill="#D5F5FF" stroke="#5BB1C7" stroke-width="3"/><ellipse cx="82" cy="33" rx="16" ry="25" transform="rotate(34 82 33)" fill="#D5F5FF" stroke="#5BB1C7" stroke-width="3"/><ellipse cx="60" cy="58" rx="35" ry="29" fill="#FFC94D" stroke="#6B472B" stroke-width="3"/><path d="M30 70q30 17 60 0l-6 9q-24 12-48 0Z" fill="#6B472B"/>${EYES(52, 12)}${MOUTH(65)}`,
 };
-const svgOf = (id) => `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 100">${ART[id]}</svg>`;
+const svgOf = (id) => `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 100" aria-hidden="true">${ART[id]}</svg>`;
 const IMG = {};
 for (const id of Object.keys(ART)) { if (typeof Image !== "undefined") { IMG[id] = new Image(); IMG[id].src = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svgOf(id))}`; } }
 
@@ -70,7 +74,7 @@ function renderSetup() {
   const open = Math.min(STAGES.length - 1, best);
   if (startStage > open) startStage = 0;
   $("dStages").innerHTML = STAGES.map((st, i) => `<button data-v="${i}" aria-pressed="${startStage === i}" ${i > open ? "disabled" : ""}><span class="dmon">${svgOf(st.monster)}</span><b>第 ${i + 1} 關</b><small>${i > open ? "還沒打開" : st.name}</small></button>`).join("");
-  $("dBest").textContent = best >= STAGES.length ? "五關都打過了！可以從任何一關開始。" : best ? `已經打到第 ${best + 1} 關，可以從那裡開始。` : "從第 1 關開始。";
+  $("dBest").textContent = best >= STAGES.length ? `${STAGES.length} 關都守住了！可以從任何一關開始。` : `已開放到第 ${open + 1} 關（共 ${STAGES.length} 關）。`;
 }
 export function renderDuo() { bind(); stopGame(false); renderSetup(); }
 export function leaveDuo() { stopGame(); }
@@ -100,7 +104,9 @@ function layout() {
     const k = aspect / G.b.aspect;
     for (const m of G.b.monsters) m.y *= k;
     for (const t of G.b.turrets) t.y = aspect / 2;
+    for (const f of G.fx) for (const key of ["y", "y1", "y2"]) if (f[key] !== undefined) f[key] *= k;
     G.b.aspect = aspect;
+    speedFix();
   }
 }
 // 戰場座標 → 畫布座標
@@ -136,7 +142,7 @@ function stageIntro() {
   const st = STAGES[G.b.stage];
   G.phase = "intro";
   play("stage");
-  for (const k of [0, 1]) { renderSide(k); showMsg(k, `<span class="mmon">${svgOf(st.monster)}</span><b>第 ${G.b.stage + 1} 關</b><span>${st.name}來了！</span>`); }
+  for (const k of [0, 1]) { renderSide(k); showMsg(k, `<span class="mmon">${svgOf(st.monster)}</span><b>第 ${G.b.stage + 1} 關</b><span>${st.name}</span>`); }
   later(() => { G.phase = "play"; for (const k of [0, 1]) { hideMsg(k); if (!G.players[k].q) nextQ(k); } }, 2200);
 }
 
@@ -171,7 +177,7 @@ function afterStep() {
     finishLog();
     for (const k of [0, 1]) {
       const me = G.players[k], other = G.players[1 - k];
-      showMsg(k, `<b>${win ? "五關全部守住了！" : "城堡被攻破了…"}</b><span>${win ? "你們是最強的搭檔！" : `打到第 ${b.stage + 1} 關。下次可以從第 ${b.stage + 1} 關開始，再試一次！`}</span>
+      showMsg(k, `<b>${win ? `${STAGES.length} 關全部守住了！` : "城堡被攻破了…"}</b><span>${win ? "你們是最強的搭檔！" : `打到第 ${b.stage + 1} 關。下次可以從第 ${b.stage + 1} 關開始，再試一次！`}</span>
         <p class="msum">你答對 <b>${me.correct}</b> 題，${other.name}答對 <b>${other.correct}</b> 題</p>
         <div class="mbtns"><button class="btn primary" data-act="again">${win ? "再玩一次" : "從這一關再來"}</button><button class="btn" data-act="exit">回去</button></div>`);
     }
@@ -246,7 +252,8 @@ function tickPick(k, dt) {
 /* ---------- 特效 ---------- */
 function handleEvents(events) {
   for (const e of events) {
-    if (["arrow", "laser", "wave", "bolt", "ice", "special"].includes(e.type)) { G.fx.push({ ...e, life: e.type === "wave" ? 0.5 : e.type === "special" ? 0.45 : 0.25, age: 0 }); play(e.type); }
+    if (e.type in FX_COLOR) { G.fx.push({ ...e, life: e.type === "wave" ? 0.5 : e.type === "special" ? 0.45 : 0.25, age: 0 }); play(e.type); }
+    else if (e.type === "hit") { G.fx.push({ ...e, life: 0.2, age: 0 }); }
     else if (e.type === "kill") { G.fx.push({ type: "puff", x: e.x, y: e.y, boss: e.boss, life: 0.5, age: 0 }); play(e.boss ? "boss" : "kill"); }
     else if (e.type === "castle") { G.fx.push({ type: "ouch", life: 0.6, age: 0 }); play("castle"); for (const k of [0, 1]) renderSide(k); }
     else if (e.type === "offer") { renderSide(e.p); play("offer"); }
@@ -268,7 +275,7 @@ function draw(dt) {
   const cv = $("dField"), ctx = cv.getContext("2d"), W = cv.width, H = cv.height, b = G.b, u = G.L * G.dpr;
   ctx.clearRect(0, 0, W, H);
   // 草地和兩邊的地盤
-  ctx.fillStyle = "#CDEBC0"; ctx.fillRect(0, 0, W, H);
+  ctx.fillStyle = STAGES[b.stage].ground ?? "#CDEBC0"; ctx.fillRect(0, 0, W, H);
   for (const k of [0, 1]) {
     ctx.fillStyle = k ? "rgba(30,136,229,.08)" : "rgba(245,124,0,.08)";
     const [x0, y0] = toScreen(k ? 0.5 : 0, 0), [x1, y1] = toScreen(k ? 1 : 0.5, b.aspect);
@@ -280,7 +287,7 @@ function draw(dt) {
   const c = castlePos(b), [cx, cy] = toScreen(c.x, c.y), cs = u * 0.09;
   const ouch = G.fx.some((f) => f.type === "ouch");
   ctx.save(); ctx.translate(cx, cy);
-  if (ouch) ctx.translate((Math.random() - 0.5) * cs * 0.2, (Math.random() - 0.5) * cs * 0.2);
+  if (ouch && !reducedMotion.matches) ctx.translate((Math.random() - 0.5) * cs * 0.2, (Math.random() - 0.5) * cs * 0.2);
   ctx.fillStyle = ouch ? "#FFCDD2" : "#FFF3E0"; ctx.strokeStyle = "#8D6E63"; ctx.lineWidth = cs * 0.08;
   ctx.beginPath(); ctx.rect(-cs, -cs * 0.7, cs * 2, cs * 1.5); ctx.fill(); ctx.stroke();
   for (const tx of [-cs * 1.05, cs * 0.55]) { ctx.beginPath(); ctx.rect(tx, -cs * 1.2, cs * 0.5, cs * 2); ctx.fill(); ctx.stroke(); }
@@ -299,11 +306,11 @@ function draw(dt) {
   }
   // 怪物
   for (const m of b.monsters) {
-    const [x, y] = toScreen(m.x, m.y), s = u * (m.boss ? 0.2 : 0.095), bob = Math.sin(m.wob) * s * 0.06;
+    const [x, y] = toScreen(m.x, m.y), s = u * (m.boss ? 0.2 : 0.095), bob = reducedMotion.matches ? 0 : Math.sin(m.wob) * s * 0.06;
     const img = IMG[m.kind];
     if (m.slow > 0) { ctx.fillStyle = "rgba(129,212,250,.55)"; ctx.beginPath(); ctx.arc(x, y, s * 0.6, 0, 7); ctx.fill(); }
     if (img && img.complete) ctx.drawImage(img, x - s / 2, y - s * 0.42 + bob, s, s * 0.83);
-    if (m.hp < m.max) {
+    if (m.boss || m.hp < m.max) {
       ctx.fillStyle = "rgba(0,0,0,.25)"; ctx.fillRect(x - s * 0.4, y - s * 0.55, s * 0.8, s * 0.08);
       ctx.fillStyle = m.boss ? "#E53935" : "#43A047"; ctx.fillRect(x - s * 0.4, y - s * 0.55, s * 0.8 * Math.max(0, m.hp / m.max), s * 0.08);
     }
@@ -312,14 +319,27 @@ function draw(dt) {
   for (const f of G.fx) {
     f.age += dt;
     const a = Math.max(0, 1 - f.age / f.life);
+    const progress = reducedMotion.matches ? 1 : 1 - a;
     ctx.globalAlpha = a;
-    if (f.type === "puff") {
-      const [x, y] = toScreen(f.x, f.y), r = u * (f.boss ? 0.12 : 0.04) * (1 + f.age * 2);
-      ctx.fillStyle = "#FFF59D"; for (let i = 0; i < 6; i++) { ctx.beginPath(); ctx.arc(x + Math.cos(i) * r, y + Math.sin(i) * r, r * 0.3, 0, 7); ctx.fill(); }
+    if (f.type === "puff" || f.type === "hit") {
+      const [x, y] = toScreen(f.x, f.y);
+      const r = u * (f.boss ? 0.12 : f.type === "puff" ? 0.05 : 0.024) * (0.6 + progress);
+      ctx.strokeStyle = f.weapon === "special" ? COLORS[f.by] : FX_COLOR[f.weapon] ?? "#FFF59D";
+      ctx.lineWidth = u * (f.boss ? 0.012 : 0.005);
+      ctx.beginPath();
+      if (f.boss) ctx.arc(x, y, r, 0, Math.PI * 2);
+      for (let i = 0; i < 6; i++) {
+        const angle = i * Math.PI / 3;
+        ctx.moveTo(x + Math.cos(angle) * r * 0.6, y + Math.sin(angle) * r * 0.6);
+        ctx.lineTo(x + Math.cos(angle) * r, y + Math.sin(angle) * r);
+      }
+      ctx.stroke();
     } else if (f.type === "wave") {
       const [x, y] = toScreen(f.x, f.y);
       ctx.strokeStyle = FX_COLOR.wave; ctx.lineWidth = u * 0.012;
-      ctx.beginPath(); ctx.arc(x, y, f.r * u * Math.min(1, f.age / f.life * 1.4), 0, 7); ctx.stroke();
+      for (const ring of [0.75, 1]) {
+        ctx.beginPath(); ctx.arc(x, y, f.r * u * progress * ring, 0, Math.PI * 2); ctx.stroke();
+      }
     } else if (f.type === "ouch") {
       ctx.fillStyle = "rgba(229,57,53,.18)"; ctx.fillRect(0, 0, W, H);
     } else if (f.x1 !== undefined) {
@@ -327,10 +347,16 @@ function draw(dt) {
       ctx.strokeStyle = f.type === "special" ? COLORS[f.p] : FX_COLOR[f.type];
       ctx.lineWidth = u * (f.type === "laser" ? f.width * 0.8 : f.type === "special" ? 0.016 : f.type === "bolt" ? 0.008 : 0.006);
       ctx.lineCap = "round"; ctx.beginPath(); ctx.moveTo(x1, y1);
-      if (f.type === "bolt") { for (let i = 1; i < 5; i++) { const t = i / 5; ctx.lineTo(x1 + (x2 - x1) * t + (Math.random() - 0.5) * u * 0.03, y1 + (y2 - y1) * t + (Math.random() - 0.5) * u * 0.03); } }
-      if (f.type === "arrow") { const t = Math.min(1, f.age / (f.life * 0.6)); ctx.moveTo(x1 + (x2 - x1) * t * 0.8, y1 + (y2 - y1) * t * 0.8); }
+      if (f.type === "bolt") { for (let i = 1; i < 5; i++) { const t = i / 5; ctx.lineTo(x1 + (x2 - x1) * t, y1 + (y2 - y1) * t + (i % 2 ? -1 : 1) * u * 0.018); } }
+      if (f.type === "arrow") { ctx.moveTo(x1 + (x2 - x1) * progress * 0.8, y1 + (y2 - y1) * progress * 0.8); }
       ctx.lineTo(x2, y2); ctx.stroke();
-      if (f.type === "special") { ctx.fillStyle = COLORS[f.p]; ctx.beginPath(); ctx.arc(x2, y2, u * 0.03 * (1 + f.age * 3), 0, 7); ctx.fill(); }
+      if (f.type === "laser" || f.type === "special") {
+        ctx.strokeStyle = "#FFF8EA"; ctx.lineWidth *= 0.35; ctx.stroke();
+      }
+      if (f.type === "special") {
+        ctx.strokeStyle = COLORS[f.p]; ctx.lineWidth = u * 0.008;
+        ctx.beginPath(); ctx.arc(x2, y2, u * (0.025 + progress * 0.075), 0, Math.PI * 2); ctx.stroke();
+      }
     }
     ctx.globalAlpha = 1;
   }

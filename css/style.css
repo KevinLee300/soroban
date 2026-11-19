@@ -270,6 +270,11 @@ h2 { font-family: var(--f-display); font-weight: 400; font-size: 22px; margin: 0
 .donut.eaten circle { opacity: .5; }
 .krow { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 12px; }
 .kop { font-family: var(--f-num); font-weight: 600; font-size: 34px; color: var(--plus); }
+@media (max-width: 480px) {
+  .krow.add-piles { flex-wrap: nowrap; gap: 4px; }
+  .add-piles .dgrid.small { --d: clamp(16px, 5.5vw, 24px); gap: 2px; }
+  .add-piles .kop { font-size: 26px; }
+}
 .keq { font-family: var(--f-num); font-weight: 600; font-size: clamp(30px, 6vw, 44px); line-height: 1.1; font-variant-numeric: tabular-nums; }
 .kbox { width: 64px; height: 64px; border: 3px dashed var(--muted); border-radius: 12px; display: grid; place-items: center; font-family: var(--f-num); font-weight: 600; font-size: 34px; color: var(--muted); }
 .kbox.sm { width: 46px; height: 46px; font-size: 26px; border-radius: 10px; }
@@ -431,8 +436,14 @@ h2 { font-family: var(--f-display); font-weight: 400; font-size: 22px; margin: 0
 }
 @media print {
   #view-math, #view-game, #view-parent, #view-drill:not(:target) { }
+  #view-sheet { gap: 6px; }
   .sheet { grid-template-columns: repeat(2, 1fr); gap: 10px; }
-  .spanel { background: #fff; border-color: #999; border-width: 2px; }
+  .spanel { background: #fff; border-color: #999; border-width: 2px; padding: 8px 10px; gap: 6px; }
+  .sheet .sbody, .sheet .squestion { gap: 6px; }
+  .sheet .squestion + .squestion { padding-top: 6px; }
+  .sheet .spile { grid-template-columns: repeat(var(--cols, 5), 20px); gap: 2px; }
+  .sheet .p5 .spile { grid-template-columns: repeat(10, 20px); }
+  .sheet .spile .donut { width: 20px; height: 20px; }
   .shead h2 { background: #fff; color: #000; border: 2px solid #999; text-shadow: none; }
   .fbox, .blk, .btop, .bpart { border-color: #666 !important; background: #fff !important; }
   .sbody { font-size: 26px; }

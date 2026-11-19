@@ -10,7 +10,18 @@ export const STAGES = [
   { monster: "ghost", name: "小幽靈", count: 34, hp: 8, speed: 0.06, every: 0.85, boss: 80 },
   { monster: "rock", name: "石頭怪", count: 42, hp: 20, speed: 0.045, every: 0.75, boss: 180 },
   { monster: "dragon", name: "大魔王小火龍", count: 52, hp: 26, speed: 0.055, every: 0.6, boss: 320 },
+  { monster: "mushroom", name: "蘑菇森林", guests: ["slime", "bat"], ground: "#C4DFAD", count: 46, hp: 31, speed: 0.062, every: 0.65, boss: 450, gear: 4 },
+  { monster: "crystal", name: "水晶洞窟", guests: ["rock", "ghost"], ground: "#C7CBE5", count: 50, hp: 38, speed: 0.065, every: 0.58, boss: 560, gear: 5 },
+  { monster: "bee", name: "蜂蜜山谷", guests: ["mushroom", "crystal"], ground: "#F1DCA1", count: 56, hp: 44, speed: 0.073, every: 0.54, boss: 700, gear: 6 },
 ];
+const TRAITS = {
+  bat: { speed: 1.25, hp: 0.75 },
+  ghost: { speed: 1.1, hp: 0.9 },
+  rock: { speed: 0.75, hp: 1.45 },
+  mushroom: { speed: 0.85, hp: 1.25 },
+  crystal: { speed: 0.78, hp: 1.5 },
+  bee: { speed: 1.25, hp: 0.7 },
+};
 export const CASTLE_HP = 10;
 export const PER_UPGRADE = 2;   // 答對幾題換一次升級
 const REACH = 0.07;             // 怪物離城堡這麼近就算打到城堡
@@ -32,10 +43,17 @@ export const dmgMult = (t) => 1 + 0.4 * t.atk;
 export const rateMult = (t) => 1 + 0.25 * t.spd;
 
 export function createBattle({ aspect = 1, stage = 0, rng = Math.random } = {}) {
+  // 直接開後面的新關時，補上途中本來可以拿到的升級。
+  const gear = STAGES[stage].gear;
+  const turrets = [0, 1].map((p) => ({
+    p, x: p ? 0.62 : 0.38, y: aspect / 2,
+    weapons: gear ? { arrow: 3, wave: 2, [p ? "laser" : "ice"]: 2 } : { arrow: 1 },
+    cd: { arrow: 0.3 }, atk: gear ?? 0, spd: gear ?? 0, correct: 0, picks: 0, offer: null,
+  }));
   return {
     aspect, rng, stage, t: 0, castle: CASTLE_HP, monsters: [], nextId: 1, spawned: 0, spawnT: 1, bossOut: false,
     state: "play", // play 進行中、clear 這關打完、win 全部打完、lose 城堡被打倒
-    turrets: [0, 1].map((p) => ({ p, x: p ? 0.62 : 0.38, y: aspect / 2, weapons: { arrow: 1 }, cd: { arrow: 0.3 }, atk: 0, spd: 0, correct: 0, picks: 0, offer: null })),
+    turrets,
     events: [],
   };
 }
@@ -46,9 +64,13 @@ const alive = (b) => b.monsters.filter((m) => m.hp > 0);
 
 function spawn(b, boss = false) {
   const s = STAGES[b.stage], top = b.rng() < 0.5, x = 0.06 + b.rng() * 0.88;
+  const slot = b.spawned % 4;
+  const kind = !boss && s.guests && slot >= 2 ? s.guests[slot - 2] : s.monster;
+  const traits = !boss && s.guests ? TRAITS[kind] : null;
+  const hp = boss ? s.boss : Math.round(s.hp * (traits?.hp ?? 1));
   b.monsters.push({
-    id: b.nextId++, kind: s.monster, boss, x, y: top ? -0.03 : b.aspect + 0.03,
-    hp: boss ? s.boss : s.hp, max: boss ? s.boss : s.hp, speed: s.speed * (boss ? 0.55 : 0.85 + b.rng() * 0.3), wob: b.rng() * 6, slow: 0,
+    id: b.nextId++, kind, boss, x, y: top ? -0.03 : b.aspect + 0.03,
+    hp, max: hp, speed: s.speed * (boss ? 0.55 : 0.85 + b.rng() * 0.3) * (traits?.speed ?? 1), wob: b.rng() * 6, slow: 0,
   });
   b.events.push({ type: "spawn", boss });
 }
@@ -60,10 +82,10 @@ function byDanger(b, p) {
   return alive(b).sort((m, n) => (p === undefined ? 0 : (mySide(n, p) ? 1 : 0) - (mySide(m, p) ? 1 : 0)) || dist(m, c) - dist(n, c));
 }
 
-function damage(b, m, dmg, by) {
+function damage(b, m, dmg, by, weapon) {
   if (m.hp <= 0) return;
   m.hp -= dmg;
-  b.events.push({ type: "hit", id: m.id, x: m.x, y: m.y, by });
+  b.events.push({ type: "hit", id: m.id, x: m.x, y: m.y, by, weapon });
   if (m.hp <= 0) b.events.push({ type: "kill", id: m.id, x: m.x, y: m.y, boss: m.boss, kind: m.kind, by });
 }
 
@@ -73,30 +95,30 @@ function fire(b, t, w) {
   if (!list.length) return false;
   const c = castlePos(b);
   if (w === "arrow") {
-    for (const m of list.slice(0, lv)) { b.events.push({ type: "arrow", p: t.p, x1: t.x, y1: t.y, x2: m.x, y2: m.y }); damage(b, m, d, t.p); }
+    for (const m of list.slice(0, lv)) { b.events.push({ type: "arrow", p: t.p, x1: t.x, y1: t.y, x2: m.x, y2: m.y }); damage(b, m, d, t.p, w); }
   } else if (w === "laser") {
     // 從砲塔射向最危險的怪物，一直延伸到畫面外，線附近的都打到
     const m = list[0], dx = m.x - t.x, dy = m.y - t.y, len = Math.hypot(dx, dy) || 1, ux = dx / len, uy = dy / len, width = 0.035 + 0.008 * lv;
     for (const n of list) {
       const px = n.x - t.x, py = n.y - t.y, along = px * ux + py * uy, off = Math.abs(px * uy - py * ux);
-      if (along > 0 && off < width) damage(b, n, d * (1 + 0.5 * (lv - 1)), t.p);
+      if (along > 0 && off < width) damage(b, n, d * (1 + 0.5 * (lv - 1)), t.p, w);
     }
     b.events.push({ type: "laser", p: t.p, x1: t.x, y1: t.y, x2: t.x + ux * 2, y2: t.y + uy * 2, width });
   } else if (w === "wave") {
     const r = 0.2 + 0.05 * lv;
-    for (const n of list) if (dist(n, c) < r) damage(b, n, d * (1 + 0.4 * (lv - 1)), t.p);
+    for (const n of list) if (dist(n, c) < r) damage(b, n, d * (1 + 0.4 * (lv - 1)), t.p, w);
     b.events.push({ type: "wave", p: t.p, x: c.x, y: c.y, r });
   } else if (w === "bolt") {
     let cur = list[0], from = { x: t.x, y: t.y };
     const hitIds = new Set();
     for (let k = 0; k < 2 + lv && cur; k++) {
       b.events.push({ type: "bolt", p: t.p, x1: from.x, y1: from.y, x2: cur.x, y2: cur.y });
-      damage(b, cur, d * (1 + 0.3 * (lv - 1)), t.p);
+      damage(b, cur, d * (1 + 0.3 * (lv - 1)), t.p, w);
       hitIds.add(cur.id); from = cur;
       cur = list.filter((n) => !hitIds.has(n.id) && n.hp > 0 && dist(n, from) < 0.25).sort((m, n) => dist(m, from) - dist(n, from))[0];
     }
   } else if (w === "ice") {
-    for (const m of list.slice(0, lv + 1)) { m.slow = 2.5; b.events.push({ type: "ice", p: t.p, x1: t.x, y1: t.y, x2: m.x, y2: m.y }); damage(b, m, d, t.p); }
+    for (const m of list.slice(0, lv + 1)) { m.slow = 2.5; b.events.push({ type: "ice", p: t.p, x1: t.x, y1: t.y, x2: m.x, y2: m.y }); damage(b, m, d, t.p, w); }
   }
   return true;
 }
@@ -173,7 +195,7 @@ export function correct(b, p) {
   const t = b.turrets[p];
   t.correct++;
   const m = byDanger(b, p)[0];
-  if (m) { b.events.push({ type: "special", p, x1: t.x, y1: t.y, x2: m.x, y2: m.y }); damage(b, m, SPECIAL_DMG * dmgMult(t), p); }
+  if (m) { b.events.push({ type: "special", p, x1: t.x, y1: t.y, x2: m.x, y2: m.y }); damage(b, m, SPECIAL_DMG * dmgMult(t), p, "special"); }
   b.monsters = alive(b);
   if (t.correct % PER_UPGRADE === 0) {
     t.picks++;

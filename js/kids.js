@@ -121,7 +121,7 @@ function add(level, rng) {
   else if (level === 2) { a = rnd(rng, 1, 9); b = rnd(rng, 1, 10 - a); }
   else { a = rnd(rng, 2, 9); b = rnd(rng, 2, 9); }
   const [x, y] = shuffle(ICING, rng);
-  const pics = level === 3 ? "" : `<div class="krow">${donuts(a, x.c, { small: true })}<span class="kop">+</span>${donuts(b, y.c, { small: true })}</div>`;
+  const pics = `<div class="krow add-piles">${donuts(a, x.c, { small: true })}<span class="kop">+</span>${donuts(b, y.c, { small: true })}</div>`;
   return { say: `${a} 加 ${b} 是多少？`, scene: pics + eq(`${a} + ${b} = ?`), ...numChoices(a + b, rng, 4, 0), meta: { a, b, ans: a + b } };
 }
 
@@ -130,9 +130,9 @@ function sub(level, rng) {
   if (level === 1) { a = rnd(rng, 2, 5); b = rnd(rng, 1, a); }
   else if (level === 2) { a = rnd(rng, 3, 10); b = rnd(rng, 1, a); }
   else { b = rnd(rng, 2, 9); a = b + rnd(rng, 1, 9); }
-  const pics = level === 3 ? "" : donuts(a, pick(ICING, rng).c, { eaten: b });
+  const pics = donuts(a, pick(ICING, rng).c, { eaten: b, small: level === 3 });
   return {
-    say: level === 3 ? `${a} 減 ${b} 是多少？` : `有 ${a} 個甜甜圈，吃掉 ${b} 個，剩下幾個？`,
+    say: `有 ${a} 個甜甜圈，吃掉 ${b} 個，剩下幾個？`,
     scene: pics + eq(`${a} − ${b} = ?`), ...numChoices(a - b, rng, 4, 0), meta: { a, b, ans: a - b },
   };
 }

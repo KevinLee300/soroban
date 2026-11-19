@@ -4,30 +4,47 @@ import * as B from "../js/battle.js";
 
 const seeded = (seed) => { let s = seed; return () => ((s = (s * 16807) % 2147483647) / 2147483647); };
 // 模擬一整場：兩個孩子各隔幾秒答對一題（0 = 不答），升級卡隨便選
-function play(gapA, gapB, seed) {
-  const rng = seeded(seed), b = B.createBattle({ aspect: 0.75, rng });
+function play(gapA, gapB, seed, stage = 0) {
+  const rng = seeded(seed), b = B.createBattle({ aspect: 0.75, stage, rng });
   let ta = gapA, tb = gapB;
   for (let i = 0; i < 400000; i++) {
     B.step(b, 0.05); B.takeEvents(b);
     if (gapA && (ta -= 0.05) <= 0) { B.correct(b, 0); ta += gapA; }
     if (gapB && (tb -= 0.05) <= 0) { B.correct(b, 1); tb += gapB; }
-    for (const p of [0, 1]) while (b.turrets[p].offer) B.choose(b, p, b.turrets[p].offer[Math.floor(rng() * 3)].id);
+    for (const t of b.turrets) while (t.offer) B.choose(b, t.p, t.offer[Math.floor(rng() * t.offer.length)].id);
     if (b.state === "clear") B.nextStage(b); else if (b.state !== "play") break;
   }
   return b;
 }
 
-test("平衡：不答題守不住；兩個人一起答題可以打完 5 關", () => {
+test("平衡：不答題守不住；兩個人一起答題可以打完全 8 關", () => {
   for (const seed of [1, 2, 3, 4, 5]) {
     const idle = play(0, 0, seed);
     assert.equal(idle.state, "lose");
     assert.ok(idle.stage <= 1, "不答題最多撐到第 2 關");
     const team = play(8, 5, seed);
     assert.equal(team.state, "win", `seed ${seed}：中班 8 秒＋小二 5 秒一題應該要贏`);
+    assert.equal(team.stage, 7);
   }
   // 只有一個人答題：有時候會輸（要合作）
   const solo = [1, 2, 3, 4, 5, 6].map((seed) => play(0, 4, seed).state);
   assert.ok(solo.includes("lose"), `只有一個人答題都贏了：${solo}`);
+});
+
+test("第 6–8 關有不同的怪物，主怪會成為魔王，且可以直接開始", () => {
+  assert.equal(new Set(B.STAGES.map(({ monster }) => monster)).size, 8);
+  for (let stage = 5; stage < B.STAGES.length; stage++) {
+    const b = B.createBattle({ stage, aspect: 0.75, rng: seeded(stage) });
+    const st = B.STAGES[stage];
+    for (const t of b.turrets) t.weapons = {};
+    for (let i = 0; i < 200 && b.spawned < 4; i++) B.step(b, 0.05);
+    assert.deepEqual([...new Set(b.monsters.map(({ kind }) => kind))], [st.monster, ...st.guests]);
+    b.spawned = st.count;
+    b.spawnT = 0;
+    B.step(b, 0.05);
+    assert.equal(b.monsters.find(({ boss }) => boss)?.kind, st.monster);
+    assert.equal(play(8, 5, stage, stage).state, "win", `從第 ${stage + 1} 關也可以過關`);
+  }
 });
 
 test("答對：放大絕招；每答對 2 題可以選一張升級卡", () => {
@@ -36,6 +53,7 @@ test("答對：放大絕招；每答對 2 題可以選一張升級卡", () => {
   B.correct(b, 0);
   const e1 = B.takeEvents(b);
   assert.ok(e1.some((e) => e.type === "special" && e.p === 0));
+  assert.ok(e1.some((e) => e.type === "hit" && e.weapon === "special" && e.by === 0));
   assert.equal(b.turrets[0].offer, null);
   B.correct(b, 0);
   const offer = b.turrets[0].offer;
@@ -76,7 +94,7 @@ test("五種武器都打得到怪物，冰凍會讓怪物變慢", () => {
     t.cd[w] = 0;
     B.step(b, 0.05);
     const ev = B.takeEvents(b);
-    assert.ok(ev.some((e) => e.type === "hit" && e.by === 0), `${w} 沒有打到怪物`);
+    assert.ok(ev.some((e) => e.type === "hit" && e.by === 0 && e.weapon === w), `${w} 沒有打到怪物`);
     if (w === "ice") assert.ok(b.monsters.some((m) => m.slow > 0) || ev.some((e) => e.type === "kill"));
   }
 });
