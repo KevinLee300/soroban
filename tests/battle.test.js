@@ -8,7 +8,7 @@ function play(gapA, gapB, seed, stage = 0) {
   const rng = seeded(seed), b = B.createBattle({ aspect: 0.75, stage, rng });
   let ta = gapA, tb = gapB;
   for (let i = 0; i < 400000; i++) {
-    B.step(b, 0.05); B.takeEvents(b);
+    B.step(b, 0.05 * B.BATTLE_PACE); B.takeEvents(b);
     if (gapA && (ta -= 0.05) <= 0) { B.correct(b, 0); ta += gapA; }
     if (gapB && (tb -= 0.05) <= 0) { B.correct(b, 1); tb += gapB; }
     for (const t of b.turrets) while (t.offer) B.choose(b, t.p, t.offer[Math.floor(rng() * t.offer.length)].id);
@@ -22,12 +22,12 @@ test("平衡：不答題守不住；兩個人一起答題可以打完全 8 關",
     const idle = play(0, 0, seed);
     assert.equal(idle.state, "lose");
     assert.ok(idle.stage <= 1, "不答題最多撐到第 2 關");
-    const team = play(8, 5, seed);
-    assert.equal(team.state, "win", `seed ${seed}：中班 8 秒＋小二 5 秒一題應該要贏`);
+    const team = play(9, 6, seed);
+    assert.equal(team.state, "win", `seed ${seed}：中班 9 秒＋小二 6 秒一題應該要贏`);
     assert.equal(team.stage, 7);
   }
   // 只有一個人答題：有時候會輸（要合作）
-  const solo = [1, 2, 3, 4, 5, 6].map((seed) => play(0, 4, seed).state);
+  const solo = [1, 2, 3, 4, 5, 6].map((seed) => play(0, 5, seed).state);
   assert.ok(solo.includes("lose"), `只有一個人答題都贏了：${solo}`);
 });
 
@@ -43,7 +43,7 @@ test("第 6–8 關有不同的怪物，主怪會成為魔王，且可以直接�
     b.spawnT = 0;
     B.step(b, 0.05);
     assert.equal(b.monsters.find(({ boss }) => boss)?.kind, st.monster);
-    assert.equal(play(8, 5, stage, stage).state, "win", `從第 ${stage + 1} 關也可以過關`);
+    assert.equal(play(9, 6, stage, stage).state, "win", `從第 ${stage + 1} 關也可以過關`);
   }
 });
 

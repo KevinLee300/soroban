@@ -51,8 +51,8 @@ test("加減法配甜甜圈：加法兩堆加起來，減法劃掉的就是拿�
     const m = q.text.match(/^(\d+) ([+−]) (\d+) = \?$/);
     if (!m) continue; // 綜合題的其他題型
     const a = +m[1], b = +m[3], all = count(q.scene, /class="donut/g), xed = count(q.scene, /class="donut eaten/g);
-    if (m[2] === "+") { assert.equal(all, a + b, q.text); assert.equal(xed, 0); }
-    else { assert.equal(all, a, q.text); assert.equal(xed, b, `${q.text} 劃掉的數量不對`); assert.equal((q.scene.match(/#E53935/g) || []).length, b, "每個拿走的都有紅色斜線"); }
+    if (m[2] === "+") { assert.equal(all, a + b, q.text); assert.equal(xed, 0); assert.match(q.hint, /兩堆/); }
+    else { assert.equal(all, a, q.text); assert.equal(xed, b, `${q.text} 劃掉的數量不對`); assert.equal((q.scene.match(/#E53935/g) || []).length, b, "每個拿走的都有紅色斜線"); assert.match(q.hint, /沒被劃掉/); }
     assert.equal(q.solved, q.text.replace("?", String(q.ans)));
   }
 });

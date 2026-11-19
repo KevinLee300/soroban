@@ -3,7 +3,7 @@
 //   直放：上面、下面是答題區（上面倒過來），中間是戰場。
 // 戰場規則在 battle.js，題目在 duo.js。
 import { TYPES, typeOf } from "./duo.js";
-import { CASTLE_HP, STAGES, WEAPONS, castlePos, choose, correct, createBattle, nextStage, step, takeEvents } from "./battle.js";
+import { BATTLE_PACE, CASTLE_HP, STAGES, WEAPONS, castlePos, choose, correct, createBattle, nextStage, step, takeEvents } from "./battle.js";
 import { activeProfile, loadDuo, loadGrade, loadProfiles, logSessionAs, saveDuo } from "./storage.js";
 import { play, setSoundOn, soundOn, startMusic, stopMusic, unlock } from "./sfx.js";
 
@@ -28,7 +28,8 @@ function cardFace(c, t) {
 }
 
 const $ = (id) => document.getElementById(id);
-const LOCK_MS = 1500;          // 答錯停多久
+const WATCH_S = 1.2;           // 答對後讓孩子看戰場
+const SOLUTION_S = 1.5;
 const AUTO_PICK_S = 12;        // 升級卡太久沒選就自動選
 const COLORS = ["#F57C00", "#1E88E5"];
 const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)");
@@ -119,7 +120,10 @@ function toScreen(x, y) {
 function start() {
   logged = false;
   unlock(); startMusic();
-  G.players = setup.map((s, i) => ({ name: s.name, type: typeOf(s.type), correct: 0, wrong: 0, locked: false, q: null, color: COLORS[i], rot: 0, autoRot: true, pickT: 0 }));
+  G.players = setup.map((s, i) => ({
+    name: s.name, type: typeOf(s.type), firstTry: 0, wrong: 0, misses: [], wait: 0, q: null,
+    color: COLORS[i], rot: 0, autoRot: true, pickT: 0,
+  }));
   G.fx = []; G.timers = []; G.t0 = Date.now(); G.on = true;
   $("duoPlay").hidden = false;
   $("dPause").textContent = "暫停";
@@ -152,9 +156,9 @@ function loop(now) {
   const dt = Math.min(0.05, (now - G.last) / 1000);
   G.last = now;
   if (G.phase === "play") {
-    step(G.b, dt);
+    step(G.b, dt * BATTLE_PACE);
     handleEvents(takeEvents(G.b));
-    for (const k of [0, 1]) tickPick(k, dt);
+    for (const k of [0, 1]) tickSide(k, dt);
     afterStep();
   }
   draw(dt);
@@ -176,10 +180,11 @@ function afterStep() {
     if (win) { const d = loadDuo(); d.best = STAGES.length; saveDuo(d); }
     finishLog();
     for (const k of [0, 1]) {
-      const me = G.players[k], other = G.players[1 - k];
+      const me = b.turrets[k], other = b.turrets[1 - k];
       showMsg(k, `<b>${win ? `${STAGES.length} 關全部守住了！` : "城堡被攻破了…"}</b><span>${win ? "你們是最強的搭檔！" : `打到第 ${b.stage + 1} 關。下次可以從第 ${b.stage + 1} 關開始，再試一次！`}</span>
-        <p class="msum">你答對 <b>${me.correct}</b> 題，${other.name}答對 <b>${other.correct}</b> 題</p>
+        <p class="msum">你答對 <b>${me.correct}</b> 題，<span class="mate"></span>答對 <b>${other.correct}</b> 題</p>
         <div class="mbtns"><button class="btn primary" data-act="again">${win ? "再玩一次" : "從這一關再來"}</button><button class="btn" data-act="exit">回去</button></div>`);
+      q$(k, ".mate").textContent = G.players[1 - k].name;
     }
   }
 }
@@ -189,61 +194,80 @@ function nextQ(k) {
   const p = G.players[k];
   let q;
   do { q = p.type.make(Math.random); } while (p.q && q.text === p.q.text && q.ans === p.q.ans);
-  p.q = q; p.locked = false;
+  p.q = q; p.misses = [];
   renderSide(k);
+}
+
+function renderHearts(k) {
+  q$(k, ".hearts").textContent = `城堡 ${"♥".repeat(G.b.castle)}${"♡".repeat(CASTLE_HP - G.b.castle)}`;
 }
 
 function renderSide(k) {
   const p = G.players[k], t = G.b.turrets[k];
-  q$(k, ".hearts").textContent = `城堡 ${"♥".repeat(G.b.castle)}${"♡".repeat(CASTLE_HP - G.b.castle)}`;
-  q$(k, ".pstat").textContent = `答對 ${p.correct}　第 ${G.b.stage + 1} 關`;
+  renderHearts(k);
+  q$(k, ".pstat").textContent = `第 ${G.b.stage + 1} 關`;
   q$(k, ".gear").innerHTML = Object.entries(t.weapons).map(([w, lv]) => `<span class="chip" title="${WEAPONS[w].name}">${icon(w)}${dots(lv)}</span>`).join("")
     + (t.atk ? `<span class="chip" title="攻擊力">${icon("atk")}${dots(t.atk)}</span>` : "") + (t.spd ? `<span class="chip" title="攻擊速度">${icon("spd")}${dots(t.spd)}</span>` : "");
-  const offer = t.offer;
+  const offer = p.wait > 0 ? null : t.offer;
   q$(k, ".cards").hidden = !offer;
   q$(k, ".quiz").hidden = !!offer;
   if (offer) {
     q$(k, ".cards").innerHTML = `<b class="ctitle">▲ ▲ ▲</b><div>${offer.map((c) => `<button class="card k-${c.kind}" data-card="${c.id}" aria-label="${c.title}">${cardFace(c, t)}</button>`).join("")}</div>`;
     return;
   }
-  if (!p.q) return;
-  q$(k, ".qscene").innerHTML = p.q.scene;
-  q$(k, ".qscene").hidden = !p.q.scene;
-  q$(k, ".qtext").textContent = p.q.scene || p.q.full ? p.q.text : `${p.q.text} = ?`;
-  q$(k, ".choices").innerHTML = p.q.choices.map((c, i) => `<button data-i="${i}">${c}</button>`).join("");
+  const { q, misses } = p, solved = misses.length === 2, watch = p.wait > 0 && !solved;
+  const showQ = !!q && !watch;
+  q$(k, ".qscene").hidden = !showQ || !q?.scene;
+  q$(k, ".qtext").hidden = !showQ;
+  q$(k, ".choices").hidden = !showQ;
+  const hint = misses.length === 1 ? q.hint || (q.scene ? "看看圖，再試一次。" : "慢慢想，再試一次。") : "";
+  q$(k, ".qhint").textContent = watch ? "答對了！看看戰場。" : hint;
+  if (!showQ) return;
+  q$(k, ".qscene").innerHTML = q.scene;
+  const prompt = q.scene || q.full ? q.text : `${q.text} = ?`;
+  q$(k, ".qtext").textContent = solved ? q.solved || (q.scene ? String(q.ans) : `${q.text} = ${q.ans}`) : prompt;
+  q$(k, ".choices").innerHTML = q.choices.map((c, i) => {
+    const missed = misses.includes(i), cls = missed ? "wrong" : solved && i === q.answer ? "right" : "";
+    return `<button data-i="${i}" class="${cls}" ${missed || solved ? "disabled" : ""}>${c}</button>`;
+  }).join("");
 }
 
 function answer(k, i) {
   const p = G.players[k];
-  if (!G.on || G.phase !== "play" || p.locked || !p.q || G.b.turrets[k].offer) return;
-  const btns = q$(k, ".choices").querySelectorAll("button");
+  if (!G.on || G.phase !== "play" || p.wait > 0 || !p.q || p.misses.includes(i) || G.b.turrets[k].offer) return;
   if (i === p.q.answer) {
-    p.correct++; p.locked = true;
-    btns[i].classList.add("right");
+    if (!p.misses.length) p.firstTry++;
+    p.wait = WATCH_S;
     play("correct");
     correct(G.b, k);
     handleEvents(takeEvents(G.b));
-    later(() => nextQ(k), 300);
   } else {
-    p.wrong++; p.locked = true;
-    btns[i].classList.add("wrong");
-    btns[p.q.answer].classList.add("right");
-    q$(k, ".qtext").textContent = p.q.solved || (p.q.scene ? `${p.q.ans}` : `${p.q.text} = ${p.q.ans}`);
+    if (!p.misses.length) p.wrong++;
+    p.misses.push(i);
+    if (p.misses.length === 2) p.wait = SOLUTION_S;
     play("wrong");
-    pane(k).classList.add("stun");
-    later(() => { pane(k).classList.remove("stun"); if (G.on) nextQ(k); }, LOCK_MS);
   }
+  const hadFocus = q$(k, ".choices").contains(document.activeElement);
+  renderSide(k);
+  if (hadFocus && !p.wait) q$(k, ".choices button:enabled")?.focus();
 }
 
 function pick(k, id) {
-  if (!choose(G.b, k, id)) return;
+  if (G.phase !== "play" || G.players[k].wait > 0 || !choose(G.b, k, id)) return;
   G.players[k].pickT = 0;
   handleEvents(takeEvents(G.b));
-  renderSide(k);
 }
-// 升級卡太久沒選，就幫他選第一張，免得卡住
-function tickPick(k, dt) {
+function tickSide(k, dt) {
   const t = G.b.turrets[k], p = G.players[k];
+  if (p.wait > 0) {
+    p.wait = Math.max(0, p.wait - dt);
+    if (p.wait === 0) {
+      nextQ(k);
+      if (t.offer) play("offer");
+    }
+    return;
+  }
+  // 升級卡顯示後太久沒選，就幫他選第一張。
   if (!t.offer) { p.pickT = 0; return; }
   p.pickT += dt;
   if (p.pickT > AUTO_PICK_S) pick(k, t.offer[0].id);
@@ -255,8 +279,7 @@ function handleEvents(events) {
     if (e.type in FX_COLOR) { G.fx.push({ ...e, life: e.type === "wave" ? 0.5 : e.type === "special" ? 0.45 : 0.25, age: 0 }); play(e.type); }
     else if (e.type === "hit") { G.fx.push({ ...e, life: 0.2, age: 0 }); }
     else if (e.type === "kill") { G.fx.push({ type: "puff", x: e.x, y: e.y, boss: e.boss, life: 0.5, age: 0 }); play(e.boss ? "boss" : "kill"); }
-    else if (e.type === "castle") { G.fx.push({ type: "ouch", life: 0.6, age: 0 }); play("castle"); for (const k of [0, 1]) renderSide(k); }
-    else if (e.type === "offer") { renderSide(e.p); play("offer"); }
+    else if (e.type === "castle") { G.fx.push({ type: "ouch", life: 0.6, age: 0 }); play("castle"); for (const k of [0, 1]) renderHearts(k); }
     else if (e.type === "upgrade") {
       renderSide(e.p); play("upgrade");
       const c = e.card, id = c.kind === "atk" ? "atk" : c.kind === "spd" ? "spd" : c.w;
@@ -373,8 +396,8 @@ function finishLog() {
   logged = true;
   const sec = (Date.now() - G.t0) / 1000;
   for (const p of G.players) {
-    const total = p.correct + p.wrong;
-    if (total > 0) logSessionAs(p.name, { id: `duo.${p.type.id}`, label: `一起守城堡・${p.type.name}`, correct: p.correct, total, sec });
+    const total = p.firstTry + p.wrong;
+    if (total > 0) logSessionAs(p.name, { id: `duo.${p.type.id}`, label: `一起守城堡・${p.type.name}`, correct: p.firstTry, total, sec });
   }
 }
 

@@ -21,12 +21,12 @@ const pileOf = (n, color, eaten = 0) => `<div class="dgrid small" style="--cols:
 // 10 以內的加減法都配甜甜圈，小朋友可以用數的：加法是兩堆，減法是劃掉拿走的
 function addQ(a, b, rng) {
   const p = a + b, [c1, c2] = [DONUT[rnd(rng, 0, 1)], DONUT[rnd(rng, 2, 4)]];
-  return { text: `${a} + ${b} = ?`, full: true, solved: `${a} + ${b} = ${p}`, scene: `<div class="krow">${pileOf(a, c1)}<span class="kop">+</span>${pileOf(b, c2)}</div>`, ans: p, ...three(p, [p - 1, p + 1, p - 2, p + 2], rng, 1) };
+  return { text: `${a} + ${b} = ?`, full: true, solved: `${a} + ${b} = ${p}`, hint: "把兩堆甜甜圈一起數。", scene: `<div class="krow">${pileOf(a, c1)}<span class="kop">+</span>${pileOf(b, c2)}</div>`, ans: p, ...three(p, [p - 1, p + 1, p - 2, p + 2], rng, 1) };
 }
 function subQ(a, b, rng, max = Infinity) {
   const p = a - b;
   const near = [p - 1, p + 1, p + 2, a + b].filter((n) => n <= max);
-  return { text: `${a} − ${b} = ?`, full: true, solved: `${a} − ${b} = ${p}`, scene: pileOf(a, DONUT[rnd(rng, 0, 4)], b), ans: p, ...three(p, near, rng) };
+  return { text: `${a} − ${b} = ?`, full: true, solved: `${a} − ${b} = ${p}`, hint: "數一數沒被劃掉的甜甜圈。", scene: pileOf(a, DONUT[rnd(rng, 0, 4)], b), ans: p, ...three(p, near, rng) };
 }
 
 // 題目格式：{ text 算式或題目, scene 圖（HTML，可以是空的）, choices [三個數字], answer 正確選項的位置, ans 答案 }
