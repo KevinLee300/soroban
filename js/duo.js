@@ -23,9 +23,10 @@ function addQ(a, b, rng) {
   const p = a + b, [c1, c2] = [DONUT[rnd(rng, 0, 1)], DONUT[rnd(rng, 2, 4)]];
   return { text: `${a} + ${b} = ?`, full: true, solved: `${a} + ${b} = ${p}`, scene: `<div class="krow">${pileOf(a, c1)}<span class="kop">+</span>${pileOf(b, c2)}</div>`, ans: p, ...three(p, [p - 1, p + 1, p - 2, p + 2], rng, 1) };
 }
-function subQ(a, b, rng) {
+function subQ(a, b, rng, max = Infinity) {
   const p = a - b;
-  return { text: `${a} − ${b} = ?`, full: true, solved: `${a} − ${b} = ${p}`, scene: pileOf(a, DONUT[rnd(rng, 0, 4)], b), ans: p, ...three(p, [p - 1, p + 1, p + 2, a + b], rng, 0) };
+  const near = [p - 1, p + 1, p + 2, a + b].filter((n) => n <= max);
+  return { text: `${a} − ${b} = ?`, full: true, solved: `${a} − ${b} = ${p}`, scene: pileOf(a, DONUT[rnd(rng, 0, 4)], b), ans: p, ...three(p, near, rng) };
 }
 
 // 題目格式：{ text 算式或題目, scene 圖（HTML，可以是空的）, choices [三個數字], answer 正確選項的位置, ans 答案 }
@@ -37,6 +38,10 @@ export const TYPES = [
   { id: "add5", name: "5 以內加法", make(rng) {
     const a = rnd(rng, 1, 4), b = rnd(rng, 1, 5 - a);
     return addQ(a, b, rng);
+  } },
+  { id: "sub5", name: "5 以內減法", make(rng) {
+    const a = rnd(rng, 1, 5), b = rnd(rng, 1, a);
+    return subQ(a, b, rng, 5);
   } },
   { id: "add10", name: "10 以內加法", make(rng) {
     const a = rnd(rng, 1, 9), b = rnd(rng, 1, 10 - a);

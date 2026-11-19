@@ -36,8 +36,19 @@ test("數字比大小", () => each("numcmp", (q) => {
 }));
 
 test("加法、減法、湊一湊、平分：算式正確，中班的數字範圍", () => {
-  each("add", (q, level) => { assert.equal(picked(q), q.meta.a + q.meta.b); assert.ok(q.meta.a + q.meta.b <= (level === 1 ? 5 : level === 2 ? 10 : 18)); });
-  each("sub", (q) => { assert.equal(picked(q), q.meta.a - q.meta.b); assert.ok(q.meta.a - q.meta.b >= 0 && q.meta.a <= 18); });
+  each("add", (q, level) => {
+    const { a, b } = q.meta;
+    assert.equal(picked(q), a + b);
+    assert.ok(a + b <= (level === 1 ? 5 : level === 2 ? 10 : 18));
+    assert.deepEqual(q.scene.split('<span class="kop">+</span>').map(donutCount), [a, b]);
+  });
+  each("sub", (q) => {
+    const { a, b } = q.meta;
+    assert.equal(picked(q), a - b);
+    assert.ok(a - b >= 0 && a <= 18);
+    assert.equal(donutCount(q.scene), a);
+    assert.equal((q.scene.match(/class="donut eaten"/g) || []).length, b);
+  });
   each("make", (q) => { assert.equal(picked(q) + q.meta.a, q.meta.total); });
   each("share", (q) => { assert.equal(picked(q) * q.meta.kids, q.meta.total); assert.ok(q.meta.total <= 20); assert.equal(donutCount(q.scene), q.meta.total); });
 });
