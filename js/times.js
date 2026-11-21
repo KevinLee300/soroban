@@ -191,3 +191,25 @@ export function makeStories(level, tables, count = 10, rng = Math.random) {
   }
   return out;
 }
+
+const BRIDGES = [
+  { name: "小兔過溪", animal: "🐇", rows: 3 },
+  { name: "松鼠回家", animal: "🐿️", rows: 4 },
+  { name: "狐狸送信", animal: "🦊", rows: 6 },
+  { name: "小鹿過河", animal: "🦌", rows: 7 },
+  { name: "狸貓郊遊", animal: "🦝", rows: 8 },
+  { name: "熊熊回山上", animal: "🐻", rows: 9 },
+];
+export const BRIDGE_COUNT = BRIDGES.length;
+export const BRIDGE_PIECES = [1, 2, 3, 4, 5];
+
+export function makeBridge(index, rng = Math.random) {
+  const width = index < 2 ? 2 + Math.floor(rng() * 4) : 6 + Math.floor(rng() * 4);
+  return { ...BRIDGES[index], width };
+}
+
+export function bridgeBuild({ rows, width }, pieces) {
+  const built = pieces.reduce((sum, piece) => sum + piece, 0);
+  const remaining = rows - built;
+  return { remaining, ready: pieces.length === 2 && remaining === 0, blocks: pieces.map((piece) => piece * width) };
+}

@@ -199,6 +199,10 @@
         <div class="tablewrap"><table class="ttable" id="tTable"></table></div>
         <p class="tfact" id="tFact" aria-live="polite"></p>
       </div>
+      <a class="lvcard bridge-entry" href="#times-bridge">
+        <span class="lvnum" aria-hidden="true">🪵</span>
+        <span class="lvtext"><b>乘法修橋隊</b><small>接起兩段橋板，讓小動物過河。</small></span>
+      </a>
       <div class="board tboard">
         <h2>練習</h2>
         <div class="optrow"><span class="lab">練幾的乘法</span><div class="seg ttables" id="tTables" role="group" aria-label="選要練幾的乘法"></div>
@@ -251,6 +255,41 @@
       <div class="ctrls">
         <button class="btn primary" id="tAgain">再來一次</button>
         <button class="btn" id="tHomeBtn">回九九乘法</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 乘法修橋隊 -->
+  <section id="view-times-bridge" class="stack" hidden>
+    <a class="back bridge-back" href="#times">← 回九九乘法</a>
+    <header class="bridge-head">
+      <h1>乘法修橋隊</h1>
+      <span id="bridgeProgress"></span>
+    </header>
+    <div class="board bridge-work">
+      <div class="bridge-scene">
+        <div id="bridgeRiver" class="bridge-river" role="img">
+          <div class="bridge-bank" aria-hidden="true"></div>
+          <div id="bridgeDeck" class="bridge-deck" aria-hidden="true"></div>
+          <div class="bridge-bank" aria-hidden="true"></div>
+          <span id="bridgeAnimal" class="bridge-animal" aria-hidden="true"></span>
+        </div>
+        <output class="bridge-formula" id="bridgeFormula"></output>
+      </div>
+      <div class="bridge-task">
+        <div>
+          <h2 id="bridgeName"></h2>
+          <p id="bridgeGoal" class="bridge-goal"></p>
+        </div>
+        <div>
+          <p class="bridge-label">選兩段橋板</p>
+          <div id="bridgePieces" class="bridge-pieces" role="group" aria-label="橋板段數"></div>
+        </div>
+        <div class="bridge-actions">
+          <button class="btn" id="bridgeUndo" type="button">拆最後一段</button>
+          <button class="btn primary" id="bridgeCheck" type="button">讓小動物過橋</button>
+        </div>
+        <p id="bridgeNotice" class="bridge-notice" role="status"></p>
       </div>
     </div>
   </section>
