@@ -210,6 +210,16 @@
         <span class="lvnum" aria-hidden="true">🪵</span>
         <span class="lvtext"><b>乘法修橋隊</b><small>接起兩段橋板，讓小動物過河。</small></span>
       </a>
+      <div class="times-small-games">
+        <a class="lvcard island-entry" href="#times-island">
+          <span class="lvnum" aria-hidden="true">🐸</span>
+          <span class="lvtext"><b>跳島探險</b><small>選每次跳幾格，跳到寶箱。</small></span>
+        </a>
+        <a class="lvcard snack-entry" href="#times-snack">
+          <span class="lvnum" aria-hidden="true">🍪</span>
+          <span class="lvtext"><b>點心店出貨</b><small>把點心裝成每盒一樣多。</small></span>
+        </a>
+      </div>
       <div class="board tboard">
         <h2>練習</h2>
         <div class="optrow"><span class="lab">練幾的乘法</span><div class="seg ttables" id="tTables" role="group" aria-label="選要練幾的乘法"></div>
@@ -338,6 +348,69 @@
         </div>
         <p id="bridgeNotice" class="bridge-notice" role="status"></p>
       </div>
+    </div>
+  </section>
+
+  <!-- 九九乘法：跳島探險 -->
+  <section class="stack times-game" id="view-times-island" hidden>
+    <a class="back" href="#times">← 回九九乘法</a>
+    <header class="times-game-head">
+      <h1>跳島探險</h1>
+      <span id="jumpProgress"></span>
+    </header>
+    <div class="board times-game-board">
+      <div class="times-game-intro">
+        <h2 id="jumpName"></h2>
+        <p id="jumpGoal"></p>
+      </div>
+      <div class="jump-map" id="jumpMap" role="img">
+        <div class="jump-course">
+          <div id="jumpTicks" class="jump-ticks" aria-hidden="true"></div>
+          <span class="jump-start" aria-hidden="true">0</span>
+          <span id="jumpChest" class="jump-chest" aria-hidden="true"></span>
+          <span id="jumpRunner" class="jump-runner" aria-hidden="true"><span id="jumpFrog">🐸</span></span>
+        </div>
+      </div>
+      <ol class="jump-trace" id="jumpTrace" aria-label="每次落地的格子"></ol>
+      <div class="times-game-controls">
+        <div id="jumpChoices" class="ctrls" role="group" aria-label="選每次跳幾格"></div>
+        <button class="btn primary" id="jumpNext" type="button" hidden></button>
+      </div>
+      <p class="times-game-notice" id="jumpNotice" role="status"></p>
+    </div>
+  </section>
+
+  <!-- 九九乘法：點心店出貨 -->
+  <section class="stack times-game" id="view-times-snack" hidden>
+    <a class="back" href="#times">← 回九九乘法</a>
+    <header class="times-game-head">
+      <h1>點心店出貨</h1>
+      <span id="snackProgress"></span>
+    </header>
+    <div class="board times-game-board">
+      <div class="times-game-intro">
+        <h2 id="snackName"></h2>
+        <p id="snackGoal"></p>
+      </div>
+      <div class="snack-counter">
+        <div class="snack-bin">
+          <h3 id="snackRemaining"></h3>
+          <div id="snackStock" class="snack-stock" aria-hidden="true"></div>
+        </div>
+        <div class="snack-bin">
+          <h3 id="snackPacked"></h3>
+          <div id="snackBoxes" class="snack-boxes"></div>
+        </div>
+      </div>
+      <div class="times-game-controls">
+        <div id="snackSizes" class="ctrls" role="group" aria-label="選盒子大小"></div>
+        <div class="ctrls">
+          <button class="btn" id="snackPack" type="button">裝一盒</button>
+          <button class="btn" id="snackUndo" type="button">倒回一盒</button>
+          <button class="btn primary" id="snackSend" type="button">送出訂單</button>
+        </div>
+      </div>
+      <p class="times-game-notice" id="snackNotice" role="status"></p>
     </div>
   </section>
 

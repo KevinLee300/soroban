@@ -174,3 +174,35 @@ test("乘法修橋隊：六座橋可以用兩段接好，拆法不同總數相�
   assert.equal(T.bridgeBuild(bridge, [5]).remaining, 2);
   assert.equal(T.bridgeBuild({ rows: 3, width: 2 }, [3]).ready, false);
 });
+
+test("跳島探險：每跳累加同樣格數，只有剛好的跳法會停在寶箱", () => {
+  assert.equal(T.ISLAND_TRAILS.length, 6);
+  assert.deepEqual(T.jumpLandings(7, 4), [7, 14, 21, 28]);
+  assert.deepEqual(T.nearbySizes(7, () => 0).sort((a, b) => a - b), [6, 7, 8]);
+  for (const { step, hops } of T.ISLAND_TRAILS) {
+    const target = step * hops;
+    const jumps = T.jumpLandings(step, hops);
+    assert.equal(jumps.length, hops);
+    for (let i = 0; i < hops; i++) assert.equal(jumps[i] - (jumps[i - 1] ?? 0), step);
+    assert.equal(jumps.at(-1), target);
+    assert.ok(T.jumpLandings(step - 1, hops).at(-1) < target);
+    assert.ok(T.jumpLandings(step + 1, hops).at(-1) > target);
+  }
+});
+
+test("點心店出貨：每盒裝一樣多，剩餘為零且盒子正確才可出貨", () => {
+  assert.equal(T.SNACK_ORDERS.length, 6);
+  for (const order of T.SNACK_ORDERS) {
+    const { total, perBox } = order, boxes = total / perBox;
+    assert.ok(Number.isInteger(boxes));
+    for (let i = 0; i < boxes; i++) {
+      assert.deepEqual(T.snackPacking(order, perBox, i), {
+        remaining: total - i * perBox, canPack: true, ready: false,
+      });
+    }
+    assert.deepEqual(T.snackPacking(order, perBox, boxes), { remaining: 0, canPack: false, ready: true });
+    assert.equal(T.snackPacking(order, perBox, boxes - 1).remaining, perBox);
+    assert.equal(T.snackPacking(order, perBox + 1, 0).canPack, false);
+    assert.equal(T.snackPacking(order, perBox - 1, boxes).ready, false);
+  }
+});

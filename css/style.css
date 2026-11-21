@@ -734,6 +734,75 @@ body.duo-on { overflow: hidden; }
   .bridge-scene { grid-row: 2; }
 }
 
+/* 九九乘法：跳島探險、點心店出貨 */
+.times-small-games { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.island-entry { border-color: var(--t1e); }
+.snack-entry { border-color: var(--t4e); }
+.island-entry .lvnum { background: var(--t1); }
+.snack-entry .lvnum { background: var(--t4); }
+.times-game > .back { display: flex; align-items: center; min-height: 44px; justify-self: start; }
+.times-game-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 20px; }
+.times-game-head span { color: var(--muted); }
+.board.times-game-board { grid-template-columns: minmax(0, 1fr); gap: 12px; padding: clamp(12px, 3vw, 26px); }
+.times-game-intro p { margin: 4px 0 0; }
+.times-game-controls { display: grid; gap: 10px; }
+.times-game-controls .btn { min-height: 44px; padding-inline: clamp(8px, 2vw, 16px); }
+.times-game-controls .btn[aria-pressed="true"] { border-color: var(--plus); background: var(--plus-soft); }
+.times-game-controls .btn[aria-disabled="true"] { opacity: .55; cursor: default; }
+.times-game-notice { margin: 0; min-height: 1.5em; color: var(--ink); }
+
+.jump-map {
+  position: relative; min-height: clamp(132px, 21vw, 184px); border: 2px solid var(--t1e); border-radius: 16px;
+  background: repeating-linear-gradient(168deg, var(--t1) 0 28px, color-mix(in srgb, var(--t1) 90%, var(--t1e)) 28px 36px);
+}
+.jump-course { position: absolute; inset: 0 clamp(21px, 4vw, 44px); }
+.jump-ticks {
+  position: absolute; inset: auto 0 32px; height: 12px; display: flex; justify-content: space-between; align-items: center;
+  background: linear-gradient(var(--t1e), var(--t1e)) center / 100% 2px no-repeat;
+}
+.jump-ticks span { width: 1px; height: 7px; background: var(--t1e); }
+.jump-ticks span:nth-child(5n + 1) { height: 12px; }
+.jump-start, .jump-chest, .jump-runner { position: absolute; left: 0; transform: translateX(-50%); }
+.jump-start { bottom: 8px; font: 600 18px var(--f-num); }
+.jump-runner { bottom: 44px; font-size: clamp(24px, 5vw, 37px); line-height: 1; }
+.jump-runner span { display: block; }
+.jump-chest {
+  top: 15px; width: 33px; height: 23px; border: 2px solid var(--wood-dark); border-radius: 7px 7px 4px 4px;
+  background: linear-gradient(var(--coin-gold) 0 40%, var(--wood-dark) 40% 52%, var(--wood) 52%);
+}
+.jump-chest::before {
+  content: ""; position: absolute; inset: 7px auto auto 50%; transform: translateX(-50%);
+  width: 9px; height: 10px; border-radius: 2px; background: var(--coin-gold); border: 1px solid var(--wood-dark);
+}
+.jump-map.found .jump-chest { box-shadow: 0 0 0 5px var(--glow); }
+.jump-trace { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; list-style: none; padding: 0; margin: 0; }
+.jump-trace li {
+  font: 600 17px var(--f-num); padding: 4px 8px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg);
+}
+.jump-trace li:last-child { color: var(--plus); border-color: var(--plus); }
+@media (prefers-reduced-motion: no-preference) {
+  .jump-runner.hopping { transition: left .35s ease-in-out; }
+}
+
+.snack-counter { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.snack-bin { min-width: 0; padding: clamp(6px, 1.5vw, 14px); border: 1px solid var(--line); border-radius: 14px; background: var(--bg); }
+.snack-bin h3 { font-size: 15px; margin: 0 0 8px; }
+.snack-stock { display: grid; grid-template-columns: repeat(auto-fill, minmax(19px, 1fr)); gap: 2px; }
+.snack-stock span {
+  display: grid; place-items: center; min-height: 22px; line-height: 1; font-size: 17px; border-radius: 4px; background: var(--panel);
+}
+.snack-stock .used { opacity: .45; }
+.snack-boxes { display: grid; grid-template-columns: repeat(auto-fill, minmax(clamp(44px, 11vw, 90px), 1fr)); gap: 5px; }
+.snack-box {
+  min-height: 33px; display: flex; flex-wrap: wrap; justify-content: center; align-content: center;
+  gap: 2px; padding: 3px; border: 1px solid var(--t4e); border-radius: 7px; background: var(--t4);
+  font-size: clamp(12px, 2.6vw, 19px); line-height: 1.1;
+}
+@media (max-width: 600px) {
+  .times-small-games { grid-template-columns: minmax(0, 1fr); }
+  .times-game { gap: 12px; }
+}
+
 /* 朗讀聲音設定 */
 .vgrid { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 10px 14px; align-items: center; max-width: 520px; }
 .vgrid label { font-family: var(--f-display); font-size: 17px; }

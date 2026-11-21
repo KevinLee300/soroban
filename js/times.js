@@ -243,3 +243,30 @@ export function bridgeBuild({ rows, width }, pieces) {
   const remaining = rows - built;
   return { remaining, ready: pieces.length === 2 && remaining === 0, blocks: pieces.map((piece) => piece * width) };
 }
+
+export const ISLAND_TRAILS = [
+  { name: "青蛙淺灘", step: 2, hops: 3 },
+  { name: "貝殼灣", step: 3, hops: 4 },
+  { name: "星星礁", step: 4, hops: 4 },
+  { name: "椰子島", step: 5, hops: 4 },
+  { name: "彩虹渡口", step: 7, hops: 4 },
+  { name: "月亮島", step: 9, hops: 5 },
+];
+
+export const jumpLandings = (step, hops) => Array.from({ length: hops }, (_, i) => step * (i + 1));
+export const nearbySizes = (size, rng = Math.random) => shuffle([size - 1, size, size + 1], rng);
+
+export const SNACK_ORDERS = [
+  { name: "小兔的餅乾", icon: "🍪", total: 6, perBox: 2 },
+  { name: "松鼠的草莓", icon: "🍓", total: 12, perBox: 3 },
+  { name: "小貓的甜甜圈", icon: "🍩", total: 20, perBox: 4 },
+  { name: "小鹿的葡萄", icon: "🍇", total: 30, perBox: 5 },
+  { name: "狐狸的蛋糕", icon: "🧁", total: 24, perBox: 6 },
+  { name: "熊熊的餅乾", icon: "🍪", total: 42, perBox: 7 },
+];
+
+export function snackPacking({ total, perBox }, boxSize, packed) {
+  const remaining = total - packed * perBox;
+  const matches = boxSize === perBox;
+  return { remaining, canPack: matches && remaining >= perBox, ready: matches && remaining === 0 };
+}

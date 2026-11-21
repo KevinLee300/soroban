@@ -11,6 +11,8 @@ import { renderSheet } from "./sheetapp.js";
 import { renderClock, leaveClock } from "./clockapp.js";
 import { renderTimes, leaveTimes } from "./timesapp.js";
 import { renderBridge } from "./timesbridge.js";
+import { leaveIsland, renderIsland } from "./timesisland.js";
+import { renderSnack } from "./timessnack.js";
 import { renderDuo, leaveDuo } from "./duoapp.js";
 
 const $ = (id) => document.getElementById(id);
@@ -48,11 +50,16 @@ function route() {
   leaveClock();
   // #times 是九九乘法首頁；#times-weak、#times-story-2 這種是直接開始那個練習（每日任務用）
   const tm = !lv && location.hash.match(/^#times(?:-([a-z]+)(?:-(\d))?)?$/);
-  const times = !!tm, bridge = tm?.[1] === "bridge";
-  $("view-times").hidden = !times || bridge;
+  const times = !!tm, activity = tm?.[1];
+  const bridge = activity === "bridge", island = activity === "island", snack = activity === "snack";
+  const regularTimes = times && !bridge && !island && !snack;
+  $("view-times").hidden = !regularTimes;
   $("view-times-bridge").hidden = !bridge;
+  $("view-times-island").hidden = !island;
+  $("view-times-snack").hidden = !snack;
   $("navTimes").classList.toggle("on", times);
-  if (!times || bridge) leaveTimes();
+  if (!regularTimes) leaveTimes();
+  if (!island) leaveIsland();
   const duo = !lv && location.hash === "#duo";
   $("view-duo").hidden = !duo;
   if (!duo) leaveDuo();
@@ -71,7 +78,7 @@ function route() {
   if (lv) {
     openLevel(lv);
     if (m[2]) { pset = practiceSets(lv).find((s) => s.id === m[2]) || null; setTab("practice"); }
-  } else if (drill) renderDrill(); else if (math) renderMathHome(); else if (parent) renderParent(); else if (sheet) renderSheet(); else if (clock) renderClock(); else if (bridge) renderBridge(); else if (times) renderTimes(tm[1], tm[2]); else if (duo) renderDuo(); else if (abacus) renderAbacus(); else if (!game) renderHome();
+  } else if (drill) renderDrill(); else if (math) renderMathHome(); else if (parent) renderParent(); else if (sheet) renderSheet(); else if (clock) renderClock(); else if (bridge) renderBridge(); else if (island) renderIsland(); else if (snack) renderSnack(); else if (times) renderTimes(tm[1], tm[2]); else if (duo) renderDuo(); else if (abacus) renderAbacus(); else if (!game) renderHome();
   window.scrollTo(0, 0);
 }
 
