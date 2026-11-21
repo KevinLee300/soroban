@@ -315,3 +315,9 @@
 - `npm test` 70 項全過。戰場測試驗證從第 1 關通關，以及直接從第 6–8 關開始。題庫測試驗證選項及圖示數量。
 - 本機 Edge 檢查約 400px 手機、平板橫直向、原本第 5 關的紀錄解鎖第 6 關、減到 0、攻擊動畫，以及加減法遊戲和練習單的挑戰配圖。混合題與單一加、減法的挑戰練習單都可輸出為一張 A4。實體平板操作與實際紙本列印待確認。
 
+## 2026-11-21｜Codex：九九乘法花園
+
+- 需求：搜尋乘法遊戲／數學 App 後，新增有趣的九九乘法學習單元。分支 `codex/multiplication-garden`。
+- 參考 [NRICH 的乘法排列](https://nrich.maths.org/articles/multiplication-series-number-arrays) 與 [Math Playground 的 Product Blocks](https://www.mathplayground.com/product_blocks.html) 的教學概念。自己設計種花、旋轉和避開池塘的六關。
+- `js/times.js` 出題並驗證花陣；`js/timesgarden.js` 更新花圃、操作和進度；`js/timesapp.js` 讓 `#times-garden` 走既有九九乘法路由。`index.html` 和 `css/style.css` 加入遊戲入口、花圃和控制鈕。
+- `npm test` 71 項通過。本機 Edge 驗證 320、390、768、1024、1440px，玩完六關、提示、旋轉、鍵盤、重玩、深色及減少動態效果，也從遊戲返回原本的練習。花圃進度在本輪有效，重開會抽新題。實機遊玩待確認。
