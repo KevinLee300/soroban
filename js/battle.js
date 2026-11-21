@@ -23,6 +23,7 @@ const TRAITS = {
   bee: { speed: 1.25, hp: 0.7 },
 };
 export const CASTLE_HP = 10;
+export const BATTLE_PACE = 0.9; // 讓孩子有時間重試和看砲塔出招
 export const PER_UPGRADE = 2;   // 答對幾題換一次升級
 const REACH = 0.07;             // 怪物離城堡這麼近就算打到城堡
 const SPECIAL_DMG = 4;          // 答對時的大絕招
