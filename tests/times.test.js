@@ -2,6 +2,25 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import * as T from "../js/times.js";
 
+test("乘法花園：每座隨機花圃都種得下，池塘關卡接受不同排法", () => {
+  assert.equal(T.GARDEN_PLOTS.length, 6);
+  for (let i = 0; i < T.GARDEN_PLOTS.length; i++) {
+    for (let k = 0; k < 100; k++) {
+      const plot = T.makeGardenPlot(i, () => k / 100);
+      assert.ok(plot.a >= 2 && plot.a <= plot.size && plot.b >= 2 && plot.b <= plot.size);
+      assert.equal(T.gardenHint(plot, plot.a, plot.b), "", plot.name);
+      assert.match(T.gardenHint(plot, 1, 1), /排數|不夠/);
+      if (plot.pond) assert.ok(T.gardenWater(plot, plot.size, plot.size));
+    }
+  }
+  const pond = { clue: "total", p: 48, pond: [6, 6] };
+  assert.equal(T.gardenHint(pond, 6, 8), "");
+  assert.equal(T.gardenHint(pond, 8, 6), "");
+  assert.match(T.gardenHint(pond, 8, 8), /池塘/);
+  assert.match(T.gardenHint({ ...pond, p: 64 }, 8, 8), /池塘/);
+  assert.match(T.gardenHint({ ...pond, clue: "rows", a: 6 }, 8, 6), /排數/);
+});
+
 test("九九乘法：72 題，口訣念法正確", () => {
   assert.equal(T.FACTS.length, 72);
   for (const f of T.FACTS) assert.equal(f.p, f.a * f.b);

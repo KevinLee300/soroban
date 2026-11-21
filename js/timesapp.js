@@ -3,6 +3,7 @@ import { FACTS, MASTERY_NAMES, TABLES, buildQueue, chant, factOf, makeQuestion, 
 import { stars } from "./logic.js";
 import { canSpeak, speak, stopSpeak } from "./speech.js";
 import { activeProfile, loadTimes, logSession, saveStars, saveTimes, today } from "./storage.js";
+import { startGarden } from "./timesgarden.js";
 
 const $ = (id) => document.getElementById(id);
 const opts = { tables: new Set(TABLES), order: "random", type: "ans", count: 20, story: 1 };
@@ -48,6 +49,12 @@ function showFact(key) {
 export function renderTimes(mode, arg) {
   bind();
   stopRun();
+  $("tGarden").hidden = mode !== "garden";
+  if (mode === "garden") {
+    $("tHome").hidden = true; $("tPlay").hidden = true; $("tResult").hidden = true;
+    startGarden();
+    return;
+  }
   $("tHome").hidden = false; $("tPlay").hidden = true; $("tResult").hidden = true;
   renderTable(); renderOpts();
   $("tFact").innerHTML = `<span>點乘法表的格子，可以看口訣。</span>`;
