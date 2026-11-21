@@ -6,6 +6,36 @@ export const TABLES = [2, 3, 4, 5, 6, 7, 8, 9];
 export const FACTS = TABLES.flatMap((a) => [1, 2, 3, 4, 5, 6, 7, 8, 9].map((b) => ({ a, b, p: a * b, key: `${a}x${b}` })));
 export const factOf = (key) => FACTS.find((f) => f.key === key);
 
+export const GARDEN_PLOTS = [
+  { name: "窗邊花圃", size: 4, from: 2, clue: "layout" },
+  { name: "石板小徑", size: 5, from: 3, clue: "layout" },
+  { name: "蝴蝶花圃", size: 6, from: 4, clue: "rows" },
+  { name: "山丘花園", size: 9, from: 6, clue: "rows" },
+  { name: "池畔花園", size: 8, from: 4, clue: "total" },
+  { name: "月光花園", size: 9, from: 6, clue: "total" },
+];
+
+export function makeGardenPlot(index, rng = Math.random) {
+  const plot = GARDEN_PLOTS[index], { size, from, clue } = plot;
+  const facts = FACTS.filter(({ a, b }) =>
+    a >= from && a <= size && b >= (clue === "total" ? 3 : 2) && b <= size
+    && (clue !== "total" || a < size || b < size));
+  const { a, b, p } = facts[Math.floor(rng() * facts.length)];
+  // 池塘放在右下角，保證抽到的乘法能種得下。
+  const pond = clue === "total" ? (a < size ? [a, b - 1] : [a - 2, b]) : null;
+  return { ...plot, a, b, p, pond };
+}
+
+export const gardenWater = ({ pond }, row, col) => !!pond && row > pond[0] && col > pond[1];
+
+export function gardenHint(plot, rows, cols) {
+  if (gardenWater(plot, rows, cols)) return "花碰到池塘了。試試換個排法。";
+  if (plot.clue !== "total" && rows !== plot.a) return `先把排數調成 ${plot.a} 排。`;
+  if (rows * cols < plot.p) return "花還不夠。試著多種一些。";
+  if (rows * cols > plot.p) return "花太多了。試著少種一些。";
+  return "";
+}
+
 function cnNumber(n) { // 10–81 的中文數字：十二、二十、五十六
   const t = Math.floor(n / 10), u = n % 10;
   return (t === 1 ? "十" : CN[t] + "十") + (u ? CN[u] : "");
@@ -190,4 +220,26 @@ export function makeStories(level, tables, count = 10, rng = Math.random) {
     seen.add(s.text); out.push(s);
   }
   return out;
+}
+
+const BRIDGES = [
+  { name: "小兔過溪", animal: "🐇", rows: 3 },
+  { name: "松鼠回家", animal: "🐿️", rows: 4 },
+  { name: "狐狸送信", animal: "🦊", rows: 6 },
+  { name: "小鹿過河", animal: "🦌", rows: 7 },
+  { name: "狸貓郊遊", animal: "🦝", rows: 8 },
+  { name: "熊熊回山上", animal: "🐻", rows: 9 },
+];
+export const BRIDGE_COUNT = BRIDGES.length;
+export const BRIDGE_PIECES = [1, 2, 3, 4, 5];
+
+export function makeBridge(index, rng = Math.random) {
+  const width = index < 2 ? 2 + Math.floor(rng() * 4) : 6 + Math.floor(rng() * 4);
+  return { ...BRIDGES[index], width };
+}
+
+export function bridgeBuild({ rows, width }, pieces) {
+  const built = pieces.reduce((sum, piece) => sum + piece, 0);
+  const remaining = rows - built;
+  return { remaining, ready: pieces.length === 2 && remaining === 0, blocks: pieces.map((piece) => piece * width) };
 }

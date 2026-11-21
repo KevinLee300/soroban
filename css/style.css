@@ -675,6 +675,65 @@ body.duo-on { overflow: hidden; }
   .tpad button { height: 56px; }
 }
 
+/* 九九乘法：乘法修橋隊 */
+.bridge-entry { border-color: var(--coin-gold-edge); }
+.bridge-entry .lvnum { background: var(--t4); }
+.bridge-back { display: flex; align-items: center; min-height: 44px; justify-self: start; }
+.bridge-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 20px; }
+#bridgeProgress { color: var(--muted); }
+.board.bridge-work {
+  grid-template-columns: minmax(0, 1.3fr) minmax(270px, 1fr);
+  align-items: start; gap: clamp(16px, 4vw, 40px); padding: clamp(12px, 3vw, 28px);
+}
+.bridge-scene, .bridge-task { display: grid; gap: 12px; min-width: 0; }
+.bridge-river {
+  --bank-width: clamp(32px, 5vw, 60px);
+  position: relative; min-height: clamp(150px, 23vw, 226px);
+  display: grid; grid-template-columns: var(--bank-width) minmax(0, 1fr) var(--bank-width);
+  border: 2px solid var(--t1e); border-radius: 16px; overflow: hidden;
+  background: repeating-linear-gradient(112deg, var(--t1) 0 22px, color-mix(in srgb, var(--t1) 88%, var(--t1e)) 22px 28px);
+}
+.bridge-bank { background: var(--t3); border-inline: 2px solid var(--t3e); }
+.bridge-deck {
+  align-self: center; height: 78px; display: grid;
+  grid-template-columns: repeat(var(--bridge-rows, 3), minmax(0, 1fr)); gap: 2px;
+}
+.bridge-row {
+  display: grid; grid-auto-rows: minmax(0, 1fr); gap: 2px;
+  padding: 3px; border: 1px solid var(--wood-dark); border-radius: 4px;
+}
+.bridge-row.missing { border: 2px dashed var(--t1e); }
+.bridge-row.first { background: var(--wood); }
+.bridge-row.second { background: var(--plus); border-color: var(--plus); }
+.bridge-row:not(.missing) span { background: var(--t4); border-radius: 2px; }
+.bridge-animal {
+  position: absolute; left: calc(var(--bank-width) / 2); top: 50%;
+  transform: translate(-50%, -50%); font-size: clamp(24px, 4vw, 36px); line-height: 1;
+}
+.bridge-river.crossed .bridge-animal { left: calc(100% - var(--bank-width) / 2); }
+@media (prefers-reduced-motion: no-preference) {
+  .bridge-river.crossed .bridge-animal { transition: left 1.35s ease-in-out; }
+  .bridge-pieces .btn:active, .bridge-actions .btn:active { transform: translateY(1px); }
+}
+.bridge-formula { color: var(--plus); font: 600 clamp(19px, 3.6vw, 30px)/1.25 var(--f-num); }
+.bridge-formula:empty { position: absolute; }
+.bridge-goal, .bridge-label, .bridge-notice { margin: 4px 0 0; }
+.bridge-label { margin-bottom: 6px; font-weight: 600; }
+.bridge-pieces { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 5px; }
+.bridge-pieces .btn { padding-inline: 2px; white-space: nowrap; }
+.bridge-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.bridge-pieces .btn, .bridge-actions .btn { min-height: 44px; }
+.bridge-actions .btn { flex: 1 1 auto; padding-inline: 10px; }
+.bridge-work .btn[aria-disabled="true"] { opacity: .55; cursor: default; }
+.bridge-notice { min-height: 1.5em; }
+@media (max-width: 640px) {
+  #view-times-bridge { gap: 12px; }
+  .board.bridge-work { grid-template-columns: minmax(0, 1fr); gap: 10px; }
+  .bridge-task { display: contents; }
+  .bridge-task > :first-child { grid-row: 1; }
+  .bridge-scene { grid-row: 2; }
+}
+
 /* 朗讀聲音設定 */
 .vgrid { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 10px 14px; align-items: center; max-width: 520px; }
 .vgrid label { font-family: var(--f-display); font-size: 17px; }
@@ -708,4 +767,68 @@ body.duo-on { overflow: hidden; }
   .abacus .bead { transition-duration: .15s; }
   .abacus .bead.hl .halo { animation: none; }
   .tok, .rule, .lvcard, .bar i { transition: none; }
+}
+
+/* 九九乘法：乘法花園 */
+#tGarden > .back { display: flex; align-items: center; min-height: 44px; justify-self: start; }
+.garden-entry { gap: 16px; border-color: var(--t3e); }
+.garden-preview {
+  flex: none; width: 74px; padding: 8px; border-radius: 12px; text-align: center;
+  color: var(--plus); background: var(--t3); font-size: 16px; line-height: 1.2;
+}
+.garden-arrow { margin-left: auto; color: var(--plus); font-size: 24px; }
+.garden-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 24px; }
+.garden-path { list-style: none; display: flex; gap: 8px; padding: 0; margin: 0; }
+.garden-path li {
+  width: 32px; height: 32px; display: grid; place-items: center; border-radius: 50%;
+  background: var(--panel); border: 1px solid var(--line); color: var(--muted); font: 600 17px var(--f-num);
+}
+.garden-path li[aria-current] { border: 2px solid var(--plus); color: var(--ink); }
+.garden-path li.bloomed { color: var(--plus); background: var(--t3); }
+.board.garden-work {
+  grid-template-columns: minmax(0, 1.1fr) minmax(250px, .9fr); gap: clamp(16px, 4vw, 44px);
+  align-items: center; padding: clamp(12px, 3vw, 32px);
+}
+.garden-scene { display: grid; justify-items: center; gap: 6px; }
+.garden-bed {
+  width: min(100%, 420px); aspect-ratio: 1; padding: 8px; border: 2px solid var(--t3e); border-radius: 16px;
+  display: grid; grid-template-columns: repeat(var(--garden-size, 4), minmax(0, 1fr));
+  grid-template-rows: repeat(var(--garden-size, 4), minmax(0, 1fr));
+  gap: clamp(2px, .5vw, 5px); background: var(--t3); container-type: inline-size;
+}
+.garden-bed span {
+  display: grid; place-items: center; border-radius: 5px; background: var(--panel); color: var(--plus);
+  font-size: min(24px, calc(72cqi / var(--garden-size))); line-height: 1;
+}
+.garden-bed .sown { background: var(--plus-soft); box-shadow: inset 0 0 0 1px var(--t3e); }
+.garden-bed .pond { background: var(--t1e); }
+.garden-bed .pond.sown { box-shadow: inset 0 0 0 2px var(--bead); }
+.garden-bed.bloomed .sown { color: var(--coincap-ink); background: var(--t4); }
+@media (prefers-reduced-motion: no-preference) {
+  .garden-bed.bloomed .sown { animation: garden-bloom .45s ease-out; }
+  .garden-entry { transition: transform .16s ease; }
+  .garden-entry:hover { transform: translateY(-2px); }
+}
+@keyframes garden-bloom { from { transform: scale(.76); } }
+.garden-pond-key { color: var(--muted); font-size: 14px; }
+.garden-task { min-width: 0; display: grid; gap: 12px; }
+.garden-goal { margin: 4px 0 0; line-height: 1.4; }
+.garden-tools { display: grid; gap: 8px; }
+.garden-step { display: grid; grid-template-columns: minmax(0, 1fr) 44px 2ch 44px; align-items: center; gap: 8px; }
+.garden-step .btn { min-width: 44px; min-height: 44px; padding: 0; font: 600 24px var(--f-num); }
+.garden-step .btn[aria-disabled="true"] { opacity: .5; cursor: default; }
+.garden-step b { text-align: center; font: 600 22px var(--f-num); }
+.garden-preview-total { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; }
+.garden-preview-total .btn { min-height: 44px; }
+.garden-preview-total .btn[aria-disabled="true"] { opacity: .5; cursor: default; }
+.garden-count { font: 600 clamp(24px, 5vw, 34px) var(--f-num); color: var(--plus); }
+.garden-notice { margin: 0; min-height: 1.5em; color: var(--ink); }
+.garden-notice:empty { position: absolute; }
+@media (max-width: 640px) {
+  #tGarden { gap: 12px; }
+  .board.garden-work { grid-template-columns: minmax(0, 1fr); gap: 10px; }
+  .garden-task { display: contents; }
+  .garden-task > :first-child { grid-row: 1; }
+  .garden-scene { grid-row: 2; }
+  .garden-bed { max-width: 230px; }
 }

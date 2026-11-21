@@ -2,6 +2,25 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import * as T from "../js/times.js";
 
+test("乘法花園：每座隨機花圃都種得下，池塘關卡接受不同排法", () => {
+  assert.equal(T.GARDEN_PLOTS.length, 6);
+  for (let i = 0; i < T.GARDEN_PLOTS.length; i++) {
+    for (let k = 0; k < 100; k++) {
+      const plot = T.makeGardenPlot(i, () => k / 100);
+      assert.ok(plot.a >= 2 && plot.a <= plot.size && plot.b >= 2 && plot.b <= plot.size);
+      assert.equal(T.gardenHint(plot, plot.a, plot.b), "", plot.name);
+      assert.match(T.gardenHint(plot, 1, 1), /排數|不夠/);
+      if (plot.pond) assert.ok(T.gardenWater(plot, plot.size, plot.size));
+    }
+  }
+  const pond = { clue: "total", p: 48, pond: [6, 6] };
+  assert.equal(T.gardenHint(pond, 6, 8), "");
+  assert.equal(T.gardenHint(pond, 8, 6), "");
+  assert.match(T.gardenHint(pond, 8, 8), /池塘/);
+  assert.match(T.gardenHint({ ...pond, p: 64 }, 8, 8), /池塘/);
+  assert.match(T.gardenHint({ ...pond, clue: "rows", a: 6 }, 8, 6), /排數/);
+});
+
 test("九九乘法：72 題，口訣念法正確", () => {
   assert.equal(T.FACTS.length, 72);
   for (const f of T.FACTS) assert.equal(f.p, f.a * f.b);
@@ -132,4 +151,26 @@ test("應用題：錯的選項也要像樣（兩個數字不一樣，沒有答�
       assert.ok(calc(c) > 0, `選項答案是 0 或負數：${c}`);
     }
   }
+});
+
+test("乘法修橋隊：六座橋可以用兩段接好，拆法不同總數相同", () => {
+  assert.equal(T.BRIDGE_COUNT, 6);
+  for (let i = 0; i < T.BRIDGE_COUNT; i++) {
+    const first = T.makeBridge(i, () => 0), last = T.makeBridge(i, () => 0.999);
+    assert.deepEqual([first.width, last.width], i < 2 ? [2, 5] : [6, 9]);
+    const pairs = T.BRIDGE_PIECES.flatMap((a) => T.BRIDGE_PIECES.map((b) => [a, b]));
+    const solutions = pairs.filter((parts) => T.bridgeBuild(first, parts).ready);
+    assert.ok(solutions.length > 0, first.name);
+    for (const parts of pairs) {
+      const result = T.bridgeBuild(first, parts);
+      assert.equal(result.ready, parts[0] + parts[1] === first.rows);
+      assert.equal(result.remaining, first.rows - parts[0] - parts[1]);
+      if (result.ready) assert.equal(result.blocks[0] + result.blocks[1], first.rows * first.width);
+    }
+  }
+  const bridge = { rows: 7, width: 8 };
+  assert.deepEqual(T.bridgeBuild(bridge, [5, 2]), { ready: true, remaining: 0, blocks: [40, 16] });
+  assert.deepEqual(T.bridgeBuild(bridge, [4, 3]).blocks, [32, 24]);
+  assert.equal(T.bridgeBuild(bridge, [5]).remaining, 2);
+  assert.equal(T.bridgeBuild({ rows: 3, width: 2 }, [3]).ready, false);
 });

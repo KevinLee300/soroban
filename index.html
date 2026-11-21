@@ -47,7 +47,7 @@
     <div class="homecards">
     <a class="lvcard abacuscard" href="#abacus"><span class="lvnum">珠</span><span class="lvtext"><b>珠算闖關</b><small>看動畫學口訣，再撥算盤練習，一關一關闖</small></span><span id="abacusStars"></span></a>
     <a class="lvcard duocard" href="#duo"><span class="lvnum">守</span><span class="lvtext"><b>一起守城堡</b><small>兩個人用同一台平板，各自答題升級砲塔，一起打退湧進來的怪物</small></span></a>
-    <a class="lvcard timescard" href="#times"><span class="lvnum">×</span><span class="lvtext"><b>九九乘法</b><small>乘法表、練習、限時 60 秒挑戰、弱點加強</small></span></a>
+    <a class="lvcard timescard" href="#times"><span class="lvnum">×</span><span class="lvtext"><b>九九乘法</b><small>乘法花園、乘法表、限時挑戰、弱點加強</small></span></a>
     <a class="lvcard mathcard" href="#math"><span class="lvnum">數</span><span class="lvtext"><b>幼兒數學</b><small>數甜甜圈、比大小、形狀、規律、錢幣、時鐘、動動腦，共 18 個小遊戲</small></span></a>
     <a class="lvcard drillcard" href="#drill"><span class="lvnum">題</span><span class="lvtext"><b>算盤題庫</b><small>直接加減、五的好朋友，拿實體算盤來算，可以列印</small></span></a>
     </div>
@@ -195,12 +195,21 @@
         <h1>九九乘法</h1>
         <p class="lead">現在練習的是「<b id="tWho"></b>」。每答一題，乘法表上那一格的顏色就會更新。</p>
       </div>
+      <a class="lvcard garden-entry" href="#times-garden">
+        <span class="garden-preview" aria-hidden="true">✿ ✿ ✿<br>✿ ✿ ✿</span>
+        <span class="lvtext"><b>乘法花園</b><small>用排數和每排的朵數，種出六座花圃。</small></span>
+        <span class="garden-arrow" aria-hidden="true">→</span>
+      </a>
       <div class="board tboard">
         <h2>乘法表</h2>
         <div class="tlegend" id="tSummary"></div>
         <div class="tablewrap"><table class="ttable" id="tTable"></table></div>
         <p class="tfact" id="tFact" aria-live="polite"></p>
       </div>
+      <a class="lvcard bridge-entry" href="#times-bridge">
+        <span class="lvnum" aria-hidden="true">🪵</span>
+        <span class="lvtext"><b>乘法修橋隊</b><small>接起兩段橋板，讓小動物過河。</small></span>
+      </a>
       <div class="board tboard">
         <h2>練習</h2>
         <div class="optrow"><span class="lab">練幾的乘法</span><div class="seg ttables" id="tTables" role="group" aria-label="選要練幾的乘法"></div>
@@ -230,6 +239,46 @@
       </div>
     </div>
 
+    <div id="tGarden" class="stack" hidden>
+      <a href="#times" class="back">← 回九九乘法</a>
+      <header class="garden-head">
+        <h1>乘法花園</h1>
+        <ol id="gardenPath" class="garden-path" aria-label="花圃進度"></ol>
+      </header>
+      <div class="board garden-work">
+        <div class="garden-scene">
+          <div id="gardenBed" class="garden-bed" role="img"></div>
+          <div id="gardenPondKey" class="garden-pond-key" hidden>藍色是池塘</div>
+        </div>
+        <div class="garden-task">
+          <div>
+            <h2 id="gardenName"></h2>
+            <p id="gardenGoal" class="garden-goal"></p>
+          </div>
+          <div id="gardenTools" class="garden-tools">
+            <div class="garden-step" role="group" aria-label="排數">
+              <span>排數</span>
+              <button class="btn" type="button" data-axis="rows" data-delta="-1" aria-label="少一排">−</button>
+              <b id="gardenRows"></b>
+              <button class="btn" type="button" data-axis="rows" data-delta="1" aria-label="多一排">＋</button>
+            </div>
+            <div class="garden-step" role="group" aria-label="每排朵數">
+              <span>每排朵數</span>
+              <button class="btn" type="button" data-axis="cols" data-delta="-1" aria-label="每排少一朵">−</button>
+              <b id="gardenCols"></b>
+              <button class="btn" type="button" data-axis="cols" data-delta="1" aria-label="每排多一朵">＋</button>
+            </div>
+          </div>
+          <div class="garden-preview-total">
+            <output id="gardenCount" class="garden-count"></output>
+            <button id="gardenTurn" class="btn" type="button">轉個方向</button>
+          </div>
+          <p id="gardenNotice" class="garden-notice" role="status"></p>
+          <button id="gardenPlant" class="btn primary big" type="button"></button>
+        </div>
+      </div>
+    </div>
+
     <div id="tPlay" class="board tplay" hidden>
       <div class="tplayhead"><b id="tModeName"></b><span class="ctrls"><button class="btn small" id="tVoice" aria-pressed="false">朗讀：關</button><button class="btn small" id="tQuit">結束</button></span></div>
       <div class="progress"><div class="bar"><i id="tBar"></i></div><span id="tProg"></span></div>
@@ -253,6 +302,41 @@
       <div class="ctrls">
         <button class="btn primary" id="tAgain">再來一次</button>
         <button class="btn" id="tHomeBtn">回九九乘法</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 乘法修橋隊 -->
+  <section id="view-times-bridge" class="stack" hidden>
+    <a class="back bridge-back" href="#times">← 回九九乘法</a>
+    <header class="bridge-head">
+      <h1>乘法修橋隊</h1>
+      <span id="bridgeProgress"></span>
+    </header>
+    <div class="board bridge-work">
+      <div class="bridge-scene">
+        <div id="bridgeRiver" class="bridge-river" role="img">
+          <div class="bridge-bank" aria-hidden="true"></div>
+          <div id="bridgeDeck" class="bridge-deck" aria-hidden="true"></div>
+          <div class="bridge-bank" aria-hidden="true"></div>
+          <span id="bridgeAnimal" class="bridge-animal" aria-hidden="true"></span>
+        </div>
+        <output class="bridge-formula" id="bridgeFormula"></output>
+      </div>
+      <div class="bridge-task">
+        <div>
+          <h2 id="bridgeName"></h2>
+          <p id="bridgeGoal" class="bridge-goal"></p>
+        </div>
+        <div>
+          <p class="bridge-label">選兩段橋板</p>
+          <div id="bridgePieces" class="bridge-pieces" role="group" aria-label="橋板段數"></div>
+        </div>
+        <div class="bridge-actions">
+          <button class="btn" id="bridgeUndo" type="button">拆最後一段</button>
+          <button class="btn primary" id="bridgeCheck" type="button">讓小動物過橋</button>
+        </div>
+        <p id="bridgeNotice" class="bridge-notice" role="status"></p>
       </div>
     </div>
   </section>

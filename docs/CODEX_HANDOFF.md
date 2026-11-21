@@ -2,6 +2,13 @@
 
 此檔記錄 Codex 接手期間的需求、變更與驗證。後續修改請依日期追加；先確認分支與 PR 是否已合併，再繼續工作。
 
+## 2026-11-21｜Codex：九九乘法修橋隊
+
+- 使用者同意製作「乘法修橋隊」。分支 `codex/multiplication-bridge`，入口在「九九乘法」的乘法表下方，路由 `#times-bridge`。
+- `js/times.js` 定義六座橋與兩段拼接規則，`js/timesbridge.js` 處理接橋、撤回、缺幾排與過河。前兩座用小數字，後四座練 6～9 的乘法，可用不同排法完成同一座橋。
+- `index.html`、`css/style.css`、`js/app.js` 加入入口、版面與路由。過橋動畫支援減少動態效果。
+- 本機 `npm test` 72 項通過（含本機另有的乘法花園測試）。Edge 驗證 320、400、768、1024、1440px、六關、接太短或太長、撤回、兩種 7 × 8 方案、鍵盤、深色、過橋動畫、重玩與原有九九乘法路由。進度在本輪有效，實機遊玩待確認。
+
 ## 2026-11-17｜練習單系列題型、圖案與主畫面安裝
 
 ### 使用者需求
@@ -315,3 +322,9 @@
 - `js/battle.js`、`tests/battle.test.js`：戰場模擬以原速的 90% 運行，驗證較慢答題仍可合作通關，以及單人答題並非一定能過關。
 - `npm test` 70 項通過。本機 Edge 檢查 400px 手機、平板橫放、兩人獨立作答、同題重試、再次答錯、看戰場期間暫停、升級卡、學習紀錄。親子實際遊玩節奏待確認。
 
+## 2026-11-21｜Codex：九九乘法花園
+
+- 需求：搜尋乘法遊戲／數學 App 後，新增有趣的九九乘法學習單元。分支 `codex/multiplication-garden`。
+- 參考 [NRICH 的乘法排列](https://nrich.maths.org/articles/multiplication-series-number-arrays) 與 [Math Playground 的 Product Blocks](https://www.mathplayground.com/product_blocks.html) 的教學概念。自己設計種花、旋轉和避開池塘的六關。
+- `js/times.js` 出題並驗證花陣；`js/timesgarden.js` 更新花圃、操作和進度；`js/timesapp.js` 讓 `#times-garden` 走既有九九乘法路由。`index.html` 和 `css/style.css` 加入遊戲入口、花圃和控制鈕。
+- `npm test` 71 項通過。本機 Edge 驗證 320、390、768、1024、1440px，玩完六關、提示、旋轉、鍵盤、重玩、深色及減少動態效果，也從遊戲返回原本的練習。花圃進度在本輪有效，重開會抽新題。實機遊玩待確認。
