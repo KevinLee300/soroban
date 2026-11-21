@@ -133,3 +133,25 @@ test("應用題：錯的選項也要像樣（兩個數字不一樣，沒有答�
     }
   }
 });
+
+test("乘法修橋隊：六座橋可以用兩段接好，拆法不同總數相同", () => {
+  assert.equal(T.BRIDGE_COUNT, 6);
+  for (let i = 0; i < T.BRIDGE_COUNT; i++) {
+    const first = T.makeBridge(i, () => 0), last = T.makeBridge(i, () => 0.999);
+    assert.deepEqual([first.width, last.width], i < 2 ? [2, 5] : [6, 9]);
+    const pairs = T.BRIDGE_PIECES.flatMap((a) => T.BRIDGE_PIECES.map((b) => [a, b]));
+    const solutions = pairs.filter((parts) => T.bridgeBuild(first, parts).ready);
+    assert.ok(solutions.length > 0, first.name);
+    for (const parts of pairs) {
+      const result = T.bridgeBuild(first, parts);
+      assert.equal(result.ready, parts[0] + parts[1] === first.rows);
+      assert.equal(result.remaining, first.rows - parts[0] - parts[1]);
+      if (result.ready) assert.equal(result.blocks[0] + result.blocks[1], first.rows * first.width);
+    }
+  }
+  const bridge = { rows: 7, width: 8 };
+  assert.deepEqual(T.bridgeBuild(bridge, [5, 2]), { ready: true, remaining: 0, blocks: [40, 16] });
+  assert.deepEqual(T.bridgeBuild(bridge, [4, 3]).blocks, [32, 24]);
+  assert.equal(T.bridgeBuild(bridge, [5]).remaining, 2);
+  assert.equal(T.bridgeBuild({ rows: 3, width: 2 }, [3]).ready, false);
+});
