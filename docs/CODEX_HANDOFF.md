@@ -328,3 +328,11 @@
 - 參考 [NRICH 的乘法排列](https://nrich.maths.org/articles/multiplication-series-number-arrays) 與 [Math Playground 的 Product Blocks](https://www.mathplayground.com/product_blocks.html) 的教學概念。自己設計種花、旋轉和避開池塘的六關。
 - `js/times.js` 出題並驗證花陣；`js/timesgarden.js` 更新花圃、操作和進度；`js/timesapp.js` 讓 `#times-garden` 走既有九九乘法路由。`index.html` 和 `css/style.css` 加入遊戲入口、花圃和控制鈕。
 - `npm test` 71 項通過。本機 Edge 驗證 320、390、768、1024、1440px，玩完六關、提示、旋轉、鍵盤、重玩、深色及減少動態效果，也從遊戲返回原本的練習。花圃進度在本輪有效，重開會抽新題。實機遊玩待確認。
+
+## 2026-11-21｜Codex：九九乘法跳島探險、點心店出貨
+
+- 需求：沿用「九九乘法」新增跳著數和分裝點心兩個單元。分支 `codex/island-and-snack-games`。
+- `js/times.js`：加入六個跳島路線、六張點心訂單和共用的選項洗牌。跳島每一步的數字依固定跳距累加；點心店依訂單檢查盒子大小、剩餘點心和出貨條件。
+- `js/timesisland.js`、`js/timessnack.js`：顯示青蛙跳躍與落點、跳太近或太遠的提示，以及選盒、裝盒、倒回與除法算式。離開跳島會取消後續跳躍，減少動態模式保留逐步落點。每個單元完成後都能重玩。
+- `index.html`、`css/style.css`、`js/app.js`：在九九乘法頁加入口，沿用既有路由和返回連結（`#times-island`、`#times-snack`）。
+- `npm test` 74 項通過。Edge 驗證 320、400、768、1024、1440px、完整 12 關、跳躍中的換頁、選錯盒、倒回、鍵盤、深色和減少動態模式，也檢查原有花園與修橋隊入口。實機遊玩待確認。
