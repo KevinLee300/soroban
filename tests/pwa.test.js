@@ -20,7 +20,7 @@ function setup({ ua = "Chrome", standalone = false, hash = "", prompt = null } =
     document: { getElementById: el, createElement: () => ({ textContent: "" }) },
     window: { addEventListener: (name, cb) => { handlers[name] = cb; } },
     navigator: { userAgent: ua, platform: "", maxTouchPoints: 0, onLine: true, clipboard: { writeText: async () => {} } },
-    location, URL, matchMedia: () => ({ matches: standalone, addEventListener() {} }),
+    location, URL, AbortController, setTimeout, clearTimeout, matchMedia: () => ({ matches: standalone, addEventListener() {} }),
   };
   vm.runInNewContext(source, context);
   if (prompt) handlers.beforeinstallprompt({ preventDefault() {}, prompt, userChoice: Promise.resolve({ outcome: "dismissed" }) });
@@ -72,4 +72,38 @@ test("安裝：複製連結失敗時選取網址；離線提醒仍有效", async
   context.navigator.onLine = false;
   handlers.offline();
   assert.equal(el("offlineNote").hidden, false);
+});
+
+test("手動更新會直接連線，更新背景程式並重新載入一次", async () => {
+  const { el, context } = setup({ standalone: true });
+  let reloads = 0, updates = 0;
+  context.location.reload = () => reloads++;
+  context.fetch = async (url, opts) => {
+    assert.equal(url.href, "https://example.com/soroban/index.html");
+    assert.equal(opts.method, "HEAD");
+    assert.equal(opts.cache, "no-store");
+    return { ok: true };
+  };
+  context.navigator.serviceWorker = { getRegistration: async () => ({ update: async () => updates++ }) };
+  await Promise.all([el("appUpdateBtn").onclick(), el("appUpdateBtn").onclick()]);
+  assert.equal(updates, 1);
+  assert.equal(reloads, 1);
+});
+
+test("離線、連線失敗或已進入練習時，保留目前畫面", async () => {
+  const { el, context } = setup();
+  let reloads = 0;
+  context.location.reload = () => reloads++;
+  context.navigator.onLine = false;
+  await el("appUpdateBtn").onclick();
+  assert.match(el("appUpdateStatus").textContent, /網路/);
+  context.navigator.onLine = true;
+  context.fetch = async () => ({ ok: false });
+  await el("appUpdateBtn").onclick();
+  assert.match(el("appUpdateStatus").textContent, /無法更新/);
+  context.fetch = async () => ({ ok: true });
+  el("view-home").hidden = true;
+  await el("appUpdateBtn").onclick();
+  assert.equal(reloads, 0);
+  assert.equal(el("appUpdateBtn").disabled, false);
 });
