@@ -355,3 +355,9 @@
 - index.html、js/pwa.js、tests/pwa.test.js；分支 codex/manual-app-update，可獨立合併到 main。
 - 本機整合工作區 78 項測試通過。Edge 400px 使用真的 service worker 驗證僅網頁內容更新、重新載入提示、保留進度與離線重試。
 - PR #29 已同步主分支，保留二上課程、全站導覽及手動更新的交接與工作紀錄。
+
+## 2026-11-24　硬幣小市集與鏡子拼花
+- 新增兩款可反覆試的操作遊戲，各四關，按家人儲存完成關卡。市集以硬幣湊價錢，可撤回；拼花在中線另一側點格子種花，可移走。
+- js/playmath.js 管理關卡與互動；index.html、css/style.css、js/app.js 和 js/catalog.js 加入幼兒數學入口、手機版面、路由與選課分類。
+- 78 項測試通過。Edge 400px 完成八關並驗證提示、撤回、重試、重新整理接關、重玩與目錄入口。
+- 分支 codex/coin-and-mirror-games，使用固定關卡；僅保留已完成的關卡。
