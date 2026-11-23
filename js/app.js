@@ -1,3 +1,4 @@
+import { renderCatalog } from "./catalogapp.js";
 import { createAbacus } from "./abacus.js";
 import * as L from "./logic.js";
 import { LEVELS } from "./levels.js";
@@ -34,6 +35,8 @@ else { $("voice").textContent = "朗讀：開"; $("voice").setAttribute("aria-pr
 /* ---------- 路由 ---------- */
 function route() {
   stopDemo();
+  const catalog = /^#catalog(?:\?|$)/.test(location.hash);
+  $("view-catalog").hidden = !catalog;
   const grade2 = location.hash.match(/^#grade2(?:-(\d+)-(\d+))?$/);
   $("view-grade2").hidden = !grade2;
   // #level-2 是關卡；#level-2-add 是直接進這一關的「加法」練習（每日任務用）
@@ -60,25 +63,27 @@ function route() {
   $("view-times-bridge").hidden = !bridge;
   $("view-times-island").hidden = !island;
   $("view-times-snack").hidden = !snack;
-  $("navTimes").classList.toggle("on", times);
   if (!regularTimes) leaveTimes();
   if (!island) leaveIsland();
   const duo = !lv && location.hash === "#duo";
   $("view-duo").hidden = !duo;
   if (!duo) leaveDuo();
   $("view-parent").hidden = !parent;
-  $("navParent").classList.toggle("on", parent);
   const abacus = !lv && location.hash === "#abacus";
   $("view-abacus").hidden = !abacus;
-  $("view-home").hidden = !!grade2 || !!lv || drill || math || game || parent || sheet || clock || times || duo || abacus;
+  $("view-home").hidden = catalog || !!grade2 || !!lv || drill || math || game || parent || sheet || clock || times || duo || abacus;
   $("view-level").hidden = !lv;
   $("view-drill").hidden = !drill;
   $("view-math").hidden = !math;
   $("view-game").hidden = !game;
-  $("navMath").classList.toggle("on", math || game || sheet || clock);
-  $("navAbacus").classList.toggle("on", abacus || !!lv);
-  $("navHome").classList.toggle("on", !(grade2 || lv || abacus || drill || math || game || parent || sheet || clock || times || duo));
-  if (grade2) renderGrade2(grade2[1], grade2[2]);
+  const activeNav = parent ? "navParent" : $("view-home").hidden ? "navCatalog" : "navHome";
+  for (const link of document.querySelectorAll(".topnav a")) {
+    link.classList.toggle("on", link.id === activeNav);
+    if (link.id === activeNav) link.setAttribute("aria-current", "location");
+    else link.removeAttribute("aria-current");
+  }
+  if (catalog) renderCatalog();
+  else if (grade2) renderGrade2(grade2[1], grade2[2]);
   else if (lv) {
     openLevel(lv);
     if (m[2]) { pset = practiceSets(lv).find((s) => s.id === m[2]) || null; setTab("practice"); }
