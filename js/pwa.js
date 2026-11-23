@@ -2,6 +2,53 @@
 // 跟其他程式分開載入，就算這裡出錯也不會影響練習。
 const $ = (id) => document.getElementById(id);
 
+// 一般課程更新不一定會改 sw.js。先直接確認首頁可連線，再重新載入整個網頁。
+const updateBtn = $("appUpdateBtn");
+if (updateBtn) {
+  const status = $("appUpdateStatus");
+  const reloaded = "soroban.manualReload";
+  try {
+    if (sessionStorage.getItem(reloaded)) {
+      status.textContent = "程式已重新載入。";
+      sessionStorage.removeItem(reloaded);
+    }
+  } catch { /* 瀏覽器可能不允許暫存提示。 */ }
+  updateBtn.onclick = async () => {
+    if (updateBtn.disabled) return;
+    updateBtn.disabled = true;
+    status.textContent = "正在檢查更新…";
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 12000);
+    try {
+      if (!navigator.onLine) throw Error("offline");
+      // HEAD 不會由離線快取回覆，連不到網站時可保留原畫面。
+      const response = await fetch(new URL("./index.html", location.href), {
+        method: "HEAD", cache: "no-store", signal: controller.signal
+      });
+      if (!response.ok) throw Error("unavailable");
+      const registration = await navigator.serviceWorker?.getRegistration();
+      if (registration) {
+        await Promise.race([registration.update(), new Promise((_, reject) => {
+          if (controller.signal.aborted) reject(Error("timeout"));
+          else controller.signal.addEventListener("abort", () => reject(Error("timeout")), { once: true });
+        })]);
+      }
+      if (!$("view-home").hidden) {
+        status.textContent = "正在重新載入程式…";
+        try { sessionStorage.setItem(reloaded, "1"); } catch { /* 仍可更新 */ }
+        location.reload();
+      } else {
+        status.textContent = "回到首頁後，可以再按更新。";
+      }
+    } catch {
+      status.textContent = "目前無法更新，請確認網路後再試一次。";
+    } finally {
+      clearTimeout(timeout);
+      updateBtn.disabled = false;
+    }
+  };
+}
+
 if ("serviceWorker" in navigator && (location.protocol === "https:" || location.hostname === "localhost")) {
   window.addEventListener("load", async () => {
     try {
