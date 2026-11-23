@@ -106,4 +106,4 @@
 ✅ Codex 完成二上第六至第十單元，共 19 堂教學與練習。分支 `codex/grade-two-lessons`。
 
 ## 全站學習導覽
-進行中：Codex，依程度、學習方式和主題整合選課入口。
+✅ Codex 完成：依程度、學習方式和主題整合 55 個活動入口。分支 `codex/learning-directory`。

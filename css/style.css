@@ -901,3 +901,26 @@ body.duo-on { overflow: hidden; }
   .garden-scene { grid-row: 2; }
   .garden-bed { max-width: 230px; }
 }
+
+/* 全站學習目錄 */
+.catalog-entry { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 16px 20px; border: 2px solid var(--plus); border-radius: 16px; background: var(--plus-soft); color: var(--ink); text-decoration: none; }
+.catalog-entry b { font: 22px var(--f-display); }
+.catalog-entry small, .catalog-list small { display: block; color: var(--muted); }
+.catalog-entry > span:last-child { color: var(--plus); font-size: 24px; }
+.catalog-filters { display: flex; flex-wrap: wrap; align-items: end; gap: 14px; padding: 18px; background: var(--panel); border: 1px solid var(--line); border-radius: 16px; }
+.catalog-filters label { flex: 1 1 145px; display: grid; gap: 4px; font-weight: 700; }
+.catalog-filters select { width: 100%; min-height: 46px; font: inherit; color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: 6px 10px; }
+#catalogCount { margin: 0; color: var(--muted); }
+.catalog-group { border: 1px solid var(--line); border-radius: 14px; background: var(--panel); }
+.catalog-group summary { padding: 14px 16px; cursor: pointer; font: 20px var(--f-display); }
+.catalog-group summary small { margin-inline-start: 10px; color: var(--muted); font: 14px var(--f-body); }
+.catalog-list { display: grid; grid-template-columns: repeat(auto-fit,minmax(min(100%,220px),1fr)); gap: 8px; padding: 0 12px 12px; }
+.catalog-list a { padding: 10px 14px; border-radius: 10px; background: var(--bg); color: var(--ink); text-decoration: none; }
+.catalog-list a:hover, .catalog-entry:hover { outline: 2px solid var(--plus); }
+.catalog-group summary:focus-visible, .catalog-filters select:focus-visible { outline: 3px solid var(--glow); }
+.homecards { grid-template-columns: repeat(auto-fill,minmax(min(100%,300px),1fr)); }
+.topnav a { display: inline-flex; align-items: center; min-height: 44px; }
+@media (max-width: 480px) {
+  .catalog-filters { gap: 8px; }
+  .catalog-filters label { display: grid; grid-template-columns: 5em 1fr; align-items: center; flex-basis: 100%; }
+}
