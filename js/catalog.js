@@ -1,6 +1,7 @@
 import { GAMES } from "./kids.js";
 import { LEVELS } from "./levels.js";
 import { units } from "./grade2.js";
+import { playGames } from "./playmath.js";
 
 export const filters = {
   level: ["剛開始學", "基礎練習", "進階挑戰"],
@@ -23,6 +24,8 @@ const kidsTopics = {
 const unitTopics = ["加減", "乘除", "時間", "乘除", "圖形與測量"];
 
 export const collections = [
+  { title: "動手玩數學", entries: playGames.map(g =>
+    entry("#play-" + g.id, g.title, g.sub, "剛開始學、基礎練習", "動手玩", g.topic)) },
   { title: "幼兒數學", entries: GAMES.map(g =>
     entry("#math-" + g.id, g.title, g.sub, g.id === "mix" ? "基礎練習、進階挑戰" : "剛開始學、基礎練習", "動手玩、做練習", kidsTopics[g.id])) },
   { title: "時鐘小學堂", entries: [

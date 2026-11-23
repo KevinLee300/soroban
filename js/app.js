@@ -1,4 +1,5 @@
 import { renderCatalog } from "./catalogapp.js";
+import { playGames, renderPlay } from "./playmath.js";
 import { createAbacus } from "./abacus.js";
 import * as L from "./logic.js";
 import { LEVELS } from "./levels.js";
@@ -35,6 +36,8 @@ else { $("voice").textContent = "朗讀：開"; $("voice").setAttribute("aria-pr
 /* ---------- 路由 ---------- */
 function route() {
   stopDemo();
+  const play = playGames.find(g => location.hash === "#play-" + g.id);
+  $("view-play").hidden = !play;
   const catalog = /^#catalog(?:\?|$)/.test(location.hash);
   $("view-catalog").hidden = !catalog;
   const grade2 = location.hash.match(/^#grade2(?:-(\d+)-(\d+))?$/);
@@ -71,7 +74,7 @@ function route() {
   $("view-parent").hidden = !parent;
   const abacus = !lv && location.hash === "#abacus";
   $("view-abacus").hidden = !abacus;
-  $("view-home").hidden = catalog || !!grade2 || !!lv || drill || math || game || parent || sheet || clock || times || duo || abacus;
+  $("view-home").hidden = !!play || catalog || !!grade2 || !!lv || drill || math || game || parent || sheet || clock || times || duo || abacus;
   $("view-level").hidden = !lv;
   $("view-drill").hidden = !drill;
   $("view-math").hidden = !math;
@@ -83,6 +86,7 @@ function route() {
     else link.removeAttribute("aria-current");
   }
   if (catalog) renderCatalog();
+  else if (play) renderPlay(play);
   else if (grade2) renderGrade2(grade2[1], grade2[2]);
   else if (lv) {
     openLevel(lv);
