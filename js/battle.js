@@ -39,11 +39,17 @@ export const WEAPONS = {
 };
 export const WEAPON_IDS = Object.keys(WEAPONS);
 
+export const TEAM_SKILLS = {
+  meteor: { name: "流星雨", icon: "☄", desc: "流星追打最靠近城堡的三隻怪。" },
+  frost: { name: "極光冰封", icon: "❄", desc: "凍住場上所有怪物兩秒。" },
+  ward: { name: "守護星盾", icon: "⬡", desc: "擋住下一次撞擊，魔王也擋得住！" },
+};
+
 // 這座砲塔現在的能力（給畫面顯示，也給模擬用）
 export const dmgMult = (t) => 1 + 0.4 * t.atk;
 export const rateMult = (t) => 1 + 0.25 * t.spd;
 
-export function createBattle({ aspect = 1, stage = 0, rng = Math.random } = {}) {
+export function createBattle({ aspect = 1, stage = 0, rng = Math.random, skill = "meteor" } = {}) {
   // 直接開後面的新關時，補上途中本來可以拿到的升級。
   const gear = STAGES[stage].gear;
   const turrets = [0, 1].map((p) => ({
@@ -54,7 +60,7 @@ export function createBattle({ aspect = 1, stage = 0, rng = Math.random } = {}) 
   return {
     aspect, rng, stage, t: 0, castle: CASTLE_HP, monsters: [], nextId: 1, spawned: 0, spawnT: 1, bossOut: false,
     state: "play", // play 進行中、clear 這關打完、win 全部打完、lose 城堡被打倒
-    turrets,
+    turrets, skill, stars: [false, false], shield: false, casts: 0,
     events: [],
   };
 }
@@ -88,6 +94,28 @@ function damage(b, m, dmg, by, weapon) {
   m.hp -= dmg;
   b.events.push({ type: "hit", id: m.id, x: m.x, y: m.y, by, weapon });
   if (m.hp <= 0) b.events.push({ type: "kill", id: m.id, x: m.x, y: m.y, boss: m.boss, kind: m.kind, by });
+}
+
+function castTogether(b) {
+  if (!b.stars[0] || !b.stars[1]) return;
+  if (b.skill === "ward") {
+    if (b.shield) return;
+    b.shield = true;
+  } else {
+    const targets = byDanger(b).filter(m => m.y >= 0 && m.y <= b.aspect);
+    if (!targets.length) return; // 留著兩顆星，等怪物走進畫面。
+    if (b.skill === "meteor") {
+      for (const m of targets.slice(0, 3)) {
+        b.events.push({ type: "meteor", x: m.x, y: m.y });
+        damage(b, m, 5 + b.stage * 2, null, "meteor");
+      }
+    } else {
+      for (const m of targets) m.frozen = 2;
+    }
+  }
+  b.stars.fill(false);
+  b.casts++;
+  b.events.push({ type: "team", skill: b.skill });
 }
 
 // 一座砲塔的一種武器射一次
@@ -136,12 +164,19 @@ export function step(b, dt) {
     for (let k = 0; k < group; k++) { spawn(b); b.spawned++; }
     b.spawnT = s.every * group * (0.7 + b.rng() * 0.6);
   } else if (b.spawned >= s.count && !b.bossOut && b.spawnT <= 0) { spawn(b, true); b.bossOut = true; }
+  castTogether(b);
   // 怪物往城堡走（被冰凍的走一半速度）
   for (const m of b.monsters) {
     if (m.hp <= 0) continue;
+    if (m.frozen > 0) { m.frozen -= dt; continue; }
     const d = dist(m, c);
     if (d <= REACH) {
       m.hp = 0;
+      if (b.shield) {
+        b.shield = false;
+        b.events.push({ type: "block", x: m.x, y: m.y });
+        continue;
+      }
       b.castle = Math.max(0, b.castle - (m.boss ? 3 : 1));
       b.events.push({ type: "castle", x: m.x, y: m.y, boss: m.boss });
       continue;
@@ -193,10 +228,13 @@ export function makeOffer(t, rng = Math.random) {
 
 // 玩家答對：放大絕招；每答對 PER_UPGRADE 題得到一次升級
 export function correct(b, p) {
+  if (b.state !== "play") return b;
   const t = b.turrets[p];
   t.correct++;
   const m = byDanger(b, p)[0];
   if (m) { b.events.push({ type: "special", p, x1: t.x, y1: t.y, x2: m.x, y2: m.y }); damage(b, m, SPECIAL_DMG * dmgMult(t), p, "special"); }
+  b.stars[p] = true;
+  castTogether(b);
   b.monsters = alive(b);
   if (t.correct % PER_UPGRADE === 0) {
     t.picks++;
