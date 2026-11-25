@@ -542,6 +542,12 @@ svg.tick { width: 100%; height: auto; display: block; overflow: visible; touch-a
 .dstages button:disabled { opacity: .45; }
 .dstages .dmon svg { width: 64px; height: 54px; display: block; }
 .dstages small { color: var(--muted); font-size: 12px; }
+#dSkills { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(175px, 100%), 1fr)); gap: 8px; }
+#dSkills button { display: grid; grid-template-columns: 42px 1fr; align-items: center; column-gap: 8px; text-align: left; padding: 10px; border: 2px solid var(--line); border-radius: 14px; background: var(--panel); }
+#dSkills button[aria-pressed="true"] { border-color: var(--minus); background: var(--minus-soft); }
+#dSkills .sigil { grid-row: span 2; font-size: 32px; text-align: center; color: var(--minus); }
+#dSkills small { color: var(--muted); }
+#dTeam { position: absolute; inset: 5px auto auto 50%; transform: translateX(-50%); padding: 3px 12px; border-radius: 20px; background: var(--panel); color: var(--ink); font-size: 13px; font-weight: 700; white-space: nowrap; pointer-events: none; }
 body.duo-on { overflow: hidden; }
 .duoplay { position: fixed; inset: 0; z-index: 60; background: #1F2A1C; display: grid; grid-template-rows: 1fr minmax(0, 1.25fr) 1fr; touch-action: manipulation; user-select: none; -webkit-user-select: none; }
 .duoplay.land { grid-template-rows: none; grid-template-columns: 1fr minmax(0, 1.25fr) 1fr; }
@@ -601,7 +607,7 @@ body.duo-on { overflow: hidden; }
 #dField { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
 .dmidbtns { position: absolute; left: 50%; bottom: 6px; transform: translateX(-50%); display: flex; gap: 6px; }
 .duoplay.land .dmidbtns { bottom: auto; top: 50%; flex-direction: column; transform: translate(-50%, 60px); }
-.dmidbtns .btn { opacity: .85; }
+.dmidbtns .btn { opacity: .85; white-space: nowrap; min-height: 44px; }
 @media (prefers-reduced-motion: reduce) { .card, .flash.go { animation: none; } .flash.go { opacity: 1; } }
 
 /* 首頁 */

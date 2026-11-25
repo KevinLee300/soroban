@@ -3,6 +3,47 @@ import assert from "node:assert/strict";
 import * as B from "../js/battle.js";
 
 const seeded = (seed) => { let s = seed; return () => ((s = (s * 16807) % 2147483647) / 2147483647); };
+const monster = (id, x) => ({ id, x, y: 0.5, hp: 40, max: 40, speed: 0.06, wob: 0, slow: 0 });
+
+test("流星等兩人集星；空場保留到下一關，優先擊中最近三隻", () => {
+  const b = B.createBattle();
+  B.correct(b, 0); B.correct(b, 0);
+  assert.deepEqual(b.stars, [true, false]);
+  B.correct(b, 1);
+  assert.equal(b.casts, 0);
+  B.nextStage(b);
+  b.monsters = [0.1, 0.7, 0.2, 0.6].map((x, i) => monster(i, x));
+  B.step(b, 0.01);
+  assert.deepEqual(B.takeEvents(b).filter(e => e.weapon === "meteor").map(e => e.id), [3, 1, 2]);
+  assert.deepEqual(b.stars, [false, false]);
+  assert.equal(b.casts, 1);
+});
+
+test("極光冰封讓所有怪物停下，兩秒後恢復移動", () => {
+  const b = B.createBattle({ skill: "frost" });
+  b.monsters = [monster(1, 0.2), monster(2, 0.8)];
+  B.correct(b, 1); B.correct(b, 0);
+  for (let i = 0; i < 8; i++) B.step(b, 0.25);
+  assert.deepEqual(b.monsters.slice(0, 2).map(m => m.x), [0.2, 0.8]);
+  B.step(b, 0.05);
+  assert.ok(b.monsters[0].x > 0.2 && b.monsters[1].x < 0.8);
+});
+
+test("星盾擋一次魔王撞擊；盾還在就先存星，下一拍再補盾", () => {
+  const b = B.createBattle({ skill: "ward" });
+  for (const p of [0, 1, 0, 1]) B.correct(b, p);
+  assert.ok(b.shield);
+  assert.equal(b.casts, 1);
+  b.monsters = [{ ...monster(1, 0.5), boss: true }, monster(2, 0.5)];
+  B.step(b, 0.01);
+  assert.equal(b.castle, B.CASTLE_HP - 1);
+  assert.equal(b.shield, false);
+  B.step(b, 0.01);
+  assert.equal(b.shield, true);
+  assert.equal(b.casts, 2);
+  assert.deepEqual(b.stars, [false, false]);
+});
+
 // 模擬一整場：兩個孩子各隔幾秒答對一題（0 = 不答），升級卡隨便選
 function play(gapA, gapB, seed, stage = 0) {
   const rng = seeded(seed), b = B.createBattle({ aspect: 0.75, stage, rng });

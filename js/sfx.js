@@ -50,6 +50,9 @@ function noise({ t = 0, dur = 0.15, vol = 0.4, freq = 1200 }) {
 }
 
 const SOUNDS = {
+  meteor: () => { tone({ type: "triangle", f1: 1100, f2: 180, dur: 0.22, vol: 0.3 }); noise({ t: 0.18, dur: 0.18, vol: 0.25, freq: 850 }); },
+  frost: () => [1047, 1319, 1568].forEach((f, i) => tone({ type: "sine", f1: f, dur: 0.28, vol: 0.2, t: i * 0.08 })),
+  ward: () => [392, 587, 784].forEach((f, i) => tone({ type: "triangle", f1: f, dur: 0.3, vol: 0.2, t: i * 0.07 })),
   arrow: () => tone({ type: "triangle", f1: 900, f2: 500, dur: 0.06, vol: 0.12 }),
   laser: () => tone({ type: "sawtooth", f1: 1400, f2: 300, dur: 0.18, vol: 0.12 }),
   wave: () => { tone({ type: "sine", f1: 160, f2: 60, dur: 0.35, vol: 0.5 }); noise({ dur: 0.25, vol: 0.12, freq: 500 }); },

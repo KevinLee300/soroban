@@ -3,7 +3,7 @@
 //   直放：上面、下面是答題區（上面倒過來），中間是戰場。
 // 戰場規則在 battle.js，題目在 duo.js。
 import { TYPES, typeOf } from "./duo.js";
-import { BATTLE_PACE, CASTLE_HP, STAGES, WEAPONS, castlePos, choose, correct, createBattle, nextStage, step, takeEvents } from "./battle.js";
+import { BATTLE_PACE, CASTLE_HP, STAGES, TEAM_SKILLS, WEAPONS, castlePos, choose, correct, createBattle, nextStage, step, takeEvents } from "./battle.js";
 import { activeProfile, loadDuo, loadGrade, loadProfiles, logSessionAs, saveDuo } from "./storage.js";
 import { play, setSoundOn, soundOn, startMusic, stopMusic, unlock } from "./sfx.js";
 
@@ -35,6 +35,7 @@ const COLORS = ["#F57C00", "#1E88E5"];
 const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)");
 const setup = [{ name: "", type: "" }, { name: "", type: "" }];
 let startStage = 0, bound = false, logged = false;
+let teamSkill = "meteor";
 const G = { on: false, b: null, raf: 0, last: 0, timers: [], players: [], fx: [], land: true, L: 1, S: 1, t0: 0, phase: "" };
 
 /* ---------- 怪物圖（自己畫的可愛造型） ---------- */
@@ -73,6 +74,7 @@ function renderSetup() {
     $(`dType${i}`).innerHTML = TYPES.map((t) => `<button data-v="${t.id}" aria-pressed="${s.type === t.id}">${t.name}</button>`).join("");
   });
   const open = Math.min(STAGES.length - 1, best);
+  $("dSkills").innerHTML = Object.entries(TEAM_SKILLS).map(([id, s]) => `<button data-skill="${id}" aria-pressed="${id === teamSkill}"><span class="sigil" aria-hidden="true">${s.icon}</span><b>${s.name}</b><small>${s.desc}</small></button>`).join("");
   if (startStage > open) startStage = 0;
   $("dStages").innerHTML = STAGES.map((st, i) => `<button data-v="${i}" aria-pressed="${startStage === i}" ${i > open ? "disabled" : ""}><span class="dmon">${svgOf(st.monster)}</span><b>第 ${i + 1} 關</b><small>${i > open ? "還沒打開" : st.name}</small></button>`).join("");
   $("dBest").textContent = best >= STAGES.length ? `${STAGES.length} 關都守住了！可以從任何一關開始。` : `已開放到第 ${open + 1} 關（共 ${STAGES.length} 關）。`;
@@ -130,7 +132,8 @@ function start() {
   document.body.classList.add("duo-on");
   G.players.forEach((p, i) => { q$(i, ".pname").textContent = p.name; pane(i).style.setProperty("--pc", p.color); });
   layout();
-  G.b = createBattle({ aspect: G.S / G.L, stage: startStage });
+  G.b = createBattle({ aspect: G.S / G.L, stage: startStage, skill: teamSkill });
+  renderTeam();
   speedFix();
   try { document.documentElement.requestFullscreen?.().catch(() => {}); } catch { /* 不支援就算了 */ }
   try { navigator.wakeLock?.request("screen").then((l) => { G.lock = l; }).catch(() => {}); } catch { /* 不支援就算了 */ }
@@ -182,7 +185,7 @@ function afterStep() {
     for (const k of [0, 1]) {
       const me = b.turrets[k], other = b.turrets[1 - k];
       showMsg(k, `<b>${win ? `${STAGES.length} 關全部守住了！` : "城堡被攻破了…"}</b><span>${win ? "你們是最強的搭檔！" : `打到第 ${b.stage + 1} 關。下次可以從第 ${b.stage + 1} 關開始，再試一次！`}</span>
-        <p class="msum">你答對 <b>${me.correct}</b> 題，<span class="mate"></span>答對 <b>${other.correct}</b> 題</p>
+        <p class="msum">你答對 <b>${me.correct}</b> 題，<span class="mate"></span>答對 <b>${other.correct}</b> 題。一起出招 <b>${b.casts}</b> 次！</p>
         <div class="mbtns"><button class="btn primary" data-act="again">${win ? "再玩一次" : "從這一關再來"}</button><button class="btn" data-act="exit">回去</button></div>`);
       q$(k, ".mate").textContent = G.players[1 - k].name;
     }
@@ -200,6 +203,18 @@ function nextQ(k) {
 
 function renderHearts(k) {
   q$(k, ".hearts").textContent = `城堡 ${"♥".repeat(G.b.castle)}${"♡".repeat(CASTLE_HP - G.b.castle)}`;
+}
+
+function renderTeam() {
+  const b = G.b, s = TEAM_SKILLS[b.skill];
+  const [orange, blue] = b.stars;
+  let status = "等兩人集星";
+  if (orange && blue) status = b.shield ? "下個盾準備好了" : "等怪物出現";
+  else if (orange) status = "等藍方集星";
+  else if (blue) status = "等橘方集星";
+  else if (b.shield) status = "保護中";
+  else if (b.casts) status = `已合招 ${b.casts} 次`;
+  $("dTeam").innerHTML = `<span aria-hidden="true">${orange ? "★" : "☆"}${blue ? "★" : "☆"}</span> ${s.name} · ${status}`;
 }
 
 function renderSide(k) {
@@ -241,6 +256,7 @@ function answer(k, i) {
     play("correct");
     correct(G.b, k);
     handleEvents(takeEvents(G.b));
+    renderTeam();
   } else {
     if (!p.misses.length) p.wrong++;
     p.misses.push(i);
@@ -276,7 +292,15 @@ function tickSide(k, dt) {
 /* ---------- 特效 ---------- */
 function handleEvents(events) {
   for (const e of events) {
-    if (e.type in FX_COLOR) { G.fx.push({ ...e, life: e.type === "wave" ? 0.5 : e.type === "special" ? 0.45 : 0.25, age: 0 }); play(e.type); }
+    if (e.type === "team") {
+      G.fx.push({ type: e.skill, ...castlePos(G.b), life: 0.8, age: 0, emblem: true });
+      play(e.skill); renderTeam();
+    }
+    else if (e.type === "meteor" || e.type === "block") {
+      G.fx.push({ ...e, life: 0.65, age: 0 });
+      if (e.type === "block") { play("wave"); renderTeam(); }
+    }
+    else if (e.type in FX_COLOR) { G.fx.push({ ...e, life: e.type === "wave" ? 0.5 : e.type === "special" ? 0.45 : 0.25, age: 0 }); play(e.type); }
     else if (e.type === "hit") { G.fx.push({ ...e, life: 0.2, age: 0 }); }
     else if (e.type === "kill") { G.fx.push({ type: "puff", x: e.x, y: e.y, boss: e.boss, life: 0.5, age: 0 }); play(e.boss ? "boss" : "kill"); }
     else if (e.type === "castle") { G.fx.push({ type: "ouch", life: 0.6, age: 0 }); play("castle"); for (const k of [0, 1]) renderHearts(k); }
@@ -294,6 +318,7 @@ function flash(k, text) {
 
 /* ---------- 畫戰場 ---------- */
 const FX_COLOR = { arrow: "#6D4C41", laser: "#E53935", wave: "#7E57C2", bolt: "#FFD600", ice: "#4FC3F7", special: "#FF4081" };
+const TEAM_COLOR = { meteor: "#AE400F", frost: "#08649C", ward: "#187660" };
 function draw(dt) {
   const cv = $("dField"), ctx = cv.getContext("2d"), W = cv.width, H = cv.height, b = G.b, u = G.L * G.dpr;
   ctx.clearRect(0, 0, W, H);
@@ -318,6 +343,16 @@ function draw(dt) {
   ctx.fillStyle = "#E91E63"; ctx.beginPath(); ctx.moveTo(0, -cs * 1.6); ctx.lineTo(cs * 0.5, -cs * 1.4); ctx.lineTo(0, -cs * 1.2); ctx.fill();
   ctx.strokeStyle = "#5D4037"; ctx.lineWidth = cs * 0.06; ctx.beginPath(); ctx.moveTo(0, -cs * 0.7); ctx.lineTo(0, -cs * 1.6); ctx.stroke();
   ctx.restore();
+  if (b.shield) {
+    ctx.beginPath();
+    for (let i = 0; i < 6; i++) {
+      const angle = (i + 0.5) * Math.PI / 3;
+      const x = cx + Math.cos(angle) * cs * 1.95, y = cy + Math.sin(angle) * cs * 1.95;
+      if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+    }
+    ctx.closePath(); ctx.fillStyle = "rgba(85,234,191,.18)"; ctx.fill();
+    ctx.strokeStyle = TEAM_COLOR.ward; ctx.lineWidth = cs * 0.12; ctx.stroke();
+  }
   // 砲塔
   for (const t of b.turrets) {
     const [x, y] = toScreen(t.x, t.y), r = u * 0.045 + Object.keys(t.weapons).length * u * 0.004;
@@ -333,6 +368,11 @@ function draw(dt) {
     const img = IMG[m.kind];
     if (m.slow > 0) { ctx.fillStyle = "rgba(129,212,250,.55)"; ctx.beginPath(); ctx.arc(x, y, s * 0.6, 0, 7); ctx.fill(); }
     if (img && img.complete) ctx.drawImage(img, x - s / 2, y - s * 0.42 + bob, s, s * 0.83);
+    if (m.frozen > 0) {
+      ctx.fillStyle = "#D9FAFF"; ctx.strokeStyle = TEAM_COLOR.frost; ctx.lineWidth = u * 0.005;
+      ctx.font = `bold ${s * 0.8}px sans-serif`; ctx.textAlign = "center"; ctx.textBaseline = "middle";
+      ctx.strokeText("❄", x, y); ctx.fillText("❄", x, y);
+    }
     if (m.boss || m.hp < m.max) {
       ctx.fillStyle = "rgba(0,0,0,.25)"; ctx.fillRect(x - s * 0.4, y - s * 0.55, s * 0.8, s * 0.08);
       ctx.fillStyle = m.boss ? "#E53935" : "#43A047"; ctx.fillRect(x - s * 0.4, y - s * 0.55, s * 0.8 * Math.max(0, m.hp / m.max), s * 0.08);
@@ -344,10 +384,44 @@ function draw(dt) {
     const a = Math.max(0, 1 - f.age / f.life);
     const progress = reducedMotion.matches ? 1 : 1 - a;
     ctx.globalAlpha = a;
-    if (f.type === "puff" || f.type === "hit") {
+    if (f.emblem || f.type === "block") {
+      const block = f.type === "block", skill = block ? "ward" : f.type;
+      const [x, y] = toScreen(f.x, f.y), r = u * (0.15 + progress * 0.13);
+      ctx.strokeStyle = TEAM_COLOR[skill]; ctx.lineWidth = u * 0.01;
+      ctx.beginPath(); ctx.arc(x, y, r, 0, 2 * Math.PI); ctx.stroke();
+      if (f.emblem) {
+        // 兩座砲塔的光在城堡會合，再展開各自的星紋。
+        for (const t of b.turrets) {
+          const [tx, ty] = toScreen(t.x, t.y);
+          ctx.strokeStyle = COLORS[t.p]; ctx.beginPath();
+          ctx.moveTo(tx, ty); ctx.quadraticCurveTo(tx, y - r, x, y); ctx.stroke();
+        }
+        ctx.fillStyle = TEAM_COLOR[skill]; ctx.textBaseline = "middle"; ctx.textAlign = "center";
+        ctx.font = `bold ${u * 0.052}px sans-serif`;
+        for (let i = 0; i < 6; i++) {
+          const angle = (i + progress * 0.5) * Math.PI / 3;
+          ctx.fillText(TEAM_SKILLS[skill].icon, x + Math.cos(angle) * r, y + Math.sin(angle) * r);
+        }
+      }
+      ctx.font = `bold ${Math.max(15 * G.dpr, u * 0.06)}px sans-serif`;
+      ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.lineWidth = 4 * G.dpr;
+      const label = block ? "擋住了！" : TEAM_SKILLS[skill].name;
+      ctx.strokeStyle = "#FFF"; ctx.strokeText(label, x, y - u * 0.15);
+      ctx.fillStyle = TEAM_COLOR[skill]; ctx.fillText(label, x, y - u * 0.15);
+    } else if (f.type === "meteor") {
+      const [x, y] = toScreen(f.x, f.y);
+      const flight = Math.max(0, 1 - progress * 2);
+      const mx = x + flight * u * 0.22, my = y - flight * u * 0.32;
+      const tail = ctx.createLinearGradient(mx, my, mx + u * 0.12, my - u * 0.18);
+      tail.addColorStop(0, "#FF9D28"); tail.addColorStop(1, "rgba(255,183,59,0)");
+      ctx.fillStyle = tail; ctx.beginPath(); ctx.moveTo(mx - u * 0.024, my);
+      ctx.lineTo(mx + u * 0.12, my - u * 0.18); ctx.lineTo(mx + u * 0.024, my); ctx.fill();
+      ctx.fillStyle = "#FFF4A9"; ctx.strokeStyle = TEAM_COLOR.meteor; ctx.lineWidth = u * 0.006;
+      ctx.beginPath(); ctx.arc(mx, my, u * 0.023, 0, 2 * Math.PI); ctx.fill(); ctx.stroke();
+    } else if (f.type === "puff" || f.type === "hit") {
       const [x, y] = toScreen(f.x, f.y);
       const r = u * (f.boss ? 0.12 : f.type === "puff" ? 0.05 : 0.024) * (0.6 + progress);
-      ctx.strokeStyle = f.weapon === "special" ? COLORS[f.by] : FX_COLOR[f.weapon] ?? "#FFF59D";
+      ctx.strokeStyle = f.weapon === "special" ? COLORS[f.by] : FX_COLOR[f.weapon] ?? TEAM_COLOR[f.weapon] ?? "#FFF59D";
       ctx.lineWidth = u * (f.boss ? 0.012 : 0.005);
       ctx.beginPath();
       if (f.boss) ctx.arc(x, y, r, 0, Math.PI * 2);
@@ -434,6 +508,12 @@ function bind() {
   }
   $("dStages").addEventListener("click", (ev) => { const b = ev.target.closest("button"); if (b && !b.disabled) { startStage = +b.dataset.v; renderSetup(); } });
   $("dStart").onclick = start;
+  $("dSkills").addEventListener("click", (ev) => {
+    const button = ev.target.closest("[data-skill]");
+    if (!button) return;
+    teamSkill = button.dataset.skill;
+    for (const b of $("dSkills").children) b.setAttribute("aria-pressed", String(b === button));
+  });
   const soundLabel = () => { const on = soundOn(); for (const id of ["dSound", "dSound2"]) { $(id).textContent = on ? "聲音：開" : "聲音：關"; $(id).setAttribute("aria-pressed", String(on)); } };
   for (const id of ["dSound", "dSound2"]) $(id).onclick = () => { unlock(); setSoundOn(!soundOn()); if (soundOn() && G.on && G.phase === "play") startMusic(); else if (!soundOn()) stopMusic(); soundLabel(); };
   soundLabel();

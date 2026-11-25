@@ -361,3 +361,9 @@
 - js/playmath.js 管理關卡與互動；index.html、css/style.css、js/app.js 和 js/catalog.js 加入幼兒數學入口、手機版面、路由與選課分類。
 - 78 項測試通過。Edge 400px 完成八關並驗證提示、撤回、重試、重新整理接關、重玩與目錄入口。
 - 分支 codex/coin-and-mirror-games，使用固定關卡；僅保留已完成的關卡。
+
+## 2026-11-25　一起守城堡雙人合招
+- 兩位玩家各答對一題就能一起出招，各自的星星可以跨關。流星雨優先打靠近城堡的三隻怪，極光冰封暫停怪物移動，守護星盾擋住一次撞擊。
+- js/battle.js 負責合招與戰場狀態，js/duoapp.js 與 js/sfx.js 呈現集星、特效與音效。index.html 和 css/style.css 加入選招按鈕與戰場提示。
+- 81 項測試通過，包含 tests/battle.test.js 的選敵、跨關、冰封、護盾與八關平衡。Chrome 以 400px 直向及 1024px 橫向實測選招、兩人答題、出招、暫停與結束，也檢查了深色與減少動態設定。
+- 分支 codex/castle-runes。合招開戰前選定，一場使用同一招。手機和平板採瀏覽器模擬尺寸，未以實體裝置測試。

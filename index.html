@@ -151,7 +151,7 @@
   <section id="view-duo" class="stack" hidden>
     <div>
       <h1>一起守城堡</h1>
-      <p class="lead">兩個人合作！平板橫放在兩人中間，各自答自己的題目。答對砲塔就會放大絕招，答對兩題可以選一個升級：攻擊力、攻擊速度，或學會新武器（弓箭、雷射光、衝擊波、閃電、冰凍）。左邊的砲塔守左半邊，右邊的守右半邊。</p>
+      <p class="lead">把平板放在兩人中間，一人守一邊。答對就發射，答對兩題可以幫砲塔選升級卡！</p>
     </div>
     <div class="dsetup">
       <div class="board tboard dp0">
@@ -166,6 +166,9 @@
       </div>
     </div>
     <div class="board tboard">
+      <h2>一起選合招</h2>
+      <p class="tip">你答對，點亮一顆星。隊友也答對，兩顆星就會一起出招！星星會等你。</p>
+      <div id="dSkills" role="group" aria-label="選擇雙人合招"></div>
       <h2>從哪一關開始</h2>
       <div class="dstages" id="dStages" role="group" aria-label="選關卡"></div>
       <p class="tip" id="dBest"></p>
@@ -192,6 +195,7 @@
       </div>
       <div class="dmid">
         <canvas id="dField" aria-label="戰場"></canvas>
+        <div id="dTeam" role="status"></div>
         <div class="dmidbtns"><button class="btn small" id="dPause">暫停</button><button class="btn small" id="dSound" aria-pressed="true">聲音：開</button><button class="btn small" id="dExit">結束</button></div>
       </div>
       <div class="dpane" id="dPane1">
